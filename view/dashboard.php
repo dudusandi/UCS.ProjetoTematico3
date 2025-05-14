@@ -47,7 +47,7 @@ try {
 </head>
 <body>
     <div class="header">
-        <div class="logo">UCS<span>express</span></div>
+        <div class="logo">ECO<span>Xchange</span></div>
         <div class="search-bar">
             <input type="text" id="searchInput" placeholder="Pesquisar produtos..." autocomplete="off">
         </div>

@@ -1,13 +1,13 @@
 <?php
 
 class Fornecedor {
-    private $id;
     private $nome;
     private $descricao;
     private $telefone;
     private $email;
     private $endereco;
-
+    private $produtos = array();
+    
     public function __construct($nome, $descricao, $telefone, $email, $endereco) {
         $this->nome = $nome;
         $this->descricao = $descricao;
@@ -16,10 +16,7 @@ class Fornecedor {
         $this->endereco = $endereco;
     }
     
-    public function getId() {
-        return $this->id;
-    }
-    
+    // Getters
     public function getNome() {
         return $this->nome;
     }
@@ -40,11 +37,11 @@ class Fornecedor {
         return $this->endereco;
     }
     
-    
-    public function setId($id) {
-        $this->id = $id;
+    public function getProdutos() {
+        return $this->produtos;
     }
     
+    // Setters
     public function setNome($nome) {
         $this->nome = $nome;
     }
@@ -65,7 +62,17 @@ class Fornecedor {
         $this->endereco = $endereco;
     }
     
-
+    // Métodos para gerenciar produtos
+    public function adicionarProduto($produto) {
+        $this->produtos[] = $produto;
+    }
+    
+    public function removerProduto($produto) {
+        $index = array_search($produto, $this->produtos);
+        if ($index !== false) {
+            unset($this->produtos[$index]);
+        }
+    }
 }
 
 ?>
