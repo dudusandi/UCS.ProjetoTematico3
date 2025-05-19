@@ -10,7 +10,6 @@ class EstoqueDAO {
     }
 
 
-    /// Método para inserir um novo estoque
     public function inserir(Estoque $estoque) {
         try {
             $sql = "INSERT INTO estoques (quantidade, preco) 
@@ -31,7 +30,6 @@ class EstoqueDAO {
         }
     }
 
-    /// Método para buscar quandiade do estoque por ID
     public function buscarQuantidadePorId($estoqueId) {
         try {
             $sql = "SELECT quantidade FROM estoques WHERE id = :id";
@@ -41,12 +39,11 @@ class EstoqueDAO {
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return $result ? $result['quantidade'] : 0;
         } catch (PDOException $e) {
-            error_log("Erro ao buscar estoque: " . $e->getMessage());
+            // error_log("Erro ao buscar estoque: " . $e->getMessage());
             throw $e;
         }
     }
 
-    /// Método para atualizar a quantidade do estoque
     public function atualizarQuantidade($estoqueId, $quantidade) {
         try {
             $sql = "UPDATE estoques SET quantidade = :quantidade WHERE id = :id";
@@ -59,7 +56,6 @@ class EstoqueDAO {
         }
     }
 
-    /// Método para buscar por ID
     public function buscarPorId($id) {
         $sql = "SELECT id, quantidade, preco 
                 FROM estoques 
@@ -81,7 +77,6 @@ class EstoqueDAO {
         return null;
     }
 
-    //Método para atualizar o estoque
     public function atualizar(Estoque $estoque) {
         try {
             $sql = "UPDATE estoques 
@@ -100,7 +95,6 @@ class EstoqueDAO {
         }
     }
 
-    // Método para excluir um ID do estoque
     public function excluir($id) {
         try {
             $sql = "DELETE FROM estoques WHERE id = :id";
@@ -109,18 +103,6 @@ class EstoqueDAO {
             return $stmt->execute();
         } catch (PDOException $e) {
             throw $e;
-        }
-    }
-    public function remover($id) {
-        try {
-            $sql = "DELETE FROM estoques WHERE id = :id";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->bindParam(":id", $id);
-            $stmt->execute();
-
-            return true;
-        } catch (PDOException $e) {
-            throw new Exception("Erro ao remover estoque: " . $e->getMessage());
         }
     }
 }

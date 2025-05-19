@@ -13,9 +13,7 @@ require_once '../model/endereco.php';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $clienteDAO = new ClienteDAO(Database::getConnection());
-        
-        // Criar objeto Endereco usando o construtor
-        $endereco = new Endereco(
+            $endereco = new Endereco(
             $_POST['rua'],
             $_POST['numero'],
             $_POST['bairro'],
@@ -24,8 +22,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_POST['estado'],
             $_POST['complemento'] ?? null
         );
-
-        // Criar objeto Cliente usando o construtor
         $cliente = new Cliente(
             $_POST['nome'],
             $_POST['telefone'],
@@ -34,8 +30,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $endereco
         );
         $cliente->setId($_POST['id']);
-
-        // Atualizar cliente
         $clienteDAO->atualizarCliente($cliente);
         
         header('Location: ../view/listar_clientes.php?mensagem=Cliente atualizado com sucesso&tipo_mensagem=sucesso');

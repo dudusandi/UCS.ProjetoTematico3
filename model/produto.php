@@ -1,60 +1,101 @@
 <?php
-
 class Produto {
+    private $id;
     private $nome;
     private $descricao;
     private $foto;
-    private $fornecedor;
-    private $estoque;
-    
-    public function __construct($nome, $descricao, $foto, $fornecedor) {
-        $this->nome = $nome;
-        $this->descricao = $descricao;
-        $this->foto = $foto;
-        $this->fornecedor = $fornecedor;
+    private $fornecedor_id;
+    private $estoque_id;
+    private $usuario_id;
+    private $quantidade;
+    private $preco;
+    public $fornecedor_nome; 
+
+    public function __construct($nome, $descricao, $foto, $fornecedor_id, $usuario_id) {
+        $this->setNome($nome);
+        $this->setDescricao($descricao);
+        $this->setFoto($foto);
+        $this->setFornecedorId($fornecedor_id);
+        $this->setUsuarioId($usuario_id);
     }
+
+    public function getId() { return $this->id; }
     
-    // Getters
-    public function getNome() {
-        return $this->nome;
+    public function setId($id) { 
+        if (!is_numeric($id) || $id < 0) {
+            throw new Exception("ID inválido");
+        }
+        $this->id = (int)$id; 
     }
+
+    public function getNome() { return $this->nome; }
     
-    public function getDescricao() {
-        return $this->descricao;
+    public function setNome($nome) { 
+        if (empty($nome)) {
+            throw new Exception("Nome é obrigatório");
+        }
+        $this->nome = $nome; 
     }
+
+    public function getDescricao() { return $this->descricao; }
     
-    public function getFoto() {
-        return $this->foto;
+    public function setDescricao($descricao) { 
+        $this->descricao = $descricao; 
     }
+
+    public function getFoto() { return $this->foto; }
     
-    public function getFornecedor() {
-        return $this->fornecedor;
+    public function setFoto($foto) { 
+        $this->foto = $foto; 
     }
+
+    public function getFornecedorId() { return $this->fornecedor_id; }
     
-    public function getEstoque() {
-        return $this->estoque;
+    public function setFornecedorId($fornecedor_id) { 
+        if (!is_numeric($fornecedor_id) || $fornecedor_id < 0) {
+            throw new Exception("ID do fornecedor inválido");
+        }
+        $this->fornecedor_id = (int)$fornecedor_id; 
     }
+
+    public function getEstoqueId() { return $this->estoque_id; }
     
-    // Setters
-    public function setNome($nome) {
-        $this->nome = $nome;
+    public function setEstoqueId($estoque_id) { 
+        if (!is_numeric($estoque_id) || $estoque_id < 0) {
+            throw new Exception("ID do estoque inválido");
+        }
+        $this->estoque_id = (int)$estoque_id; 
     }
+
+    public function getUsuarioId() { return $this->usuario_id; }
     
-    public function setDescricao($descricao) {
-        $this->descricao = $descricao;
+    public function setUsuarioId($usuario_id) { 
+        if (!is_numeric($usuario_id) || $usuario_id < 0) {
+            throw new Exception("ID do usuário inválido");
+        }
+        $this->usuario_id = (int)$usuario_id; 
     }
+
+    public function getQuantidade() { return $this->quantidade; }
     
-    public function setFoto($foto) {
-        $this->foto = $foto;
+    public function setQuantidade($quantidade) { 
+        if (!is_numeric($quantidade) || $quantidade < 0) {
+            throw new Exception("Quantidade inválida");
+        }
+        $this->quantidade = (int)$quantidade; 
     }
+
+    public function getPreco() { return $this->preco; }
     
-    public function setFornecedor($fornecedor) {
-        $this->fornecedor = $fornecedor;
+    public function setPreco($preco) { 
+        if (!is_numeric($preco) || $preco < 0) {
+            throw new Exception("Preço inválido");
+        }
+        $this->preco = (float)$preco; 
     }
-    
-    public function setEstoque($estoque) {
-        $this->estoque = $estoque;
+
+    public function getFornecedorNome() {
+        return $this->fornecedor_nome ?? 'Sem fornecedor';
     }
 }
-
 ?>

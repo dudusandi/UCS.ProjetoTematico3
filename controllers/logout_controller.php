@@ -1,11 +1,14 @@
 <?php
 session_start();
+$carrinhos = isset($_SESSION['carrinhos']) ? $_SESSION['carrinhos'] : [];
 
-$_SESSION = array();
+unset($_SESSION['usuario_id']);
+unset($_SESSION['usuario_email']);
+unset($_SESSION['usuario_nome']);
+unset($_SESSION['is_admin']);
 
-// Função para explodir tudo (Cuidado)
-session_destroy();
+$_SESSION['carrinhos'] = $carrinhos;
 
-header("Location: ../view/login.php");
+header("Location: ../view/dashboard.php");
 exit;
 ?>

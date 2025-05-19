@@ -18,7 +18,6 @@ try {
     $itensPorPagina = 6;
     $offset = ($pagina - 1) * $itensPorPagina;
 
-    // Buscar clientes
     if (!empty($termo)) {
         $clientes = $clienteDAO->buscarClientesDinamicos($termo, $itensPorPagina, $offset);
         $total = $clienteDAO->contarClientesBuscados($termo);
@@ -26,8 +25,6 @@ try {
         $clientes = $clienteDAO->listarTodos($itensPorPagina, $offset);
         $total = $clienteDAO->contarTodos();
     }
-
-    // Formatar resposta
     $clientesFormatados = array_map(function($cliente) {
         $endereco = $cliente->getEndereco();
         return [

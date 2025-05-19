@@ -18,7 +18,6 @@ try {
     $itensPorPagina = 6;
     $offset = ($pagina - 1) * $itensPorPagina;
 
-    // Buscar fornecedores
     if (!empty($termo)) {
         $fornecedores = $fornecedorDAO->buscarFornecedoresDinamicos($termo, $itensPorPagina, $offset);
         $total = $fornecedorDAO->contarFornecedoresBuscados($termo);
@@ -26,8 +25,6 @@ try {
         $fornecedores = $fornecedorDAO->listarTodos($itensPorPagina, $offset);
         $total = $fornecedorDAO->contarTodos();
     }
-
-    // Formatar resposta
     $fornecedoresFormatados = array_map(function($fornecedor) {
         $endereco = $fornecedor->getEndereco();
         return [

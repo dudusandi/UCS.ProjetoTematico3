@@ -1,39 +1,54 @@
 <?php
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../dao/produto_dao.php';
+ob_start();
+session_start();
+require_once '../config/database.php';
+require_once '../dao/produto_dao.php';
+require_once '../model/produto.php';
 
-header('Content-Type: application/json');
+ob_clean();
+
+header('Content-Type: application/json; charset=utf-8');
 
 try {
-    $pdo = Database::getConnection();
-    $produtoDao = new ProdutoDAO($pdo);
-    $id = $_GET['id'] ?? null;
-
-    if (!$id) {
-        throw new Exception('ID não fornecido');
+    if (!isset($_GET['id'])) {
+        throw new Exception('ID do produto não fornecido');
     }
 
-    $produto = $produtoDao->buscarPorId((int)$id);
+    $id = (int)$_GET['id'];
+    $pdo = Database::getConnection();
+    $produtoDAO = new ProdutoDAO($pdo);
+    $produto = $produtoDAO->buscarPorId($id);
+
     if (!$produto) {
         throw new Exception('Produto não encontrado');
     }
 
     $response = [
-        'id' => $produto->getId(),
-        'nome' => $produto->getNome(),
-        'descricao' => $produto->getDescricao(),
-        'fornecedor' => (int)$produto->getFornecedorId(),
-        'fornecedor_nome' => $produto->fornecedor_nome ?? 'Sem fornecedor',
-        'estoque' => $produto->getQuantidade() ?? 0,
-        'preco' => $produto->getPreco() ?? 0,
-        'foto' => $produto->getFoto(),
-        'usuario_id' => $produto->getUsuarioId(),
-        'estoque_baixo' => ($produto->getQuantidade() ?? 0) <= 5
+        'success' => true,
+        'produto' => [
+            'id' => $produto->getId(),
+            'nome' => $produto->getNome(),
+            'descricao' => $produto->getDescricao(),
+            'foto' => $produto->getFoto() ? base64_encode(stream_get_contents($produto->getFoto())) : null,
+            'fornecedor_id' => $produto->getFornecedorId(),
+            'quantidade' => $produto->getQuantidade(),
+            'preco' => $produto->getPreco(),
+            'fornecedor_nome' => $produto->getFornecedorNome()
+        ]
     ];
 
+    ob_clean();
     echo json_encode($response);
+
 } catch (Exception $e) {
     http_response_code(400);
-    echo json_encode(['error' => $e->getMessage()]);
+    
+    ob_clean();
+    echo json_encode([
+        'success' => false,
+        'error' => $e->getMessage()
+    ]);
 }
+
+ob_end_flush();
 ?>

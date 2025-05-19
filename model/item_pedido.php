@@ -2,23 +2,30 @@
 
 class ItemPedido {
     private $quantidade;
-    private $preco;
+    private $preco_unitario;
     private $produto;
     private $pedido;
+    private $subtotal;
     
-    public function __construct($quantidade, $preco, $produto, $pedido) {
-        $this->quantidade = $quantidade;
-        $this->preco = $preco;
+    public function __construct($quantidade, $preco_unitario, $produto, $pedido, $subtotal = null) {
+        $this->quantidade = (int)$quantidade;
+        $this->preco_unitario = (float)$preco_unitario;
         $this->produto = $produto;
         $this->pedido = $pedido;
+        
+        if ($subtotal !== null) {
+            $this->subtotal = (float)$subtotal;
+        } else {
+            $this->subtotal = $this->quantidade * $this->preco_unitario;
+        }
     }
     
     public function getQuantidade() {
         return $this->quantidade;
     }
     
-    public function getPreco() {
-        return $this->preco;
+    public function getPrecoUnitario() {
+        return $this->preco_unitario;
     }
     
     public function getProduto() {
@@ -29,12 +36,18 @@ class ItemPedido {
         return $this->pedido;
     }
     
-    public function setQuantidade($quantidade) {
-        $this->quantidade = $quantidade;
+    public function getSubtotal() {
+        return $this->subtotal;
     }
     
-    public function setPreco($preco) {
-        $this->preco = $preco;
+    public function setQuantidade($quantidade) {
+        $this->quantidade = (int)$quantidade;
+        $this->subtotal = $this->quantidade * $this->preco_unitario;
+    }
+    
+    public function setPrecoUnitario($preco_unitario) {
+        $this->preco_unitario = (float)$preco_unitario;
+        $this->subtotal = $this->quantidade * $this->preco_unitario;
     }
     
     public function setProduto($produto) {

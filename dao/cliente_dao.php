@@ -10,7 +10,6 @@ class ClienteDAO {
         $this->pdo = $pdo;
     }
 
-    // Método para buscar cliente por email e senha
     public function buscarPorEmailSenha($email, $senha) {
         $sql = "SELECT c.id, c.nome, c.telefone, c.email, c.cartao_credito, c.senha, 
                        e.rua, e.numero, e.bairro, e.cep, e.cidade, e.estado, e.complemento
@@ -49,7 +48,6 @@ class ClienteDAO {
         return null;
     }
 
-    // Método para buscar cliente por email
     public function buscarPorEmail($email) {
         $sql = "SELECT c.id, c.nome, c.telefone, c.email, c.cartao_credito, 
                        e.rua, e.numero, e.bairro, e.cep, e.cidade, e.estado, e.complemento
@@ -86,7 +84,6 @@ class ClienteDAO {
         return null;
     }
 
-    // Método para cadastrar cliente
     public function cadastrarCliente(Cliente $cliente, string $senhaHash) {
         try {
             $this->pdo->beginTransaction();
@@ -130,7 +127,6 @@ class ClienteDAO {
         }
     }
 
-    // Método para listar todos os clientes
     public function listarTodos($limit = null, $offset = null) {
         try {
             $sql = "SELECT c.id, c.nome, c.telefone, c.email, c.cartao_credito, 
@@ -171,24 +167,20 @@ class ClienteDAO {
             }
             return $clientes;
         } catch (PDOException $e) {
-            error_log(date('[Y-m-d H:i:s] ') . "Erro em listarTodos: " . $e->getMessage() . PHP_EOL);
             throw $e;
         }
     }
 
-    // Método para contar todos os clientes
     public function contarTodos() {
         try {
             $sql = "SELECT COUNT(*) FROM clientes";
             $stmt = $this->pdo->query($sql);
             return (int)$stmt->fetchColumn();
         } catch (PDOException $e) {
-            error_log(date('[Y-m-d H:i:s] ') . "Erro em contarTodos: " . $e->getMessage() . PHP_EOL);
             throw $e;
         }
     }
 
-    // Método para buscar clientes dinamicamente com base em um termo
     public function buscarClientesDinamicos($termo, $limite = 6, $offset = 0) {
         try {
             $termo = "%{$termo}%";
@@ -236,12 +228,10 @@ class ClienteDAO {
             
             return $clientes;
         } catch (PDOException $e) {
-            error_log("Erro ao buscar clientes: " . $e->getMessage());
             throw new Exception("Erro ao buscar clientes");
         }
     }
 
-    // Método para contar clientes encontrados com base no termo
     public function contarClientesBuscados($termo) {
         try {
             $termo = "%{$termo}%";
@@ -261,12 +251,10 @@ class ClienteDAO {
             
             return (int) $stmt->fetchColumn();
         } catch (PDOException $e) {
-            error_log("Erro ao contar clientes: " . $e->getMessage());
             throw new Exception("Erro ao contar clientes");
         }
     }
 
-    // Método para buscar cliente por ID
     public function buscarPorId($id) {
         $sql = "SELECT c.id, c.nome, c.telefone, c.email, c.cartao_credito, 
                        e.rua, e.numero, e.bairro, e.cep, e.cidade, e.estado, e.complemento
@@ -304,7 +292,6 @@ class ClienteDAO {
         return null;
     }
 
-    // Método para atualizar cliente
     public function atualizarCliente($cliente) {
         try {
             $this->pdo->beginTransaction();
@@ -352,7 +339,6 @@ class ClienteDAO {
         }
     }
 
-    // Método para remover cliente
     public function removerCliente($id) {
         try {
             $this->pdo->beginTransaction();
@@ -369,13 +355,10 @@ class ClienteDAO {
 
             $enderecoId = $stmtGet->fetch(PDO::FETCH_ASSOC)['endereco_id'];
 
-            // Remove o cliente da tabela clientes
             $sqlCliente = "DELETE FROM clientes WHERE id = :id";
             $stmtCliente = $this->pdo->prepare($sqlCliente);
             $stmtCliente->bindParam(":id", $id, PDO::PARAM_INT);
             $stmtCliente->execute();
-
-            // Remove o endereço associado
             $sqlEndereco = "DELETE FROM enderecos WHERE id = :id";
             $stmtEndereco = $this->pdo->prepare($sqlEndereco);
             $stmtEndereco->bindParam(":id", $enderecoId, PDO::PARAM_INT);
@@ -389,7 +372,6 @@ class ClienteDAO {
         }
     }
 
-    // Método para verificar se o email já existe
     public function emailExiste($email, $excludeId = null) {
         $sql = "SELECT COUNT(*) FROM clientes WHERE email = :email";
         if ($excludeId) {
@@ -404,7 +386,6 @@ class ClienteDAO {
         return $stmt->fetchColumn() > 0;
     }
 
-    // Método para atualizar a senha do cliente
     public function atualizarSenha($clienteId, $novaSenhaHash) {
         $sql = "UPDATE clientes SET senha = :senha WHERE id = :id";
         $stmt = $this->pdo->prepare($sql);

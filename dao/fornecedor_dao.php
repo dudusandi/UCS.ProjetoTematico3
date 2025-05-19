@@ -11,7 +11,6 @@ class FornecedorDAO {
         $this->pdo = $pdo;
     }
 
-    //Cadastra um novo fornecedor
     public function cadastrarFornecedor(Fornecedor $fornecedor) {
         try {
             $this->pdo->beginTransaction();
@@ -54,19 +53,6 @@ class FornecedorDAO {
         }
     }
 
-
-    //Exclui um fornecedor
-    public function excluir($id) {
-        try {
-            $sql = "DELETE FROM fornecedores WHERE id = :id";
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->execute(['id' => $id]);
-        } catch (PDOException $e) {
-            throw new Exception("Erro ao excluir fornecedor: " . $e->getMessage());
-        }
-    }
-
-    //Buscar fornecedor por ID
     public function buscarNomePorId($fornecedorId) {
         try {
             $sql = "SELECT nome FROM fornecedores WHERE id = :id";
@@ -76,11 +62,10 @@ class FornecedorDAO {
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
             return $result ? $result['nome'] : 'Desconhecido';
         } catch (PDOException $e) {
-            error_log("Erro ao buscar fornecedor: " . $e->getMessage());
+            // error_log("Erro ao buscar fornecedor: " . $e->getMessage());
             throw $e;
         }
     }
-
 
     public function listarTodos($limit = null, $offset = null) {
         try {
@@ -120,12 +105,10 @@ class FornecedorDAO {
             }
             return $fornecedores;
         } catch (PDOException $e) {
-            error_log(date('[Y-m-d H:i:s] ') . "Erro em listarTodos: " . $e->getMessage() . PHP_EOL);
             throw $e;
         }
     }
 
-    // Conta todos os fornecedores
     public function contarTodos() {
         try {
             $sql = "SELECT COUNT(*) FROM fornecedores";
@@ -184,7 +167,6 @@ class FornecedorDAO {
             
             return $fornecedores;
         } catch (PDOException $e) {
-            error_log("Erro ao buscar fornecedores: " . $e->getMessage());
             throw new Exception("Erro ao buscar fornecedores");
         }
     }
@@ -209,13 +191,10 @@ class FornecedorDAO {
             
             return (int) $stmt->fetchColumn();
         } catch (PDOException $e) {
-            error_log("Erro ao contar fornecedores: " . $e->getMessage());
             throw new Exception("Erro ao contar fornecedores");
         }
     }
 
-
-    //Buscar fornecedor por ID
     public function buscarPorId($id) {
         $sql = "SELECT f.id, f.nome, f.descricao, f.telefone, f.email, 
                        e.rua, e.numero, e.bairro, e.cep, e.cidade, e.estado, e.complemento
@@ -253,7 +232,6 @@ class FornecedorDAO {
         return null;
     }
 
-    // Listar fornecedores para o select
     public function listarFornecedores() {
         try {
             $sql = "SELECT id, nome FROM fornecedores ORDER BY nome ASC";
@@ -265,7 +243,6 @@ class FornecedorDAO {
         }
     }
 
-    //Atualizar fornecedor
     public function atualizarFornecedor(Fornecedor $fornecedor) {
         try {
             $this->pdo->beginTransaction();
@@ -313,18 +290,28 @@ class FornecedorDAO {
         }
     }
 
-
-    //Remover fornecedor
     public function removerFornecedor($id) {
         try {
+            // Verificar se o fornecedor está associado a produtos
+            $sqlCheckProdutos = "SELECT COUNT(*) FROM produtos WHERE fornecedor_id = :id";
+            $stmtCheckProdutos = $this->pdo->prepare($sqlCheckProdutos);
+            $stmtCheckProdutos->bindParam(":id", $id, PDO::PARAM_INT);
+            $stmtCheckProdutos->execute();
+            $count = $stmtCheckProdutos->fetchColumn();
+
+            if ($count > 0) {
+                throw new Exception('Não é possível excluir o fornecedor porque ele está associado a produtos');
+            }
+
             $this->pdo->beginTransaction();
 
             $sqlGetEndereco = "SELECT endereco_id FROM fornecedores WHERE id = :id";
             $stmtGet = $this->pdo->prepare($sqlGetEndereco);
-            $stmtGet->bindParam(":id", $id);
+            $stmtGet->bindParam(":id", $id, PDO::PARAM_INT);
             $stmtGet->execute();
 
             if ($stmtGet->rowCount() == 0) {
+                $this->pdo->rollBack();
                 throw new Exception("Fornecedor não encontrado");
             }
 
@@ -332,19 +319,28 @@ class FornecedorDAO {
 
             $sqlFornecedor = "DELETE FROM fornecedores WHERE id = :id";
             $stmtFornecedor = $this->pdo->prepare($sqlFornecedor);
-            $stmtFornecedor->bindParam(":id", $id);
+            $stmtFornecedor->bindParam(":id", $id, PDO::PARAM_INT);
             $stmtFornecedor->execute();
 
-            $sqlEndereco = "DELETE FROM enderecos WHERE id = :id";
-            $stmtEndereco = $this->pdo->prepare($sqlEndereco);
-            $stmtEndereco->bindParam(":id", $enderecoId);
-            $stmtEndereco->execute();
+            if ($enderecoId) {
+                $sqlEndereco = "DELETE FROM enderecos WHERE id = :id";
+                $stmtEndereco = $this->pdo->prepare($sqlEndereco);
+                $stmtEndereco->bindParam(":id", $enderecoId, PDO::PARAM_INT);
+                $stmtEndereco->execute();
+            }
 
             $this->pdo->commit();
             return true;
         } catch (PDOException $e) {
-            $this->pdo->rollBack();
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
             throw new Exception("Erro ao remover fornecedor: " . $e->getMessage());
+        } catch (Exception $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $e;
         }
     }
 }
