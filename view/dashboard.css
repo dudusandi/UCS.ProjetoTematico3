@@ -15,7 +15,7 @@ body {
 }
 
 .header {
-    background-color: #394e65;
+    background-color: #493965;
     padding: 15px 20px;
     display: flex;
     align-items: center;
@@ -32,11 +32,11 @@ body {
 .logo {
     font-size: 24px;
     font-weight: bold;
-    color: #ffffff;
+    color: #00ff1a;
 }
 
 .logo span {
-    color: #ffca2c;
+    color: #9bb3a5;
 }
 
 .search-bar {

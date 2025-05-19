@@ -1,9 +1,5 @@
 <?php
-session_start();
-if (!isset($_SESSION['usuario_id'])) {
-    header('Location: login.php');
-    exit;
-}
+
 
 require_once '../config/database.php';
 require_once '../dao/cliente_dao.php';
@@ -35,7 +31,7 @@ if (isset($_POST['estado'])) {
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Cadastro de Cliente - UcsExpress</title>
+    <title>Cadastro de Cliente - ECOxchange</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="editar.css">
@@ -45,7 +41,7 @@ if (isset($_POST['estado'])) {
 <body>
 
 <div class="header">
-    <div class="logo">UCS<span>express</span></div>
+    <div class="logo">ECO<span>xchange</span></div>
 </div>
 
 <div class="container">
