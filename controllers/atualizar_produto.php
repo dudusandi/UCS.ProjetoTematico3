@@ -10,14 +10,14 @@ $usuario_id = (int)$_SESSION['usuario_id'];
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../dao/produto_dao.php';
-require_once __DIR__ . '/../dao/estoque_dao.php';
+// require_once __DIR__ . '/../dao/estoque_dao.php';
 require_once __DIR__ . '/../model/produto.php';
-require_once __DIR__ . '/../model/estoque.php';
+// require_once __DIR__ . '/../model/estoque.php';
 
 try {
     $pdo = Database::getConnection();
     $produtoDao = new ProdutoDAO($pdo);
-    $estoqueDao = new EstoqueDAO($pdo);
+    // $estoqueDao = new EstoqueDAO($pdo);
 
     $id = (int)($_POST['id'] ?? 0);
     if ($id <= 0) {
@@ -31,18 +31,19 @@ try {
         exit;
     }
 
-    $nome = trim(htmlspecialchars($_POST['nome'] ?? '', ENT_QUOTES, 'UTF-8'));
-    $descricao = trim(htmlspecialchars($_POST['descricao'] ?? '', ENT_QUOTES, 'UTF-8'));
-    $fornecedor = trim(htmlspecialchars($_POST['fornecedor'] ?? '', ENT_QUOTES, 'UTF-8'));
-    $estoque = (int)($_POST['estoque'] ?? 0);
-    $preco = (float)($_POST['preco'] ?? 0);
-
-    if (empty($nome) || empty($fornecedor)) {
-        echo json_encode(['error' => 'Nome e fornecedor são obrigatórios']);
+    // Verificar se o produto pertence ao usuário logado
+    if ($produtoExistente->getUsuarioId() !== $usuario_id) {
+        http_response_code(403); // Forbidden
+        echo json_encode(['error' => 'Você não tem permissão para editar este produto.']);
         exit;
     }
-    if ($estoque < 0) {
-        echo json_encode(['error' => 'Estoque inválido']);
+
+    $nome = trim(htmlspecialchars($_POST['nome'] ?? '', ENT_QUOTES, 'UTF-8'));
+    $descricao = trim(htmlspecialchars($_POST['descricao'] ?? '', ENT_QUOTES, 'UTF-8'));
+    $preco = (float)($_POST['preco'] ?? 0.0);
+
+    if (empty($nome)) {
+        echo json_encode(['error' => 'Nome é obrigatório']);
         exit;
     }
     if ($preco < 0) {
@@ -74,23 +75,19 @@ try {
         $foto = file_get_contents($file['tmp_name']);
     }
 
-    $produtoAtualizado = new Produto($nome, $descricao, $foto, (int)$fornecedor, $usuario_id);
+    // Usar o usuario_id original do produto, não pode ser alterado aqui.
+    // A ordem correta dos parâmetros do construtor é: nome, descricao, imagem, preco, usuario_id
+    $produtoAtualizado = new Produto(
+        $nome, 
+        $descricao, 
+        $foto, 
+        $preco, // preco
+        $produtoExistente->getUsuarioId() // usuario_id original do produto
+    );
     $produtoAtualizado->setId($id);
-    $produtoAtualizado->setEstoqueId($produtoExistente->getEstoqueId());
-    $produtoAtualizado->setQuantidade($estoque);
-    $produtoAtualizado->setPreco($preco);
 
     if ($produtoDao->atualizarProduto($produtoAtualizado)) {
-        $estoqueId = $produtoExistente->getEstoqueId();
-        
-        $estoqueObjeto = new Estoque($estoque, $preco);
-        $estoqueObjeto->setId($estoqueId);
-
-        if ($estoqueDao->atualizar($estoqueObjeto)) {
-            echo json_encode(['success' => true]);
-        } else {
-            echo json_encode(['error' => 'Erro ao atualizar o estoque e preço']);
-        }
+        echo json_encode(['success' => true]);
     } else {
         echo json_encode(['error' => 'Erro ao atualizar o produto']);
     }

@@ -29,11 +29,9 @@ try {
             'id' => $produto->getId(),
             'nome' => $produto->getNome(),
             'descricao' => $produto->getDescricao(),
-            'foto' => $produto->getFoto() ? base64_encode(stream_get_contents($produto->getFoto())) : null,
-            'fornecedor_id' => $produto->getFornecedorId(),
-            'quantidade' => $produto->getQuantidade(),
+            'foto' => $produto->getFoto() ? base64_encode($produto->getFoto()) : null,
             'preco' => $produto->getPreco(),
-            'fornecedor_nome' => $produto->getFornecedorNome()
+            'usuario_id' => $produto->getUsuarioId()
         ]
     ];
 

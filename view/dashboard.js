@@ -21,8 +21,6 @@ function mostrarDetalhes(id) {
             document.getElementById('produtoNome').textContent = produto.nome;
             document.getElementById('produtoCodigo').textContent = produto.id;
             document.getElementById('produtoDescricao').textContent = produto.descricao || 'Nenhuma';
-            document.getElementById('produtoFornecedor').textContent = produto.fornecedor_nome || 'Sem fornecedor';
-            document.getElementById('produtoEstoque').textContent = estoqueProduto > 0 ? estoqueProduto : 'Indisponível';
             document.getElementById('produtoPreco').textContent = `R$ ${(produto.preco ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             document.getElementById('produtoFoto').src = produto.foto ? `data:image/jpeg;base64,${produto.foto}` : 'https://via.placeholder.com/200';
 
@@ -30,37 +28,7 @@ function mostrarDetalhes(id) {
             document.getElementById('produtoId').value = id;
             document.getElementById('produtoNomeInput').value = produto.nome;
             document.getElementById('produtoDescricaoInput').value = produto.descricao || '';
-            document.getElementById('produtoEstoqueInput').value = estoqueProduto;
             document.getElementById('produtoPrecoInput').value = produto.preco ?? 0;
-
-            const fornecedorSelect = document.getElementById('produtoFornecedorInput');
-            fornecedorSelect.innerHTML = '<option value="">Selecione um fornecedor</option>';
-            if (window.fornecedores && window.fornecedores.length > 0) {
-                window.fornecedores.forEach(fornecedor => {
-                    const option = document.createElement('option');
-                    option.value = fornecedor.id;
-                    option.text = fornecedor.nome;
-                    if (fornecedor.id == produto.fornecedor_id) {
-                        option.selected = true;
-                    }
-                    fornecedorSelect.appendChild(option);
-                });
-            }
-
-            // Controle de exibição baseado no estoque
-            const mensagemIndisponivelModal = document.getElementById('mensagemIndisponivelModal');
-            const containerAdicionarAoCarrinhoModal = document.getElementById('containerAdicionarAoCarrinhoModal');
-            const quantidadeModalProdutoInput = document.getElementById('quantidadeModalProduto');
-
-            if (estoqueProduto > 0) {
-                mensagemIndisponivelModal.style.display = 'none';
-                containerAdicionarAoCarrinhoModal.style.display = 'flex';
-                quantidadeModalProdutoInput.max = estoqueProduto;
-                quantidadeModalProdutoInput.value = 1;
-            } else {
-                mensagemIndisponivelModal.style.display = 'block';
-                containerAdicionarAoCarrinhoModal.style.display = 'none';
-            }
 
             // Link do botão de exclusão
             const btnConfirmarExclusao = document.getElementById('btnConfirmarExclusao');
@@ -152,18 +120,6 @@ function confirmarExclusao() {
     detalhesModal.hide();
     const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
     confirmModal.show();
-}
-
-// Função para adicionar produto do modal ao carrinho
-function adicionarProdutoDoModalAoCarrinho() {
-    const quantidadeInput = document.getElementById('quantidadeModalProduto');
-    const quantidade = parseInt(quantidadeInput.value);
-
-    if (currentProdutoId && quantidade > 0) {
-        carrinho.adicionarItem(currentProdutoId, quantidade);
-    } else {
-        alert('Por favor, insira uma quantidade válida.');
-    }
 }
 
 // Configurar eventos

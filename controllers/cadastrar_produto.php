@@ -10,16 +10,12 @@ require_once '../model/produto.php';
 header('Content-Type: application/json; charset=utf-8');
 
 try {
+    if (!isset($_SESSION['usuario_id']) || empty($_SESSION['usuario_id'])) {
+        throw new Exception('Usuário não autenticado. Faça login para cadastrar um produto.');
+    }
+
     if (!isset($_POST['nome']) || empty($_POST['nome'])) {
         throw new Exception('Nome do produto é obrigatório');
-    }
-
-    if (!isset($_POST['fornecedor_id']) || empty($_POST['fornecedor_id'])) {
-        throw new Exception('Fornecedor é obrigatório');
-    }
-
-    if (!isset($_POST['quantidade']) || !is_numeric($_POST['quantidade']) || $_POST['quantidade'] < 0) {
-        throw new Exception('Quantidade inválida');
     }
 
     if (!isset($_POST['preco']) || !is_numeric($_POST['preco']) || $_POST['preco'] < 0) {
@@ -46,16 +42,13 @@ try {
         $_POST['nome'],
         $_POST['descricao'] ?? null,
         $foto,
-        $_POST['fornecedor_id'],
+        (float)($_POST['preco'] ?? 0.0),
         $_SESSION['usuario_id']
     );
 
-    $produto->setQuantidade($_POST['quantidade']);
-    $produto->setPreco($_POST['preco']);
-
     $pdo = Database::getConnection();
     $produtoDAO = new ProdutoDAO($pdo);
-    $produtoDAO->cadastrarProduto($produto, $_POST['quantidade'], $_POST['preco']);
+    $produtoDAO->cadastrarProduto($produto);
 
     echo json_encode([
         'success' => true,

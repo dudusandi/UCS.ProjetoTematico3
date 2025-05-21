@@ -1,9 +1,13 @@
 <?php
+header('Content-Type: application/json');
 session_start();
+
 if (!isset($_SESSION['usuario_id'])) {
-    header('Location: ../view/login.php');
+    http_response_code(401); // Unauthorized
+    echo json_encode(['success' => false, 'error' => 'Usuário não autenticado']);
     exit;
 }
+$usuario_id_logado = (int)$_SESSION['usuario_id'];
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../dao/produto_dao.php';
@@ -12,27 +16,47 @@ try {
     $pdo = Database::getConnection();
     $produtoDao = new ProdutoDAO($pdo);
 
-    $id = $_GET['id'] ?? null;
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405); // Method Not Allowed
+        echo json_encode(['success' => false, 'error' => 'Método não permitido']);
+        exit;
+    }
 
-    if ($id) {
-        $pdo->beginTransaction();
-        
-        if ($produtoDao->removerProduto((int)$id)) {
-            $pdo->commit();
-            header('Location: ../view/dashboard.php?mensagem=Produto+excluído+com+sucesso&tipo_mensagem=success');
-            exit;
-        } else {
-            $pdo->rollBack();
-            throw new Exception('Erro ao remover o produto.'); 
-        }
+    $id = $_POST['id'] ?? null;
+    if (!$id || !is_numeric($id)) {
+        http_response_code(400); // Bad Request
+        echo json_encode(['success' => false, 'error' => 'ID do produto inválido ou não fornecido']);
+        exit;
+    }
+    $id = (int)$id;
+
+    $produto = $produtoDao->buscarPorId($id);
+
+    if (!$produto) {
+        http_response_code(404); // Not Found
+        echo json_encode(['success' => false, 'error' => 'Produto não encontrado']);
+        exit;
+    }
+
+    // Verificar se o produto pertence ao usuário logado
+    if ($produto->getUsuarioId() !== $usuario_id_logado) {
+        http_response_code(403); // Forbidden
+        echo json_encode(['success' => false, 'error' => 'Você não tem permissão para excluir este produto.']);
+        exit;
+    }
+
+    // A remoção do produto em si não precisa de transação aqui se for uma única operação DELETE.
+    // O DAO pode ou não usar transações internamente se fizer múltiplas coisas.
+    if ($produtoDao->removerProduto($id)) {
+        echo json_encode(['success' => true, 'message' => 'Produto excluído com sucesso']);
     } else {
-        throw new Exception('ID não fornecido');
+        http_response_code(500); // Internal Server Error
+        echo json_encode(['success' => false, 'error' => 'Erro ao remover o produto do banco de dados']);
     }
+
 } catch (Exception $e) {
-    if (isset($pdo) && $pdo->inTransaction()) {
-        $pdo->rollBack();
-    }
-    header('Location: ../view/dashboard.php?mensagem=Erro+ao+excluir:+' . urlencode($e->getMessage()) . '&tipo_mensagem=erro');
-    exit;
+    error_log("Erro ao excluir produto: " . $e->getMessage());
+    http_response_code(500); // Internal Server Error
+    echo json_encode(['success' => false, 'error' => 'Erro interno do servidor ao tentar excluir o produto: ' . $e->getMessage()]);
 }
 ?>
