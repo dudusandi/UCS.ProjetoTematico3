@@ -31,4 +31,3 @@ class Cliente {
     public function setCartaoCredito($cartaoCredito) { $this->cartaoCredito = $cartaoCredito; }
     public function setEndereco(Endereco $endereco) { $this->endereco = $endereco; }
 }
-?>

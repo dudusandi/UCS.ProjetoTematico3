@@ -94,4 +94,3 @@ try {
 } catch (Exception $e) {
     echo json_encode(['error' => 'Erro ao processar: ' . $e->getMessage()]);
 }
-?>

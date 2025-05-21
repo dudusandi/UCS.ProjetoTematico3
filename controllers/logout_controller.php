@@ -11,4 +11,3 @@ $_SESSION['carrinhos'] = $carrinhos;
 
 header("Location: ../view/dashboard.php");
 exit;
-?>

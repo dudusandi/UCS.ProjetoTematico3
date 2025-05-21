@@ -39,6 +39,28 @@ try {
             </form>
         </div>
         <div class="user-options">
+            <?php if (isset($_SESSION['usuario_id'])): // Verifica se o usuário está logado ?>
+                <div class="dropdown me-2" id="notificacoesDropdownContainer" style="display: inline-block;">
+                    <button class="btn btn-outline-secondary position-relative" type="button" id="notificacoesDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-bell"></i>
+                        <span id="contadorNotificacoes" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">
+                            0
+                            <span class="visually-hidden">notificações não lidas</span>
+                        </span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificacoesDropdownBtn" id="listaNotificacoesDropdown">
+                        <li><h6 class="dropdown-header">Notificações</h6></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <!-- Notificações serão inseridas aqui pelo JS -->
+                        <li id="notificacaoItemLoading" class="dropdown-item text-muted">Carregando...</li>
+                        <li id="notificacaoItemNenhuma" class="dropdown-item text-muted d-none">Nenhuma notificação nova.</li>
+                        <li><hr class="dropdown-divider d-none" id="notificacoesDividerFinal"></li>
+                        <li><a class="dropdown-item text-center d-none" href="#" id="verTodasNotificacoesLink">Ver todas</a></li> 
+                        <li><a class="dropdown-item text-center d-none" href="#" id="marcarTodasLidasLink" onclick="marcarTodasComoLidas(event)">Marcar todas como lidas</a></li>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
             <?php if (isset($_SESSION['usuario_nome'])): ?>
                 <span>Olá, <?= htmlspecialchars($_SESSION['usuario_nome']) ?>!</span>
                 <a href="../controllers/logout_controller.php">Sair</a>
@@ -185,9 +207,9 @@ try {
                         </div>
                         <div class="col-md-8">
                             <div id="visualizacao">
-                                <p><strong>Código:</strong> <span id="produtoCodigo"></span></p>
                                 <p><strong>Descrição:</strong> <span id="produtoDescricao"></span></p>
                                 <p><strong>Preço:</strong> <span id="produtoPreco"></span></p>
+                                <p><strong>Anunciado por:</strong> <span id="produtoAnuncianteNome"></span></p>
                             </div>
                             <form id="editarForm" class="d-none">
                                 <input type="hidden" id="produtoId" name="id">
@@ -210,6 +232,11 @@ try {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                     
+                    <!-- Botão Tenho Interesse -->
+                    <button id="btnTenhoInteresse" type="button" class="btn btn-success d-none" onclick="registrarInteresseProduto()">
+                        <i class="bi bi-heart"></i> Tenho Interesse
+                    </button>
+
                     <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
                         <button id="btnEditar" class="btn btn-primary" onclick="alternarEdicao()">
                             <i class="bi bi-pencil"></i> Editar
@@ -295,7 +322,6 @@ try {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-    window.fornecedores = <?php echo json_encode($fornecedores); ?>;
     window.usuarioLogadoId = <?php echo json_encode(isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : null); ?>;
     window.isAdmin = <?php echo json_encode(isset($_SESSION['is_admin']) && $_SESSION['is_admin']); ?>;
 
@@ -321,21 +347,8 @@ try {
     // }
     </script>
     <script src="./dashboard.js"></script>
-    // <script src="./carrinho.js"></script>
+    <!-- <script src="./carrinho.js"></script> Removido pois o arquivo não existe mais -->
     <script>
-        // Preencher select de fornecedores
-        // document.addEventListener('DOMContentLoaded', function() {
-        //     const fornecedorSelect = document.getElementById('fornecedor');
-        //     if (window.fornecedores && window.fornecedores.length > 0) {
-        //         window.fornecedores.forEach(fornecedor => {
-        //             const option = document.createElement('option');
-        //             option.value = fornecedor.id;
-        //             option.text = fornecedor.nome;
-        //             fornecedorSelect.appendChild(option);
-        //         });
-        //     }
-        // });
-
         function exibirProduto(produto) {
             if (produto.foto) {
                 const fotoBase64 = btoa(String.fromCharCode.apply(null, new Uint8Array(produto.foto)));

@@ -283,3 +283,34 @@ body {
 .btn-search-custom:hover {
     background-color: #e65c00; /* Laranja um pouco mais escuro no hover */
 }
+
+/* Estilos para o dropdown de notificações */
+#listaNotificacoesDropdown.dropdown-menu {
+    min-width: 450px; /* Aumenta a largura do dropdown */
+    padding: 0.5rem; /* Adiciona um pouco de padding interno */
+}
+
+#listaNotificacoesDropdown .dropdown-item {
+    /* color: #000000 !important; */ /* Movido para ser mais específico abaixo */
+    white-space: normal !important; /* Permite quebra de linha no texto do item */
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+/* Cor do texto principal da notificação para preto */
+#listaNotificacoesDropdown .dropdown-item div > span {
+    color: #000000 !important; 
+}
+
+#listaNotificacoesDropdown .dropdown-item .text-muted {
+    color: #333333 !important; /* Torna a data um pouco mais escura para melhor leitura */
+}
+
+/* Ajuste para o link "Marcar todas como lidas" e "Ver todas" se existirem */
+#listaNotificacoesDropdown .dropdown-item.text-center a {
+    color: #007bff !important; /* Cor padrão de link Bootstrap para consistência */
+}
+
+#listaNotificacoesDropdown .dropdown-item.text-center a:hover {
+    text-decoration: underline !important;
+}

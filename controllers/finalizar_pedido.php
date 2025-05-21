@@ -54,5 +54,4 @@ try {
     
 } catch (Exception $e) {
     responderErro('Erro ao finalizar o pedido: ' . $e->getMessage());
-}
-?> 
+} 

@@ -25,4 +25,3 @@ try {
     header('Location: ../view/listar_fornecedor.php?mensagem=Erro ao excluir: ' . urlencode($e->getMessage()) . '&tipo_mensagem=erro');
     exit;
 }
-?>

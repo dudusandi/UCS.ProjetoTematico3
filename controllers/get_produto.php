@@ -4,6 +4,8 @@ session_start();
 require_once '../config/database.php';
 require_once '../dao/produto_dao.php';
 require_once '../model/produto.php';
+require_once '../dao/cliente_dao.php';
+require_once '../model/cliente.php';
 
 ob_clean();
 
@@ -17,10 +19,19 @@ try {
     $id = (int)$_GET['id'];
     $pdo = Database::getConnection();
     $produtoDAO = new ProdutoDAO($pdo);
+    $clienteDAO = new ClienteDAO($pdo);
     $produto = $produtoDAO->buscarPorId($id);
 
     if (!$produto) {
         throw new Exception('Produto não encontrado');
+    }
+
+    $nomeAnunciante = 'Não informado';
+    if ($produto->getUsuarioId()) {
+        $anunciante = $clienteDAO->buscarPorId($produto->getUsuarioId());
+        if ($anunciante) {
+            $nomeAnunciante = $anunciante->getNome();
+        }
     }
 
     $response = [
@@ -31,7 +42,8 @@ try {
             'descricao' => $produto->getDescricao(),
             'foto' => $produto->getFoto() ? base64_encode($produto->getFoto()) : null,
             'preco' => $produto->getPreco(),
-            'usuario_id' => $produto->getUsuarioId()
+            'usuario_id' => $produto->getUsuarioId(),
+            'anunciante_nome' => $nomeAnunciante
         ]
     ];
 
@@ -49,4 +61,3 @@ try {
 }
 
 ob_end_flush();
-?>
