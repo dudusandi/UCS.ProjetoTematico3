@@ -7,22 +7,103 @@
 
 body {
     background-color: #f5f5f5;
-    /* Define altura total da viewport e evita rolagem no body */
-    height: 100vh;
-    overflow: hidden;
+    height: 100vh; /* Ocupa toda a altura da viewport */
+    overflow: hidden; /* Impede o scroll do body */
+    display: flex;
+    flex-direction: row; /* GARANTIR que seja row para side-nav e main-content lado a lado */
+}
+
+.side-nav-bar {
+    width: 260px; /* Largura da barra lateral */
+    height: 100vh; /* Altura total */
+    background-color: #343a40; /* Cor de fundo escura para um visual moderno */
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centraliza os ícones/texto se não houver texto */
+    border-right: 1px solid #444;
+    flex-shrink: 0; /* Impede que a side-nav encolha */
+    color: #f8f9fa; /* Cor do texto clara */
+}
+
+.side-nav-bar .logo-container {
+    padding: 10px 20px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.side-nav-bar .logo-container .logo {
+    font-size: 28px; /* Aumenta o logo */
+    font-weight: bold;
+    color: #00ff1a; /* Mantém a cor original, pode ser ajustada */
+}
+
+.side-nav-bar .logo-container .logo span {
+    color: #9bb3a5; /* Mantém a cor original */
+}
+
+.side-nav-bar a {
+    text-decoration: none;
+    color: #adb5bd; /* Cor dos links */
+    font-size: 16px; /* Tamanho da fonte dos links */
+    padding: 15px 25px; /* Espaçamento interno dos links */
+    display: flex; /* Para alinhar ícones e texto */
+    align-items: center;
+    width: 100%; /* Faz o link ocupar toda a largura */
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.side-nav-bar a i {
+    margin-right: 15px; /* Espaço entre o ícone e o texto */
+    font-size: 20px; /* Tamanho dos ícones */
+    width: 20px; /* Largura fixa para alinhamento */
+    text-align: center;
+}
+
+.side-nav-bar a:hover,
+.side-nav-bar a.active { /* Estilo para link ativo */
+    background-color: #495057; /* Cor de fundo ao passar o mouse/ativo */
+    color: #f8f9fa; /* Cor do texto ao passar o mouse/ativo */
+    border-left: 3px solid #00ff1a; /* Destaque lateral para o item ativo/hover */
+    padding-left: 22px; /* Ajuste para compensar a borda */
+}
+
+.side-nav-bar .user-info-nav {
+    margin-top: auto; /* Empurra para o final da barra lateral */
+    padding: 20px;
+    border-top: 1px solid #444;
+    width: 100%;
+    text-align: center;
+}
+
+.side-nav-bar .user-info-nav span {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.side-nav-bar .user-info-nav a {
+    font-size: 14px;
+    padding: 10px 25px;
+    justify-content: center; /* Centraliza o texto do link de logout */
+}
+
+.main-content {
+    flex-grow: 1; /* Ocupa o espaço restante */
+    height: 100vh; /* Ocupa toda a altura */
+    overflow-y: hidden; /* O scroll principal será dentro das seções */
     display: flex;
     flex-direction: column;
 }
 
 .header {
-    background-color: #493965;
+    background-color: #493965; /* Mantido, mas agora dentro do .main-content */
     padding: 15px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid #ddd;
-    /* Garante que o header não role */
-    flex-shrink: 0;
+    flex-shrink: 0; /* Impede que o header encolha */
 }
 
 #loading {
@@ -78,10 +159,6 @@ body {
     color: #ff6f00;
 }
 
-.user-options span {
-    color: #dcdcdc;
-}
-
 .cart {
     position: relative;
 }
@@ -97,95 +174,109 @@ body {
     font-size: 12px;
 }
 
-.nav-bar {
-    background-color: #fff;
-    padding: 10px 20px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    border-bottom: 1px solid #ddd;
-    /* Garante que a nav-bar não role */
-    flex-shrink: 0;
-}
-
-.nav-bar a {
-    text-decoration: none;
-    color: #333;
-    font-size: 16px;
-}
-
-.nav-bar a:hover {
-    color: #ff6f00;
-}
-
 .welcome {
     padding: 20px;
     font-size: 24px;
     color: #d5d5d5;
-    /* Garante que a seção welcome não role */
     flex-shrink: 0;
 }
 
 .products-section {
     padding: 20px;
-    /* Faz a seção ocupar o espaço restante e permite rolagem */
-    flex-grow: 1;
-    overflow-y: auto;
-    /* Opcional: define uma altura mínima para evitar colapso */
-    min-height: 200px;
+    flex-grow: 1; /* Faz a seção ocupar o espaço vertical restante */
+    overflow-y: auto; /* Habilita o scroll vertical APENAS para esta seção */
+    min-height: 0; /* Necessário para flex-grow funcionar corretamente com overflow em alguns casos */
 }
 
 #produtosContainer {
-    min-height: 100%; /* Faz o container ocupar a altura da products-section */
+    /* min-height: 100%;  Pode não ser mais necessário ou desejável com flex-grow na parent */
+    /* Considere remover ou ajustar se causar problemas com o scroll da products-section */
 }
 
 .produto-card {
-    transition: transform 0.2s, box-shadow 0.2s;
-    cursor: pointer;
     border: 1px solid #e0e0e0;
-    background: #f7f7f7;
+    background: #ffffff; 
+    border-radius: 50%; /* Card continua totalmente redondo */
+    aspect-ratio: 1 / 1; /* Força o card a ser um quadrado, que vira círculo */
+    overflow: hidden; /* MUITO IMPORTANTE para o efeito */
+    display: flex;
+    flex-direction: column; /* Empilha a imagem (wrapper) e o corpo */
+    /* Removido padding geral, será controlado por seções internas */
 }
 
 .produto-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
 }
 
-.card-img-container {
-    height: 200px;
-    overflow: hidden;
-    background: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* Nova div para envolver a imagem e controlar sua forma na metade superior */
+.card-img-half-circle-wrapper {
+    width: 100%;
+    height: 70%; /* Ocupa 70% da altura do card para a imagem */
+    overflow: hidden; /* Essencial para cortar a imagem */
+    position: relative; /* Para posicionamento da imagem interna */
+    /* Não precisa de border-radius aqui, o card pai já corta em círculo */
+}
+
+.card-img-container { /* Reutilizado, mas com novo propósito */
+    width: 100%;
+    height: 100%; /* Preenche o card-img-half-circle-wrapper */
+    /* background-color: #e9ecef; */ /* Movido para o card-img-top ou pode ser removido se a imagem sempre cobrir */
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    position: absolute; /* Para garantir que a imagem preencha corretamente */
+    top: 0;
+    left: 0;
+    /* border-radius e overflow removidos daqui, controlados pelo wrapper e card pai */
 }
 
 .card-img-top {
-    height: 100%;
     width: 100%;
-    object-fit: contain;
-    padding: 10px;
+    height: 100%;
+    object-fit: cover; 
+    object-position: center; 
+    /* Não precisa de position absolute se o .card-img-container já é absoluto e preenche o wrapper */
+}
+
+.card-img-placeholder-icon {
+    font-size: 2.5rem; /* Ajuste para caber na metade do círculo */
+    color: #adb5bd; 
+    /* Centralizado pelo flex do .card-img-container */
 }
 
 .card-body {
-    padding: 1rem;
+    width: 100%;
+    height: 30%; /* Ocupa os 30% restantes da altura para o texto */
+    padding: 8px 12px 12px 12px; /* Padding ajustado para menos altura */
+    text-align: center; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centraliza o conteúdo do corpo verticalmente */
+    align-items: center;   /* Centraliza o conteúdo do corpo horizontalmente */
+    box-sizing: border-box; /* Para padding não aumentar a altura */
+    background-color: #f7f7f7; /* Fundo para a parte do texto, se desejado */
 }
 
 .card-title {
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
+    font-size: 0.85rem; 
+    font-weight: 600; 
+    margin-bottom: 0.2rem;
     color: #333;
+    line-height: 1.2;
+    /* A classe text-truncate no HTML pode ser usada para uma linha. */
+    /* Para múltiplas linhas com truncamento em área não retangular é complexo. */
+    /* Manter simples por agora. */
 }
 
 .card-text {
-    margin-bottom: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    margin-bottom: 0; /* Ajuste conforme necessário */
+    /* display: flex; */ /* Removido, não mais necessário para empilhar apenas preço */
+    /* flex-direction: column; */ /* Removido */
+    /* gap: 0; */ /* Removido */
 }
 
 .preco {
-    font-size: 1.2rem;
+    font-size: 0.95rem; 
     font-weight: bold;
     color: #ff6f00;
 }
@@ -314,3 +405,185 @@ body {
 #listaNotificacoesDropdown .dropdown-item.text-center a:hover {
     text-decoration: underline !important;
 }
+
+/* Ajuste para a barra de pesquisa dentro do conteúdo */
+.search-bar-content {
+    /* margin-bottom: 20px;  Já tem mb-4 na classe bootstrap */
+    /* Adicione estilos específicos se o d-flex do bootstrap não for suficiente */
+}
+
+.side-nav-bar .nav-item-notificacao {
+    /* Estilo para o container do botão de notificação, se necessário */
+    width: 100%;
+    position: relative; /* Para o posicionamento do dropdown */
+}
+
+.side-nav-bar .btn-notificacao {
+    background: none;
+    border: none;
+    color: #adb5bd;
+    padding: 15px 25px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.side-nav-bar .btn-notificacao:hover,
+.side-nav-bar .btn-notificacao.active-link { /* Manter consistência com os links */
+    background-color: #495057;
+    color: #f8f9fa;
+}
+
+.side-nav-bar .btn-notificacao i {
+    margin-right: 15px;
+    font-size: 20px;
+    width: 20px;
+    text-align: center;
+}
+
+.side-nav-bar #listaNotificacoesDropdown {
+    /* Ajustes para o dropdown de notificações na side-nav */
+    /* Pode precisar de ajustes de posicionamento se não abrir corretamente */
+    /* Ex: position: fixed; left: 260px; top: auto; bottom: auto; transform: translateY(-50%); */
+    /* A linha acima é um exemplo, o ideal é testar com o HTML */
+    background-color: #343a40; /* Fundo escuro como a side-nav */
+    border: 1px solid #444;
+    min-width: 350px; /* Largura do dropdown */
+}
+
+.side-nav-bar #listaNotificacoesDropdown .dropdown-header,
+.side-nav-bar #listaNotificacoesDropdown .dropdown-item {
+    color: #f8f9fa; /* Texto claro */
+}
+
+.side-nav-bar #listaNotificacoesDropdown .dropdown-item:hover {
+    background-color: #495057; /* Cor de hover */
+}
+
+.side-nav-bar #listaNotificacoesDropdown .dropdown-divider {
+    border-top: 1px solid #444;
+}
+
+/* Cor do texto principal da notificação para branco/cinza claro */
+.side-nav-bar #listaNotificacoesDropdown .dropdown-item div > span {
+    color: #e0e0e0 !important; 
+}
+
+.side-nav-bar #listaNotificacoesDropdown .dropdown-item .text-muted {
+    color: #adb5bd !important; 
+}
+
+.side-nav-bar #listaNotificacoesDropdown .dropdown-item.text-center a {
+    color: #00ff1a !important; /* Cor de destaque */
+}
+
+/* REMOÇÃO DO HEADER ROXO SUPERIOR */
+/* 
+.header {
+    background-color: #493965; 
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #ddd;
+    flex-shrink: 0; 
+}
+*/
+
+/* ESTILOS PARA A NOVA BARRA DE BUSCA CENTRALIZADA */
+.search-bar-container {
+    padding: 20px 0; /* Espaçamento acima e abaixo da barra de busca */
+    width: 100%;
+    display: flex; /* Para centralizar a search-bar-md3 */
+    justify-content: center;
+    flex-shrink: 0; /* Para não encolher se o conteúdo abaixo for grande */
+}
+
+.search-bar-md3 {
+    display: flex;
+    align-items: center;
+    width: 50%; /* Metade da largura do container pai */
+    max-width: 600px; /* Limite máximo de largura */
+    background-color: #e8eaed; /* Cor de fundo estilo Material Design 3 (cinza claro) */
+    border-radius: 28px; /* Cantos bem arredondados */
+    padding: 8px 12px 8px 20px; /* Ajustado: Topo Direita Baixo Esquerda */
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.1), 0 1px 4px 0 rgba(0,0,0,0.08); /* Sombra sutil */
+}
+
+.search-bar-md3 input[type="text"] {
+    flex-grow: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 16px;
+    color: #3c4043; /* Cor do texto do input */
+    margin-right: 8px;
+}
+
+.search-bar-md3 input[type="text"]::placeholder {
+    color: #5f6368; /* Cor do placeholder */
+}
+
+.search-bar-md3 button {
+    border: none;
+    background: transparent;
+    color: #5f6368; /* Cor do ícone de busca */
+    padding: 8px;
+    border-radius: 50%; /* Para manter o ícone com fundo redondo se desejado */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.search-bar-md3 button i {
+    font-size: 20px;
+}
+
+.search-bar-md3 button:hover {
+    background-color: rgba(0,0,0,0.05); /* Leve feedback no hover */
+}
+
+/* FIM DOS ESTILOS DA NOVA BARRA DE BUSCA */
+
+/* ESTILOS PARA O BANNER ECOLÓGICO */
+.ecological-info-banner {
+    padding: 15px 20px;
+    margin: 10px 20px 15px 20px; /* Ajuste de margem, principalmente superior/inferior */
+    /* background-color: #f8f9fa; */ /* REMOVIDO */
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column; /* Ícone e texto empilhados */
+    align-items: center; /* Centraliza itens na vertical (ícone e parágrafo) */
+    /* justify-content: center; */ /* Não mais necessário com column e align-items */
+    text-align: center;
+    /* border: 1px solid #e9ecef; */ /* REMOVIDO */
+}
+
+.ecological-info-banner i {
+    font-size: 2.2rem; /* Ícone um pouco maior */
+    color: #28a745; /* Verde para o ícone de planta */
+    /* margin-right: 12px; */ /* REMOVIDO */
+    margin-bottom: 10px; /* Espaço entre o ícone e o texto */
+}
+
+.ecological-info-banner p {
+    margin-bottom: 0; /* Remove margem padrão do parágrafo */
+    font-size: 0.9rem;
+    color: #c6c9cb; /* Cinza para baixo contraste */
+    line-height: 1.4;
+    width: 70%; /* Texto ocupa 50% da largura */
+    max-width: 900px; /* Limite máximo para não ficar muito largo em telas grandes */
+}
+/* FIM ESTILOS BANNER ECOLÓGICO */
+
+/* Ajuste para a barra de pesquisa dentro do conteúdo - AGORA REMOVIDA OU SUBSTITUÍDA */
+/*
+.search-bar-content {
+     margin-bottom: 20px;  Já tem mb-4 na classe bootstrap 
+     Adicione estilos específicos se o d-flex do bootstrap não for suficiente 
+}
+*/

@@ -34,7 +34,7 @@ $produto_id = (int)$produto_id;
 
 try {
     $pdo = Database::getConnection();
-    $produtoDao = new ProdutoDAO($pdo);
+    $produtoDao = new ProdutoDAO();
     $notificacaoDao = new NotificacaoDAO($pdo);
     // $clienteDao = new ClienteDAO($pdo); // Já instanciado se precisar do nome do interessado de forma mais robusta
 
@@ -46,7 +46,8 @@ try {
         exit;
     }
 
-    $usuario_id_destino = $produto->getUsuarioId();
+    // Acessar como array, pois buscarPorId agora retorna array
+    $usuario_id_destino = $produto['usuario_id']; 
 
     if ($usuario_id_origem === $usuario_id_destino) {
         http_response_code(400); // Bad Request
@@ -57,7 +58,8 @@ try {
     // Criar a notificação
     $tipo_notificacao = 'interesse_compra';
     // Usar o nome do usuário logado na mensagem
-    $mensagem = htmlspecialchars($nome_usuario_logado) . " demonstrou interesse no seu produto: " . htmlspecialchars($produto->getNome());
+    // Acessar como array
+    $mensagem = htmlspecialchars($nome_usuario_logado) . " demonstrou interesse no seu produto: " . htmlspecialchars($produto['nome']);
     $link = "view/produto_detalhes.php?id=" . $produto_id; // Exemplo de link, pode ser ajustado
 
     $notificacao = new Notificacao(

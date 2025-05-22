@@ -47,7 +47,7 @@ try {
     );
 
     $pdo = Database::getConnection();
-    $produtoDAO = new ProdutoDAO($pdo);
+    $produtoDAO = new ProdutoDAO();
     $produtoDAO->cadastrarProduto($produto);
 
     echo json_encode([

@@ -7,9 +7,9 @@ class ProdutoDAO {
     private $pdo;
     // private $estoqueDAO;
 
-    public function __construct($pdo) {
-        $this->pdo = $pdo;
-        // $this->estoqueDAO = new EstoqueDAO($pdo);
+    public function __construct() {
+        $this->pdo = Database::getConnection();
+        // $this->estoqueDAO = new EstoqueDAO($this->pdo);
     }
 
     public function cadastrarProduto(Produto $produto) {
@@ -95,11 +95,14 @@ class ProdutoDAO {
     public function buscarPorId($id) {
         try {
             if (!is_numeric($id) || $id <= 0) {
-                throw new Exception("ID inválido");
+                throw new InvalidArgumentException("ID do produto inválido.");
             }
 
-            $sql = "SELECT p.id, p.nome, p.descricao, p.foto, p.usuario_id, p.preco
+            // Modificado para fazer JOIN com clientes e buscar o nome do usuário
+            $sql = "SELECT p.id, p.nome, p.descricao, p.foto, p.usuario_id, p.preco, 
+                           c.nome AS proprietario_nome 
                     FROM produtos p
+                    LEFT JOIN clientes c ON p.usuario_id = c.id
                     WHERE p.id = :id";
             $stmt = $this->pdo->prepare($sql);
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
@@ -110,21 +113,47 @@ class ProdutoDAO {
                 return null;
             }
 
+            // O construtor do Produto pode precisar ser ajustado se você quiser que ele armazene proprietario_nome
+            // Por enquanto, vamos retornar um array associativo do DAO para simplificar a passagem de dados para o JS
+            // ou garantir que o objeto Produto tenha como obter essa informação.
+            // Para este exemplo, vou retornar um array com todos os dados necessários.
+            
+            // Se o seu objeto Produto não tem um campo para proprietario_nome, 
+            // e você não quer modificá-lo, retornar um array aqui é uma opção direta para o AJAX.
+            return [
+                'id' => $linha['id'],
+                'nome' => $linha['nome'],
+                'descricao' => $linha['descricao'],
+                'foto' => $linha['foto'], // Assumindo que foto é BLOB e será tratado no JS/PHP para exibição
+                'preco' => $linha['preco'],
+                'usuario_id' => $linha['usuario_id'], // ID do proprietário
+                'proprietario_nome' => $linha['proprietario_nome'] ?? 'Nome não disponível' // Nome do proprietário
+            ];
+
+            /* // Se preferir manter retornando o objeto Produto, você precisaria:
+            // 1. Adicionar um campo e getter/setter para proprietario_nome no model/produto.php
+            // 2. Modificar o construtor do Produto para aceitar proprietario_nome
+            // 3. Instanciar e retornar o objeto Produto aqui:
             $produto = new Produto(
                 $linha['nome'],
                 $linha['descricao'],
                 $linha['foto'],
                 $linha['preco'],
                 $linha['usuario_id']
+                // , $linha['proprietario_nome'] // se o construtor for atualizado
             );
             $produto->setId($linha['id']);
-            // $produto->setEstoqueId($linha['estoque_id']);
-            // $produto->setQuantidade($linha['quantidade']);
-            // $produto->setPreco($linha['preco']);
-
+            // $produto->setProprietarioNome($linha['proprietario_nome']); // se tiver setter
             return $produto;
+            */
+
         } catch (PDOException $e) {
-            throw $e;
+            // Logar o erro em um ambiente de produção
+            // error_log("Erro no ProdutoDAO->buscarPorId: " . $e->getMessage());
+            throw new Exception("Erro ao buscar produto por ID: " . $e->getMessage());
+        } catch (InvalidArgumentException $e) {
+            // error_log("Argumento inválido em ProdutoDAO->buscarPorId: " . $e->getMessage());
+            throw $e; // Re-lança a exceção para ser tratada pelo chamador
         }
     }
 
@@ -186,7 +215,7 @@ class ProdutoDAO {
         try {
             $produto = $this->buscarPorId($id);
             if ($produto) {
-                if ($produto->getFoto()) {
+                if ($produto['foto']) {
                 }
 
                 // $estoqueId = $produto->getEstoqueId();

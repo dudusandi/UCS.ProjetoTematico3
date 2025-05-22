@@ -17,33 +17,24 @@ try {
     }
 
     $id = (int)$_GET['id'];
-    $pdo = Database::getConnection();
-    $produtoDAO = new ProdutoDAO($pdo);
-    $clienteDAO = new ClienteDAO($pdo);
-    $produto = $produtoDAO->buscarPorId($id);
+    $produtoDAO = new ProdutoDAO();
+    
+    $produtoArray = $produtoDAO->buscarPorId($id);
 
-    if (!$produto) {
+    if (!$produtoArray) {
         throw new Exception('Produto não encontrado');
-    }
-
-    $nomeAnunciante = 'Não informado';
-    if ($produto->getUsuarioId()) {
-        $anunciante = $clienteDAO->buscarPorId($produto->getUsuarioId());
-        if ($anunciante) {
-            $nomeAnunciante = $anunciante->getNome();
-        }
     }
 
     $response = [
         'success' => true,
         'produto' => [
-            'id' => $produto->getId(),
-            'nome' => $produto->getNome(),
-            'descricao' => $produto->getDescricao(),
-            'foto' => $produto->getFoto() ? base64_encode($produto->getFoto()) : null,
-            'preco' => $produto->getPreco(),
-            'usuario_id' => $produto->getUsuarioId(),
-            'anunciante_nome' => $nomeAnunciante
+            'id' => $produtoArray['id'],
+            'nome' => $produtoArray['nome'],
+            'descricao' => $produtoArray['descricao'],
+            'foto' => $produtoArray['foto'] ? base64_encode(stream_get_contents($produtoArray['foto'])) : null,
+            'preco' => $produtoArray['preco'],
+            'usuario_id' => $produtoArray['usuario_id'],
+            'proprietario_nome' => $produtoArray['proprietario_nome']
         ]
     ];
 

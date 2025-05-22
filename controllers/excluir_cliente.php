@@ -16,7 +16,7 @@ if (!isset($_GET['id'])) {
 $id = (int)$_GET['id'];
 
 try {
-    $clienteDAO = new ClienteDAO(Database::getConnection());
+    $clienteDAO = new ClienteDAO();
     $clienteDAO->removerCliente($id);
     header('Location: ../view/listar_clientes.php?mensagem=Cliente excluído com sucesso&tipo_mensagem=sucesso');
 } catch (Exception $e) {

@@ -11,7 +11,7 @@ require_once __DIR__ . '/../dao/cliente_dao.php';
 
 try {
     $pdo = Database::getConnection();
-    $clienteDAO = new ClienteDAO($pdo);
+    $clienteDAO = new ClienteDAO();
 
     $termo = $_GET['termo'] ?? '';
     $pagina = isset($_GET['pagina']) ? max(1, (int)$_GET['pagina']) : 1;

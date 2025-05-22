@@ -16,7 +16,7 @@ require_once __DIR__ . '/../model/produto.php';
 
 try {
     $pdo = Database::getConnection();
-    $produtoDao = new ProdutoDAO($pdo);
+    $produtoDao = new ProdutoDAO();
     // $estoqueDao = new EstoqueDAO($pdo);
 
     $id = (int)($_POST['id'] ?? 0);
@@ -32,7 +32,7 @@ try {
     }
 
     // Verificar se o produto pertence ao usuário logado
-    if ($produtoExistente->getUsuarioId() !== $usuario_id) {
+    if ($produtoExistente['usuario_id'] !== $usuario_id) {
         http_response_code(403); // Forbidden
         echo json_encode(['error' => 'Você não tem permissão para editar este produto.']);
         exit;
@@ -55,7 +55,7 @@ try {
         exit;
     }
 
-    $foto = $produtoExistente->getFoto() ?? null;
+    $foto = $produtoExistente['foto'] ?? null;
 
     if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
         $file = $_FILES['foto'];
@@ -82,7 +82,7 @@ try {
         $descricao, 
         $foto, 
         $preco, // preco
-        $produtoExistente->getUsuarioId() // usuario_id original do produto
+        $produtoExistente['usuario_id'] // usuario_id original do produto, acessado como array
     );
     $produtoAtualizado->setId($id);
 

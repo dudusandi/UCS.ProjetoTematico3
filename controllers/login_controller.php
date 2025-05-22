@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         $pdo = Database::getConnection();
-        $clienteDAO = new ClienteDAO($pdo);
+        $clienteDAO = new ClienteDAO();
 
         $cliente = $clienteDAO->buscarPorEmailSenha($email, $senha);
 

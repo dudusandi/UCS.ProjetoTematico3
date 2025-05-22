@@ -12,7 +12,7 @@ require_once '../model/endereco.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        $clienteDAO = new ClienteDAO(Database::getConnection());
+        $clienteDAO = new ClienteDAO();
             $endereco = new Endereco(
             $_POST['rua'],
             $_POST['numero'],

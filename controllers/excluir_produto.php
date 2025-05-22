@@ -14,7 +14,7 @@ require_once __DIR__ . '/../dao/produto_dao.php';
 
 try {
     $pdo = Database::getConnection();
-    $produtoDao = new ProdutoDAO($pdo);
+    $produtoDao = new ProdutoDAO();
 
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         http_response_code(405); // Method Not Allowed
@@ -39,7 +39,7 @@ try {
     }
 
     // Verificar se o produto pertence ao usuário logado
-    if ($produto->getUsuarioId() !== $usuario_id_logado) {
+    if ($produto['usuario_id'] !== $usuario_id_logado) {
         http_response_code(403); // Forbidden
         echo json_encode(['success' => false, 'error' => 'Você não tem permissão para excluir este produto.']);
         exit;

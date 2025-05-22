@@ -6,8 +6,8 @@ require_once __DIR__ . '/../model/endereco.php';
 class ClienteDAO {
     private $pdo;
 
-    public function __construct($pdo) {
-        $this->pdo = $pdo;
+    public function __construct() {
+        $this->pdo = Database::getConnection();
     }
 
     public function buscarPorEmailSenha($email, $senha) {

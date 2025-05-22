@@ -6,13 +6,12 @@ class Produto {
     private $foto;
     private $usuario_id;
     private $preco;
-    private $imagem;
 
-    public function __construct($nome, $descricao, $imagem, $preco, $usuario_id) {
+    public function __construct($nome, $descricao, $foto_param, $preco, $usuario_id) {
         // $this->id = $id; // ID será definido depois
         $this->nome = $nome;
         $this->descricao = $descricao;
-        $this->imagem = $imagem;
+        $this->foto = $foto_param;
         $this->setPreco($preco);
         $this->setUsuarioId($usuario_id);
     }
@@ -37,8 +36,8 @@ class Produto {
 
     public function getFoto() { return $this->foto; }
     
-    public function setFoto($foto) { 
-        $this->foto = $foto; 
+    public function setFoto($foto_param) { 
+        $this->foto = $foto_param; 
     }
 
     public function getPreco() { return $this->preco; }
@@ -49,12 +48,6 @@ class Produto {
             return;
         }
         $this->preco = (float)$preco; 
-    }
-
-    public function getImagem() { return $this->imagem; }
-    
-    public function setImagem($imagem) { 
-        $this->imagem = $imagem; 
     }
 
     public function getUsuarioId() { return $this->usuario_id; }

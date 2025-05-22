@@ -30,7 +30,7 @@ function mostrarDetalhes(id) {
             document.getElementById('produtoNome').textContent = produto.nome;
             document.getElementById('produtoDescricao').textContent = produto.descricao || 'Nenhuma';
             document.getElementById('produtoPreco').textContent = `R$ ${(produto.preco ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-            document.getElementById('produtoAnuncianteNome').textContent = produto.anunciante_nome || 'Não informado';
+            document.getElementById('produtoAnuncianteNome').textContent = produto.proprietario_nome || 'Não informado';
             document.getElementById('produtoFoto').src = produto.foto ? `data:image/jpeg;base64,${produto.foto}` : 'https://via.placeholder.com/200';
 
             // Elementos do formulário de edição
@@ -48,6 +48,22 @@ function mostrarDetalhes(id) {
             const btnExcluir = document.getElementById('btnExcluir');
             const btnSalvar = document.getElementById('btnSalvar');
             const btnTenhoInteresse = document.getElementById('btnTenhoInteresse');
+
+            // Lógica para o botão "Enviar Mensagem ao Vendedor"
+            const btnEnviarMensagem = document.getElementById('btnEnviarMensagemVendedor');
+            const proprietarioIdDoProduto = produto.usuario_id; // Assumindo que o backend envia usuario_id como o ID do dono
+
+            console.log("[mostrarDetalhes] ID Proprietário do Produto:", proprietarioIdDoProduto, "(tipo:", typeof proprietarioIdDoProduto, ")");
+
+            if (proprietarioIdDoProduto && window.usuarioLogadoId && parseInt(proprietarioIdDoProduto) !== parseInt(window.usuarioLogadoId)) {
+                console.log("[mostrarDetalhes] Mostrando botão Enviar Mensagem.");
+                btnEnviarMensagem.href = `../view/chat.php?usuario_id=${proprietarioIdDoProduto}`; // Ajustado o caminho para view/chat.php
+                btnEnviarMensagem.classList.remove('d-none');
+            } else {
+                console.log("[mostrarDetalhes] Escondendo botão Enviar Mensagem (usuário é o dono ou não logado ou proprietário não definido).");
+                btnEnviarMensagem.classList.add('d-none');
+            }
+            // Fim da lógica do botão Enviar Mensagem
 
             console.log("[mostrarDetalhes] Verificando condições de exibição dos botões:");
             console.log("[mostrarDetalhes] ID Usuário Logado:", window.usuarioLogadoId, "(tipo:", typeof window.usuarioLogadoId, ")");

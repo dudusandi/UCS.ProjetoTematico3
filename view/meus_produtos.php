@@ -9,20 +9,43 @@ if (!isset($_SESSION['usuario_id'])) {
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../dao/produto_dao.php';
+require_once __DIR__ . '/../dao/mensagem_dao.php';
+require_once __DIR__ . '/../dao/cliente_dao.php';
 
-$usuario_id = $_SESSION['usuario_id'];
-$mensagem = $_GET['mensagem'] ?? '';
-$tipoMensagem = $_GET['tipo_mensagem'] ?? '';
+$id_usuario_logado = $_SESSION['usuario_id'];
+$nome_usuario = "Usuário"; // Default
+$contador_mensagens_nao_lidas = 0;
 
 try {
-    $pdo = Database::getConnection();
-    $produtoDao = new ProdutoDAO($pdo);
+    $pdo = Database::getConnection(); // Assegura que a conexão PDO seja obtida primeiro.
+
+    $clienteDAO = new ClienteDAO();
+    $cliente_logado_info = $clienteDAO->buscarPorId($id_usuario_logado);
+    if ($cliente_logado_info) {
+        $nome_usuario = $cliente_logado_info->getNome();
+        // Atualizar nome na sessão se não estiver lá ou for diferente
+        if (!isset($_SESSION['usuario_nome']) || $_SESSION['usuario_nome'] !== $nome_usuario) {
+             $_SESSION['usuario_nome'] = $nome_usuario;
+        }
+    } else {
+        // error_log("Cliente não encontrado para o ID: " . $id_usuario_logado . " em meus_produtos.php");
+        // Se o cliente não for encontrado, mas a sessão existir, talvez usar um nome genérico ou invalidar a sessão.
+        // Por agora, mantém $nome_usuario como "Usuário" se $cliente_logado_info for nulo.
+    }
+
+    $mensagemDAO = new MensagemDAO();
+    $contador_mensagens_nao_lidas = $mensagemDAO->contarMensagensNaoLidas($id_usuario_logado);
+    
+    $produtoDao = new ProdutoDAO(); // Instanciado aqui pois depende do PDO e não há mais lógica de header conflitante antes.
+
 } catch (Exception $e) {
-    error_log("Erro ao conectar ao banco de dados: " . $e->getMessage());
-    $mensagem = "Erro crítico ao carregar a página. Tente novamente mais tarde.";
-    $tipoMensagem = 'erro';
-    // Não prosseguir se não conseguir conectar ao DB
+    error_log("Erro na inicialização de dados em meus_produtos.php: " . $e->getMessage());
+    // Considerar definir uma mensagem de erro para ser exibida ao usuário.
+    // Por exemplo, $mensagem_feedback_geral = "Ocorreu um erro ao carregar a página. Tente novamente.";
 }
+
+$mensagem_feedback = $_GET['mensagem'] ?? '';
+$tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
 
 ?>
 <!DOCTYPE html>
@@ -32,137 +55,255 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meus Produtos - ECOxchange</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="dashboard.css"> <!-- CSS unificado -->
     <style>
-        .produto-card .card-footer {
-            background-color: transparent;
-            border-top: none;
+        /* Estilos específicos que não foram para dashboard.css (se houver) */
+        .list-group-item img {
+            width: 70px; /* Ajuste leve */
+            height: 70px; 
+            object-fit: cover; 
+            margin-right: 15px; 
+            border-radius: 4px;
         }
-        .empty-state {
-            text-align: center;
-            padding: 50px;
-            color: #6c757d;
+        .img-placeholder-icon {
+            width: 70px; 
+            height: 70px; 
+            background-color: #e9ecef; 
+            margin-right: 15px; 
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+         .list-group-item .btn-group .btn {
+            padding: 0.25rem 0.5rem; /* Botões de ação menores */
+            font-size: 0.8rem;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo"><a href="dashboard.php" style="text-decoration: none; color: inherit;">ECO<span>xchange</span></a></div>
-        <div class="search-bar">
-            <form id="searchFormMeusProdutos" class="d-flex" method="GET" action="meus_produtos.php">
-                <input type="text" id="searchInputMeusProdutos" name="termo" class="form-control me-2" placeholder="Pesquisar nos meus produtos..." value="<?= htmlspecialchars($_GET['termo'] ?? '') ?>">
-                <button type="submit" class="btn btn-outline-success">
-                    <i class="bi bi-search"></i>
-                </button>
-            </form>
+    <div class="side-nav-bar">
+        <div class="logo-container">
+            <div class="logo">ECO<span>xchange</span></div>
         </div>
-        <div class="user-options">
-            <?php if (isset($_SESSION['usuario_nome'])): ?>
-                <span>Olá, <?= htmlspecialchars($_SESSION['usuario_nome']) ?>!</span>
-                <a href="../controllers/logout_controller.php" class="btn btn-outline-danger ms-2">Sair</a>
+
+        <a href="dashboard.php">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+        </a>
+        
+        <?php if ($id_usuario_logado): ?>
+            <a href="#" data-bs-toggle="modal" data-bs-target="#cadastroProdutoModalDashboard"> <!-- Mesmo modal do dashboard -->
+                <i class="bi bi-plus-circle"></i>
+                <span>Cadastrar Produto</span>
+            </a>
+            <a href="meus_produtos.php" class="active"> <!-- Link ativo -->
+                <i class="bi bi-archive"></i>
+                <span>Meus Produtos</span>
+            </a>
+            <a href="minhas_mensagens.php" class="position-relative">
+                <i class="bi bi-chat-left-dots"></i>
+                <span>Minhas Mensagens</span>
+                <?php if ($contador_mensagens_nao_lidas > 0): ?>
+                    <span class="badge bg-danger position-absolute top-50 start-100 translate-middle-y ms-2" style="font-size: 0.65em; padding: 0.3em 0.5em;"><?php echo $contador_mensagens_nao_lidas; ?></span>
+                <?php endif; ?>
+            </a>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
+            <a href="../view/listar_clientes.php">
+                <i class="bi bi-people"></i>
+                <span>Gerenciar Clientes</span>
+            </a> 
+        <?php endif; ?>
+
+        <!-- Notificações na Side Nav -->
+        <?php if ($id_usuario_logado): ?>
+        <div class="nav-item-notificacao dropdown">
+            <button class="btn-notificacao dropdown-toggle" type="button" id="notificacoesDropdownBtnSideNav" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-bell"></i>
+                <span>Notificações</span>
+                <span id="contadorNotificacoesSideNav" class="badge bg-danger position-absolute top-50 start-100 translate-middle-y ms-2" style="font-size: 0.65em; padding: 0.3em 0.5em; <?php echo ($contador_mensagens_nao_lidas > 0 ? '' : 'display:none;'); ?>">
+                    <?php echo $contador_mensagens_nao_lidas; ?> 
+                </span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="notificacoesDropdownBtnSideNav" id="listaNotificacoesDropdownMeusProdutos">
+                <li><h6 class="dropdown-header">Notificações</h6></li>
+                <li><hr class="dropdown-divider"></li>
+                <li id="notificacaoItemLoadingMeusProdutos" class="dropdown-item text-muted">Carregando...</li>
+                <li id="notificacaoItemNenhumaMeusProdutos" class="dropdown-item text-muted d-none">Nenhuma notificação nova.</li>
+                <li><hr class="dropdown-divider d-none" id="notificacoesDividerFinalMeusProdutos"></li>
+                <li><a class="dropdown-item text-center d-none" href="#" id="verTodasNotificacoesLinkMeusProdutos">Ver todas</a></li> 
+                <li><a class="dropdown-item text-center d-none" href="#" id="marcarTodasLidasLinkMeusProdutos" onclick="marcarTodasComoLidasClientSide(event, 'MeusProdutos')">Marcar todas como lidas</a></li>
+            </ul>
+        </div>
+        <?php endif; ?>
+        <!-- Fim Notificações na Side Nav -->
+
+        <div class="user-info-nav">
+            <?php if ($id_usuario_logado): ?>
+                <span><i class="bi bi-person-circle"></i> <?= htmlspecialchars($nome_usuario) ?></span>
+                <a href="../controllers/logout_controller.php">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Sair</span>
+                </a>
             <?php else: ?>
-                <a href="login.php" class="btn btn-primary btn-sm">Login</a>
+                <a href="login.php">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Login</span>
+                </a>
             <?php endif; ?>
         </div>
     </div>
 
-    <div class="nav-bar">
-        <a href="dashboard.php" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar ao Início</a>
-    </div>
-
-    <div class="container mt-4">
-        <h2>Meus Produtos Anunciados</h2>
-
-        <?php if (!empty($mensagem)): ?>
-            <div class="alert alert-<?= $tipoMensagem === 'erro' ? 'danger' : 'success' ?> alert-dismissible fade show" role="alert">
-                <?= htmlspecialchars($mensagem, ENT_QUOTES, 'UTF-8') ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="main-content">
+        <div class="header">
+            <!-- Logo e user options principais movidos para a side-nav -->
+            <div class="flex-grow-1"></div> <!-- Espaçador -->
+            <div class="user-options">
+                 <?php if (isset($_SESSION['usuario_id'])): ?>
+                    <div class="dropdown me-2" id="notificacoesDropdownContainer" style="display: inline-block;">
+                        <button class="btn btn-outline-light position-relative" type="button" id="notificacoesDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell"></i>
+                            <span id="contadorNotificacoesHeader" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger <?php echo $contador_mensagens_nao_lidas > 0 ? '' : 'd-none'; ?>">
+                                <?php echo $contador_mensagens_nao_lidas; ?> 
+                                <span class="visually-hidden">notificações não lidas</span>
+                            </span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificacoesDropdownBtn" id="listaNotificacoesDropdown">
+                            <li><h6 class="dropdown-header">Notificações</h6></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li id="notificacaoItemLoadingHeader" class="dropdown-item text-muted">Carregando...</li>
+                            <li id="notificacaoItemNenhumaHeader" class="dropdown-item text-muted d-none">Nenhuma notificação nova.</li>
+                            <li><hr class="dropdown-divider d-none" id="notificacoesDividerFinalHeader"></li>
+                            <li><a class="dropdown-item text-center d-none" href="#" id="verTodasNotificacoesLinkHeader">Ver todas</a></li> 
+                            <li><a class="dropdown-item text-center d-none" href="#" id="marcarTodasLidasLinkHeader" onclick="marcarTodasComoLidasClientSide(event)">Marcar todas como lidas</a></li>
+                        </ul>
+                    </div>
+                <?php endif; ?>
             </div>
-        <?php endif; ?>
+        </div>
 
-        <div id="meusProdutosContainer">
-            <?php
-            if (isset($produtoDao)) { // Só prossegue se o DAO foi inicializado
-                try {
-                    $itensPorPagina = 8;
-                    $paginaAtual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
-                    if ($paginaAtual < 1) $paginaAtual = 1;
-                    $offset = ($paginaAtual - 1) * $itensPorPagina;
-                    $termo = $_GET['termo'] ?? '';
+        <!-- Conteúdo específico de Meus Produtos -->
+        <div class="products-section container-fluid mt-3"> <!-- Ajustado para container-fluid e margem -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>Meus Produtos</h2>
+                <!-- O botão de cadastrar novo produto foi para a side-nav -->
+            </div>
+            
+            <!-- Nova Barra de pesquisa MD3 específica para "Meus Produtos" -->
+            <div class="search-bar-container mb-3">
+                <div class="search-bar-md3">
+                    <form id="searchFormMeusProdutos" method="GET" action="meus_produtos.php" class="d-flex flex-grow-1">
+                        <input type="text" id="searchInputMeusProdutos" name="termo" class="form-control flex-grow-1" placeholder="Pesquisar em Meus Produtos..." value="<?= htmlspecialchars($_GET['termo'] ?? '') ?>">
+                        <button type="submit" class="btn">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
 
-                    $produtos = $produtoDao->buscarPorUsuarioId($usuario_id, $termo, $itensPorPagina, $offset);
-                    $totalProdutos = $produtoDao->contarProdutosPorUsuarioId($usuario_id, $termo);
-                    $totalPaginas = ceil($totalProdutos / $itensPorPagina);
+            <?php if (!empty($mensagem_feedback)): ?>
+                <div class="alert alert-<?= $tipoMensagem_feedback === 'erro' ? 'danger' : 'success' ?> alert-dismissible fade show" role="alert">
+                    <?= htmlspecialchars($mensagem_feedback, ENT_QUOTES, 'UTF-8') ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            <?php endif; ?>
 
-                    if (empty($produtos)) {
-                        echo '<div class="empty-state">
-                                <i class="bi bi-dropbox" style="font-size: 4rem;"></i>
-                                <h3 class="mt-3">' . ($termo ? "Nenhum produto seu encontrado para \"" . htmlspecialchars($termo) . "\"" : "Você ainda não cadastrou nenhum produto.") . '</h3>
-                                <!-- <p class="mt-2">Que tal <a href="#" data-bs-toggle="modal" data-bs-target="#cadastroProdutoModal">cadastrar seu primeiro produto</a> agora?</p> -->
-                              </div>';
-                    } else {
-                        echo '<ul class="list-group">'; // Início da lista
-                        foreach ($produtos as $produto) {
-                            $fotoUrl = $produto['foto'] ? 'data:image/jpeg;base64,' . base64_encode($produto['foto']) : 'https://via.placeholder.com/80?text=Sem+Imagem';
-                            $precoFormatado = number_format($produto['preco'] ?? 0.0, 2, ',', '.');
+            <div id="meusProdutosContainer">
+                <?php
+                if ($produtoDao) { // Só prossegue se o DAO foi inicializado
+                    try {
+                        $itensPorPagina = 8;
+                        $paginaAtual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+                        if ($paginaAtual < 1) $paginaAtual = 1;
+                        $offset = ($paginaAtual - 1) * $itensPorPagina;
+                        $termo_busca_meus_produtos = $_GET['termo'] ?? ''; // Usar a variável específica da busca local
 
-                            echo '<li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">';
-                            echo '    <div class="d-flex align-items-center me-3 mb-2 mb-md-0" style="cursor:pointer;" onclick="abrirModalEdicao(' . $produto['id'] . ')">';
-                            echo '        <img src="' . $fotoUrl . '" alt="' . htmlspecialchars($produto['nome']) . '" style="width: 80px; height: 80px; object-fit: cover; margin-right: 15px; border-radius: 4px;">';
-                            echo '        <div>';
-                            echo '            <h5 class="mb-1 text-truncate" title="' . htmlspecialchars($produto['nome']) . '">' . htmlspecialchars($produto['nome']) . '</h5>';
-                            echo '            <p class="mb-0 text-muted">R$ ' . $precoFormatado . '</p>';
-                            echo '        </div>';
-                            echo '    </div>';
-                            echo '    <div class="btn-group" role="group" aria-label="Ações do produto">';
-                            echo '        <button class="btn btn-sm btn-outline-primary" onclick="abrirModalEdicao(' . $produto['id'] . ')">';
-                            echo '            <i class="bi bi-pencil-square"></i> Editar';
-                            echo '        </button>';
-                            echo '        <button class="btn btn-sm btn-outline-danger" onclick="confirmarExclusao(' . $produto['id'] . ', \'' . htmlspecialchars(addslashes($produto['nome']), ENT_QUOTES) . '\')">';
-                            echo '            <i class="bi bi-trash"></i> Excluir';
-                            echo '        </button>';
-                            echo '    </div>';
-                            echo '</li>';
+                        $produtos = $produtoDao->buscarPorUsuarioId($id_usuario_logado, $termo_busca_meus_produtos, $itensPorPagina, $offset);
+                        $totalProdutos = $produtoDao->contarProdutosPorUsuarioId($id_usuario_logado, $termo_busca_meus_produtos);
+                        $totalPaginas = ceil($totalProdutos / $itensPorPagina);
+
+                        if (empty($produtos)) {
+                            echo '<div class="empty-state">';
+                            echo '    <i class="bi bi-dropbox" style="font-size: 4rem;"></i>';
+                            echo '    <h3 class="mt-3">' . ($termo_busca_meus_produtos ? "Nenhum produto seu encontrado para \"" . htmlspecialchars($termo_busca_meus_produtos) . "\"" : "Você ainda não cadastrou nenhum produto.") . '</h3>';
+                            echo '    <p class="mt-2">Que tal <a href="#" data-bs-toggle="modal" data-bs-target="#cadastroProdutoModalDashboard">cadastrar seu primeiro produto</a> agora?</p>';
+                            echo '</div>';
+                        } else {
+                            echo '<ul class="list-group">';
+                            foreach ($produtos as $produto) {
+                                $precoFormatado = number_format($produto['preco'] ?? 0.0, 2, ',', '.');
+
+                                echo '<li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">';
+                                echo '    <div class="d-flex align-items-center me-3 mb-2 mb-md-0" style="flex-grow: 1; min-width: 200px; cursor:pointer;" onclick="abrirModalEdicao(' . $produto['id'] . ')">'; // Adicionado flex-grow e min-width
+                                
+                                // Lógica para exibir imagem ou ícone
+                                if (!empty($produto['foto'])) {
+                                    $fotoUrl = 'data:image/jpeg;base64,' . base64_encode($produto['foto']);
+                                    echo '        <img src="' . $fotoUrl . '" alt="' . htmlspecialchars($produto['nome']) . '">';
+                                } else {
+                                    echo '        <div class="img-placeholder-icon d-flex align-items-center justify-content-center">';
+                                    echo '            <i class="bi bi-card-image" style="font-size: 2.5rem; color: #6c757d;"></i>';
+                                    echo '        </div>';
+                                }
+                                // Fim da lógica imagem/ícone
+
+                                echo '        <div>';
+                                echo '            <h5 class="mb-1 text-truncate" title="' . htmlspecialchars($produto['nome']) . '">' . htmlspecialchars($produto['nome']) . '</h5>';
+                                echo '            <p class="mb-0 text-muted">R$ ' . $precoFormatado . '</p>';
+                                echo '        </div>';
+                                echo '    </div>';
+                                echo '    <div class="btn-group mt-2 mt-md-0" role="group" aria-label="Ações do produto">'; // Adicionado mt-2 mt-md-0 para espaçamento em telas menores
+                                echo '        <button class="btn btn-sm btn-outline-primary" onclick="abrirModalEdicao(' . $produto['id'] . ')">';
+                                echo '            <i class="bi bi-pencil-square"></i> Editar';
+                                echo '        </button>';
+                                echo '        <button class="btn btn-sm btn-outline-danger" onclick="confirmarExclusao(' . $produto['id'] . ', \'' . htmlspecialchars(addslashes($produto['nome']), ENT_QUOTES) . '\')">';
+                                echo '            <i class="bi bi-trash"></i> Excluir';
+                                echo '        </button>';
+                                echo '    </div>';
+                                echo '</li>';
+                            }
+                            echo '</ul>';
+
+                            if ($totalPaginas > 1) {
+                                echo '<nav aria-label="Paginação de Meus Produtos" class="mt-4">';
+                                echo '<ul class="pagination justify-content-center">';
+                                $queryString = $termo_busca_meus_produtos ? '&termo=' . urlencode($termo_busca_meus_produtos) : '';
+                                if ($paginaAtual > 1) {
+                                    echo '<li class="page-item"><a class="page-link" href="?pagina=' . ($paginaAtual - 1) . $queryString . '">Anterior</a></li>';
+                                } else {
+                                    echo '<li class="page-item disabled"><span class="page-link">Anterior</span></li>';
+                                }
+                                for ($i = 1; $i <= $totalPaginas; $i++) {
+                                    echo '<li class="page-item ' . ($i == $paginaAtual ? 'active' : '') . '"><a class="page-link" href="?pagina=' . $i . $queryString . '">' . $i . '</a></li>';
+                                }
+                                if ($paginaAtual < $totalPaginas) {
+                                    echo '<li class="page-item"><a class="page-link" href="?pagina=' . ($paginaAtual + 1) . $queryString . '">Próximo</a></li>';
+                                } else {
+                                    echo '<li class="page-item disabled"><span class="page-link">Próximo</span></li>';
+                                }
+                                echo '</ul></nav>';
+                            }
                         }
-                        echo '</ul>'; // Fim da lista
-
-                        if ($totalPaginas > 1) {
-                            echo '<nav aria-label="Paginação de Meus Produtos" class="mt-4">';
-                            echo '<ul class="pagination justify-content-center">';
-                            $queryString = $termo ? '&termo=' . urlencode($termo) : '';
-                            if ($paginaAtual > 1) {
-                                echo '<li class="page-item"><a class="page-link" href="?pagina=' . ($paginaAtual - 1) . $queryString . '">Anterior</a></li>';
-                            } else {
-                                echo '<li class="page-item disabled"><span class="page-link">Anterior</span></li>';
-                            }
-                            for ($i = 1; $i <= $totalPaginas; $i++) {
-                                echo '<li class="page-item ' . ($i == $paginaAtual ? 'active' : '') . '"><a class="page-link" href="?pagina=' . $i . $queryString . '">' . $i . '</a></li>';
-                            }
-                            if ($paginaAtual < $totalPaginas) {
-                                echo '<li class="page-item"><a class="page-link" href="?pagina=' . ($paginaAtual + 1) . $queryString . '">Próximo</a></li>';
-                            } else {
-                                echo '<li class="page-item disabled"><span class="page-link">Próximo</span></li>';
-                            }
-                            echo '</ul></nav>';
-                        }
+                    } catch (Exception $e) {
+                        echo '<div class="alert alert-danger">Erro ao carregar seus produtos: ' . htmlspecialchars($e->getMessage()) . '</div>';
                     }
-                } catch (Exception $e) {
-                    echo '<div class="alert alert-danger">Erro ao carregar seus produtos: ' . htmlspecialchars($e->getMessage()) . '</div>';
+                } else {
+                     echo '<div class="alert alert-danger">' . htmlspecialchars($mensagem_feedback) . '</div>';
                 }
-            } else {
-                 echo '<div class="alert alert-danger">' . htmlspecialchars($mensagem) . '</div>';
-            }
-            ?>
+                ?>
+            </div>
         </div>
     </div>
 
-    <!-- Modal de Detalhes/Edição (similar ao dashboard.php, mas adaptado) -->
+    <!-- Modal de Edição de Produto (usaremos este para edições) -->
     <div class="modal fade" id="produtoModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="produtoModalNome">Detalhes do Produto</h5>
+                    <h5 class="modal-title" id="produtoModalNome">Editar Produto</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -222,18 +363,103 @@ try {
         </div>
     </div>
 
+    <!-- Modal de Cadastro de Produto (copiado do dashboard.php para consistência) -->
+    <div class="modal fade" id="cadastroProdutoModalDashboard" tabindex="-1" aria-labelledby="cadastroProdutoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cadastroProdutoModalLabel">Cadastrar Novo Produto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="mensagemErroCadastro" class="alert alert-danger d-none" role="alert"></div>
+                    <div id="mensagemSucessoCadastro" class="alert alert-success d-none" role="alert"></div>
+                    <form id="formCadastroProdutoDashboard" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="cadastroNome" class="form-label">Nome do Produto *</label>
+                                <input type="text" class="form-control" id="cadastroNome" name="nome" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="cadastroPreco" class="form-label">Preço *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" class="form-control" id="cadastroPreco" name="preco" min="0" step="0.01" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cadastroDescricao" class="form-label">Descrição</label>
+                            <textarea class="form-control" id="cadastroDescricao" name="descricao" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cadastroFoto" class="form-label">Foto do Produto</label>
+                            <input type="file" class="form-control" id="cadastroFoto" name="foto" accept="image/*">
+                            <div class="form-text">Formatos aceitos: JPG, PNG, GIF.</div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" id="btnSalvarCadastroProdutoDashboard" class="btn btn-primary">Cadastrar Produto</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Passar dados do PHP para o JavaScript
         window.usuarioLogadoId = <?= json_encode($_SESSION['usuario_id'] ?? null); ?>;
-        
+        window.isAdmin = <?= json_encode(isset($_SESSION['is_admin']) && $_SESSION['is_admin']); ?>; // Adicionado para consistência
+
         const produtoModalElement = document.getElementById('produtoModal');
-        const produtoModal = new bootstrap.Modal(produtoModalElement);
+        const produtoModalInstance = new bootstrap.Modal(produtoModalElement);
         const confirmExcluirModalElement = document.getElementById('confirmExcluirModal');
-        const confirmExcluirModal = new bootstrap.Modal(confirmExcluirModalElement);
+        const confirmExcluirModalInstance = new bootstrap.Modal(confirmExcluirModalElement);
         let produtoIdParaExcluir = null;
 
-        // Funções para o modal de edição
+        // Modal de Cadastro (do Dashboard)
+        const cadastroProdutoModalDashboardElement = document.getElementById('cadastroProdutoModalDashboard');
+        let cadastroProdutoModalDashboardInstance = null;
+        if (cadastroProdutoModalDashboardElement) {
+            cadastroProdutoModalDashboardInstance = new bootstrap.Modal(cadastroProdutoModalDashboardElement);
+        }
+        
+        document.getElementById('btnSalvarCadastroProdutoDashboard')?.addEventListener('click', async function() {
+            const form = document.getElementById('formCadastroProdutoDashboard');
+            const formData = new FormData(form);
+            const msgErroCadastro = document.getElementById('mensagemErroCadastro');
+            const msgSucessoCadastro = document.getElementById('mensagemSucessoCadastro');
+
+            msgErroCadastro.classList.add('d-none');
+            msgSucessoCadastro.classList.add('d-none');
+
+            try {
+                const response = await fetch('../controllers/cadastrar_produto.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (result.success) {
+                    msgSucessoCadastro.textContent = result.message || 'Produto cadastrado com sucesso!';
+                    msgSucessoCadastro.classList.remove('d-none');
+                    form.reset();
+                    setTimeout(() => {
+                        cadastroProdutoModalDashboardInstance.hide();
+                        window.location.reload(); 
+                    }, 1500);
+                } else {
+                    msgErroCadastro.textContent = result.error || 'Erro desconhecido ao cadastrar produto.';
+                    msgErroCadastro.classList.remove('d-none');
+                }
+            } catch (error) {
+                console.error('Erro ao cadastrar produto:', error);
+                msgErroCadastro.textContent = 'Erro de comunicação ao cadastrar. Tente novamente.';
+                msgErroCadastro.classList.remove('d-none');
+            }
+        });
+
+
         async function abrirModalEdicao(produtoId) {
             document.getElementById('mensagemErroModal').classList.add('d-none');
             document.getElementById('mensagemSucessoModal').classList.add('d-none');
@@ -247,13 +473,13 @@ try {
                 if (data.success && data.produto) {
                     const p = data.produto;
                     document.getElementById('produtoModalId').value = p.id;
-                    document.getElementById('produtoModalNome').textContent = p.nome; // Título do Modal
+                    document.getElementById('produtoModalNome').textContent = 'Editar: ' + p.nome;
                     document.getElementById('produtoModalNomeInput').value = p.nome;
                     document.getElementById('produtoModalDescricaoInput').value = p.descricao;
                     document.getElementById('produtoModalPrecoInput').value = p.preco;
                     document.getElementById('produtoModalFoto').src = p.foto ? `data:image/jpeg;base64,${p.foto}` : 'https://via.placeholder.com/200?text=Sem+Imagem';
-                    document.getElementById('produtoModalFotoInput').value = ''; // Limpar input de foto
-                    produtoModal.show();
+                    document.getElementById('produtoModalFotoInput').value = '';
+                    produtoModalInstance.show();
                 } else {
                     throw new Error(data.error || 'Produto não encontrado ou falha ao carregar.');
                 }
@@ -270,10 +496,7 @@ try {
             if (fotoInput.files.length > 0) {
                 formData.append('foto', fotoInput.files[0]);
             }
-            
-            // Adicionar ID ao FormData, pois o input está hidden e pode não ser pego por new FormData(form) em alguns casos.
             formData.append('id', document.getElementById('produtoModalId').value);
-
 
             document.getElementById('mensagemErroModal').classList.add('d-none');
             document.getElementById('mensagemSucessoModal').classList.add('d-none');
@@ -288,8 +511,8 @@ try {
                     document.getElementById('mensagemSucessoModal').textContent = result.message || 'Produto atualizado com sucesso!';
                     document.getElementById('mensagemSucessoModal').classList.remove('d-none');
                     setTimeout(() => {
-                        produtoModal.hide();
-                        window.location.reload(); // Recarregar a página para ver as alterações
+                        produtoModalInstance.hide();
+                        window.location.reload();
                     }, 1500);
                 } else {
                     document.getElementById('mensagemErroModal').textContent = result.error || 'Erro desconhecido ao atualizar o produto.';
@@ -302,29 +525,23 @@ try {
             }
         }
         
-        // Funções para exclusão
         function confirmarExclusao(id, nome) {
             document.getElementById('confirmExcluirNomeProduto').textContent = nome;
             produtoIdParaExcluir = id;
-            confirmExcluirModal.show();
+            confirmExcluirModalInstance.show();
         }
 
         document.getElementById('btnConfirmarExclusaoDefinitiva').addEventListener('click', async function() {
             if (!produtoIdParaExcluir) return;
-
             try {
                 const response = await fetch('../controllers/excluir_produto.php', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded', },
                     body: `id=${produtoIdParaExcluir}`
                 });
                 const result = await response.json();
                 if (result.success) {
-                    confirmExcluirModal.hide();
-                    // Idealmente, remover o card do DOM ou recarregar.
-                    // Para simplicidade, recarregando a página:
+                    confirmExcluirModalInstance.hide();
                     window.location.href = 'meus_produtos.php?mensagem=Produto excluído com sucesso&tipo_mensagem=sucesso';
                 } else {
                     alert('Erro ao excluir produto: ' + (result.error || 'Erro desconhecido'));
@@ -335,28 +552,47 @@ try {
             }
         });
 
-        // Para o modal de detalhes (se quiser manter a funcionalidade de apenas visualizar)
-        // A função mostrarDetalhes(id) do dashboard.js precisaria ser adaptada ou copiada
-        // Por ora, o card já tem o botão Editar que abre um modal focado na edição.
-        // Se o clique no card for para visualização, e o botão Editar para edição,
-        // o modal precisaria de dois estados (visualização/edição) como no dashboard.
-        // Para simplificar, o clique no card levará direto para edição nesta página.
-        function mostrarDetalhes(produtoId) {
-            // Nesta página, o "mostrarDetalhes" vai direto para edição.
-            abrirModalEdicao(produtoId);
-        }
-
-        // Listener para o input de foto no modal de edição
         document.getElementById('produtoModalFotoInput').addEventListener('change', function(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('produtoModalFoto').src = e.target.result;
-                }
+                reader.onload = function(e) { document.getElementById('produtoModalFoto').src = e.target.result; }
                 reader.readAsDataURL(file);
             }
         });
+
+        // Função para o dropdown de notificações do header
+        function marcarTodasComoLidasClientSide(event, prefix = '') {
+            event.preventDefault();
+            const contadorNotificacoes = document.getElementById('contadorNotificacoesSideNav'); // Usar o ID unificado da SideNav
+            const listaNotificacoes = document.getElementById('listaNotificacoesDropdown' + prefix); 
+            
+            if (contadorNotificacoes) {
+                contadorNotificacoes.style.display = 'none';
+                // contadorNotificacoes.textContent = '0'; // Não precisa zerar o texto se vai esconder
+            }
+            
+            if(listaNotificacoes){
+                const itensNotificacao = listaNotificacoes.querySelectorAll('.notificacao-nao-lida'); 
+                itensNotificacao.forEach(item => item.classList.remove('notificacao-nao-lida'));
+
+                const loadingItem = listaNotificacoes.querySelector('#notificacaoItemLoading' + prefix);
+                const nenhumaItem = listaNotificacoes.querySelector('#notificacaoItemNenhuma' + prefix);
+                const dividerFinal = listaNotificacoes.querySelector('#notificacoesDividerFinal' + prefix);
+                const verTodasLink = listaNotificacoes.querySelector('#verTodasNotificacoesLink' + prefix);
+                const marcarLidasLink = listaNotificacoes.querySelector('#marcarTodasLidasLink' + prefix);
+
+                if(loadingItem) loadingItem.classList.add('d-none');
+                if(nenhumaItem) nenhumaItem.classList.remove('d-none');
+                if(dividerFinal) dividerFinal.classList.add('d-none');
+                if(verTodasLink) verTodasLink.classList.add('d-none');
+                if(marcarLidasLink) marcarLidasLink.classList.add('d-none');
+            }
+            // Adicionar chamada AJAX para backend se necessário: fetch('../controllers/marcar_notificacoes_lidas_controller.php', { method: 'POST' }) ...
+        }
+        // Adicionar aqui a lógica para carregar notificações no dropdown do header, se for usar.
+        // Ex: document.addEventListener('DOMContentLoaded', () => { if (window.usuarioLogadoId) carregarNotificacoes(); });
+        // A função carregarNotificacoes precisaria ser definida ou importada.
     </script>
 </body>
 </html> 
