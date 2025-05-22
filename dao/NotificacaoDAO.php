@@ -139,4 +139,20 @@ class NotificacaoDAO {
         }
         return null;
     }
+
+    public function deletarNotificacao($notificacao_id, $usuario_id_destino) {
+        // Deleta a notificação apenas se ela pertencer ao usuário especificado
+        $sql = "DELETE FROM notificacoes WHERE id = :nid AND usuario_id_destino = :uid_destino";
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindValue(':nid', $notificacao_id, PDO::PARAM_INT);
+            $stmt->bindValue(':uid_destino', $usuario_id_destino, PDO::PARAM_INT);
+            $stmt->execute();
+            // Retorna true se alguma linha foi afetada (ou seja, a notificação foi deletada)
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            error_log("Erro ao deletar notificação: " . $e->getMessage());
+            return false;
+        }
+    }
 } 

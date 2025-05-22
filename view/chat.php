@@ -3,17 +3,16 @@ session_start();
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../dao/mensagem_dao.php';
-require_once __DIR__ . '/../dao/cliente_dao.php'; // Usando ClienteDAO
-require_once __DIR__ . '/../model/cliente.php';   // Usando Cliente model
+require_once __DIR__ . '/../dao/cliente_dao.php';
+require_once __DIR__ . '/../model/cliente.php';
 
 if (!isset($_SESSION['usuario_id'])) {
-    header('Location: login.php'); // Ajuste para sua página de login
+    header('Location: login.php');
     exit();
 }
 
 if (!isset($_GET['usuario_id']) || !filter_var($_GET['usuario_id'], FILTER_VALIDATE_INT)) {
-    // Se o ID do outro usuário não for fornecido ou não for um inteiro, redireciona ou mostra erro
-    header('Location: minhas_mensagens.php'); // Volta para a lista de conversas
+    header('Location: minhas_mensagens.php');
     exit();
 }
 
@@ -21,7 +20,6 @@ $usuario_logado_id = (int)$_SESSION['usuario_id'];
 $outro_usuario_id = (int)$_GET['usuario_id'];
 
 if ($usuario_logado_id === $outro_usuario_id) {
-    // Não permitir que o usuário converse consigo mesmo
     header('Location: minhas_mensagens.php');
     exit();
 }
@@ -29,180 +27,223 @@ if ($usuario_logado_id === $outro_usuario_id) {
 $mensagemDAO = new MensagemDAO();
 $clienteDAO = new ClienteDAO();
 
-// Buscar detalhes do usuário logado
+// Buscar detalhes do usuário logado para o corpo da página (já usado abaixo)
 $usuario_logado = $clienteDAO->buscarPorId($usuario_logado_id);
 $nome_usuario_logado = ($usuario_logado && method_exists($usuario_logado, 'getNome')) ? $usuario_logado->getNome() : "Você";
 
-// Buscar detalhes do outro usuário
+// Buscar detalhes do outro usuário para o corpo da página
 $outro_usuario = $clienteDAO->buscarPorId($outro_usuario_id);
 if (!$outro_usuario) {
-    // Se o outro usuário não existir, volta para a lista de conversas
-    // Ou pode mostrar uma mensagem de erro mais amigável
     $_SESSION['erro_chat'] = "Usuário não encontrado.";
     header('Location: minhas_mensagens.php');
     exit();
 }
 $nome_outro_usuario = ($outro_usuario && method_exists($outro_usuario, 'getNome')) ? $outro_usuario->getNome() : "Usuário #{$outro_usuario_id}";
 
-// Marcar mensagens desta conversa como lidas (mensagens que o usuário logado recebeu do outro usuário)
+// Marcar mensagens desta conversa como lidas
 $mensagemDAO->marcarMensagensComoLidas($usuario_logado_id, $outro_usuario_id);
 
 // Buscar todas as mensagens da conversa
 $mensagens_da_conversa = $mensagemDAO->buscarConversa($usuario_logado_id, $outro_usuario_id);
 
-// Incluir seu cabeçalho padrão aqui, se houver
-// Exemplo: include_once __DIR__ . '/layout/header.php';
+// --- Lógica para Side Nav Bar ---
+$nome_usuario_sidenav = "Usuário"; 
+$contador_mensagens_nao_lidas_geral = 0;
+$id_usuario_logado_s = $_SESSION['usuario_id'] ?? null; // Usar uma variável diferente para evitar conflito se $id_usuario_logado já foi usado
 
-// --- Lógica do dashboard para header e nav-bar (adaptada de minhas_mensagens.php) ---
-// ProdutoDAO não é diretamente necessário para o chat em si, mas incluído por consistência se o header/nav o esperar
-// require_once __DIR__ . '/../dao/produto_dao.php'; 
-
-$nome_usuario_display_header = "Usuário"; // Default para o header
-$contador_mensagens_nao_lidas_header = 0; // Para o ícone de sino no header
-
-// $usuario_logado_id já está definido acima
-if (isset($_SESSION['usuario_id'])) { // Redundante, mas mantém a estrutura original
+if ($id_usuario_logado_s) {
     try {
-        // ClienteDAO já instanciado como $clienteDAO_chat
-        $cliente_logado_info = $clienteDAO->buscarPorId($usuario_logado_id);
-        if ($cliente_logado_info) {
-            if (!isset($_SESSION['usuario_nome'])) {
-                 $_SESSION['usuario_nome'] = $cliente_logado_info->getNome();
+        $pdo_s = Database::getConnection(); 
+        $clienteDAO_s = new ClienteDAO(); // Nova instância ou reutilizar se o escopo permitir
+        $cliente_s = $clienteDAO_s->buscarPorId($id_usuario_logado_s);
+        if ($cliente_s) {
+            $nome_usuario_sidenav = $cliente_s->getNome();
+            if (!isset($_SESSION['usuario_nome']) || $_SESSION['usuario_nome'] !== $nome_usuario_sidenav) {
+                 $_SESSION['usuario_nome'] = $nome_usuario_sidenav;
             }
-            $nome_usuario_display_header = $_SESSION['usuario_nome'];
         }
 
-        // MensagemDAO já instanciado como $mensagemDAO_chat ou podemos usar $mensagemDAO_header de minhas_mensagens.php
-        // Para evitar recriar, e se o escopo for o mesmo, poderíamos usar $mensagemDAO_chat.
-        // Mas para manter a lógica do header separada, pode-se criar um novo se necessário ou passar a instância.
-        // Aqui vamos assumir que o $contador_mensagens_nao_lidas_header é para o sino e é melhor recalcular ou ter uma instância separada.
-        $mensagemDAO_header_specific = new MensagemDAO();
-        $contador_mensagens_nao_lidas_header = $mensagemDAO_header_specific->contarMensagensNaoLidas($usuario_logado_id);
-
-        // O contador para o botão "Minhas Mensagens" na nav-bar ($contador_mensagens_nao_lidas)
-        // pode ser o mesmo $contador_mensagens_nao_lidas_header aqui, já que ambos são para o usuário logado.
-        $contador_mensagens_nao_lidas_nav = $contador_mensagens_nao_lidas_header;
+        $mensagemDAO_s = new MensagemDAO(); 
+        $contador_mensagens_nao_lidas_geral = $mensagemDAO_s->contarMensagensNaoLidas($id_usuario_logado_s);
 
     } catch (Exception $e) {
-        error_log("Erro ao buscar dados para o header em chat.php: " . $e->getMessage());
+        error_log("Erro ao buscar dados para side-nav em chat.php: " . $e->getMessage());
     }
 }
-// --- Fim da lógica do dashboard ---
-
+// --- Fim da lógica para Side Nav Bar ---
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat com <?php echo htmlspecialchars($nome_outro_usuario); ?> - ECOxchange</title>
+    <title>Chat com <?php echo htmlspecialchars($nome_outro_usuario); ?> - ECOxChange</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="dashboard.css"> <!-- CSS do Dashboard -->
-    <link rel="stylesheet" href="estilo_mensagens.css"> <!-- CSS específico para mensagens e chat -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="dashboard.css"> 
+    <link rel="stylesheet" href="estilo_mensagens.css"> 
     <style>
-        /* Estilos para o botão ativo na nav-bar (se necessário aqui) */
-        .nav-bar .btn.active { 
-            background-color: #0dcaf0;
-            color: white;
+        /* Estilos específicos para chat.php se necessário */
+        .main-content .products-section {
+            padding-top: 10px; /* Menor padding no topo para a seção de chat */
         }
-        /* Ajustes para o layout do chat dentro do novo container */
-        .products-section .chat-container-wrapper {
-            /* background-color: #fff;  O chat-container interno já tem seu fundo */
-            padding: 0; /* Remover padding se .products-section já tem */
-            border-radius: 8px;
-            /* box-shadow: 0 2px 4px rgba(0,0,0,0.1); */ /* Sombra já no chat-container interno */
-            height: calc(100vh - 180px); /* Ajustar altura para caber header/nav + um pouco de margem */
-            display: flex; /* Para o chat-container ocupar toda a altura */
+        .chat-container-wrapper {
+            height: calc(100vh - 70px); /* Ajustar altura: 100vh menos um espaço para o topo da main-content */
+            display: flex; 
             flex-direction: column;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">ECO<span>xchange</span></div>
-        <div class="search-bar">
-            <form id="searchForm" class="d-flex" method="GET" action="dashboard.php">
-                <input type="text" id="searchInput" name="termo" placeholder="Pesquisar produtos..." value="">
-                <button type="submit" class="btn-search-custom"><i class="bi bi-search"></i></button>
-            </form>
+    <div class="side-nav-bar">
+        <div class="logo-container">
+            <div class="logo">ECO<span>xchange</span></div>
         </div>
-        <div class="user-options">
-            <?php if (isset($_SESSION['usuario_id'])): ?>
-                <div class="dropdown me-2" id="notificacoesDropdownContainer" style="display: inline-block;">
-                    <button class="btn btn-outline-secondary position-relative" type="button" id="notificacoesDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-bell"></i>
-                        <span id="contadorNotificacoes" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger <?php echo $contador_mensagens_nao_lidas_header > 0 ? '' : 'd-none'; ?>">
-                            <?php echo $contador_mensagens_nao_lidas_header; ?>
-                            <span class="visually-hidden">notificações não lidas</span>
-                        </span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificacoesDropdownBtn" id="listaNotificacoesDropdown">
-                        <li><h6 class="dropdown-header">Notificações</h6></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li id="notificacaoItemLoading" class="dropdown-item text-muted">Carregando...</li>
-                        <li id="notificacaoItemNenhuma" class="dropdown-item text-muted d-none">Nenhuma notificação nova.</li>
-                        <li><hr class="dropdown-divider d-none" id="notificacoesDividerFinal"></li>
-                        <li><a class="dropdown-item text-center d-none" href="#" id="verTodasNotificacoesLink">Ver todas</a></li> 
-                        <li><a class="dropdown-item text-center d-none" href="#" id="marcarTodasLidasLink" onclick="marcarTodasComoLidasClientSide(event)">Marcar todas como lidas</a></li>
-                    </ul>
-                </div>
-            <?php endif; ?>
-            <?php if (isset($_SESSION['usuario_nome'])): ?>
-                <span>Olá, <?= htmlspecialchars($_SESSION['usuario_nome']) ?>!</span>
-                <a href="../controllers/logout_controller.php">Sair</a>
-            <?php else: ?>
-                <a href="login.php" class="btn btn-primary btn-sm">Login</a>
-            <?php endif; ?>
-        </div>
-    </div>
-    
-    <div class="nav-bar">
-        <a href="minhas_mensagens.php" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left-circle"></i> Voltar para Conversas
+
+        <a href="dashboard.php">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
         </a>
-        <a href="dashboard.php" class="btn btn-outline-info ms-2">
-            <i class="bi bi-speedometer2"></i> Dashboard
-        </a>
+        
+        <?php if ($id_usuario_logado_s): ?>
+            <a href="#" data-bs-toggle="modal" data-bs-target="#cadastroProdutoModalDashboard"> 
+                <i class="bi bi-plus-circle"></i>
+                <span>Cadastrar Produto</span>
+            </a>
+            <a href="meus_produtos.php">
+                <i class="bi bi-archive"></i>
+                <span>Meus Produtos</span>
+            </a>
+            <a href="minhas_mensagens.php" class="active position-relative"> 
+                <i class="bi bi-chat-left-dots"></i>
+                <span>Minhas Mensagens</span>
+                <?php if ($contador_mensagens_nao_lidas_geral > 0): ?>
+                    <span class="badge bg-danger position-absolute top-50 start-100 translate-middle-y ms-2" style="font-size: 0.65em; padding: 0.3em 0.5em;"><?php echo $contador_mensagens_nao_lidas_geral; ?></span>
+                <?php endif; ?>
+            </a>
+        <?php endif; ?>
+
         <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-            <a href="../view/listar_clientes.php" class="btn btn-outline-primary ms-2">
-                <i class="bi bi-people"></i> Editar Clientes
+            <a href="../view/listar_clientes.php">
+                <i class="bi bi-people"></i>
+                <span>Gerenciar Clientes</span>
             </a> 
         <?php endif; ?>
+
+        <!-- Seção de Notificações Visível na Side Nav -->
+        <?php if ($id_usuario_logado_s): ?>
+        <div class="notifications-section-container">
+            <div class="notifications-header">
+                <i class="bi bi-bell"></i>
+                <span>Notificações</span>
+                <span id="contadorNotificacoesSideNav" class="badge bg-danger ms-2" style="font-size: 0.7em; padding: 0.3em 0.5em; <?php echo ($contador_mensagens_nao_lidas_geral > 0 ? '' : 'display:none;'); ?>">
+                    <?php echo $contador_mensagens_nao_lidas_geral; ?> 
+                </span>
+            </div>
+            <ul class="notifications-list" id="listaNotificacoesSideNav">
+                <li id="notificacaoItemLoadingSideNav" class="dropdown-item text-muted">Carregando...</li>
+                <li id="notificacaoItemNenhumaSideNav" class="dropdown-item text-muted d-none">Nenhuma notificação nova.</li>
+                <li id="marcarTodasLidasContainerSideNav" class="d-none"><a class="dropdown-item text-center" href="#" id="marcarTodasLidasLinkSideNav" onclick="marcarTodasComoLidas(event)">Marcar todas como lidas</a></li> 
+            </ul>
+        </div>
+        <?php endif; ?>
+        <!-- Fim Seção de Notificações Visível -->
+
+        <div class="user-info-nav">
+            <?php if ($id_usuario_logado_s): ?>
+                <span><i class="bi bi-person-circle"></i> <?= htmlspecialchars($nome_usuario_sidenav) ?></span>
+                <a href="../controllers/logout_controller.php">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Sair</span>
+                </a>
+            <?php else: ?>
+                <a href="login.php">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Login</span>
+                </a>
+            <?php endif; ?>
+        </div>
     </div>
 
-    <div class="products-section container"> 
-        <div class="chat-container-wrapper"> <!-- Novo wrapper para controlar altura e layout -->
-            <div class="chat-container"> <!-- chat-container original, agora filho do wrapper -->
-                <div class="chat-header">
-                    <!-- Título já definido em estilo_mensagens.css, aqui apenas o nome -->
-                    <h5>Chat com <?php echo htmlspecialchars($nome_outro_usuario); ?></h5>
-                </div>
+    <div class="main-content">
+        <!-- O header roxo e a nav-bar antiga foram removidos -->
+        <!-- Conteúdo do Chat -->
+        <div class="products-section container-fluid mt-0" style="max-width: 70%; margin-left: auto; margin-right: auto; padding-top: 15px;"> 
+            <div class="chat-container-wrapper"> 
+                <div class="chat-container"> 
+                    <div class="chat-header">
+                        <h5>Chat com <?php echo htmlspecialchars($nome_outro_usuario); ?></h5>
+                    </div>
 
-                <div class="mensagens-box" id="chat-messages-area"> <!-- Usando .mensagens-box de estilo_mensagens.css -->
-                    <?php if (empty($mensagens_da_conversa)): ?>
-                        <p class="sem-mensagens">Nenhuma mensagem ainda. Seja o primeiro a enviar!</p> <!-- Usando .sem-mensagens -->
-                    <?php else: ?>
-                        <?php foreach ($mensagens_da_conversa as $msg): ?>
-                            <?php 
-                            $classe_css = ($msg->getRemetenteId() == $usuario_logado_id) ? 'enviada' : 'recebida';
-                            $data_formatada = date("d/m/Y H:i", strtotime($msg->getDataEnvio()));
-                            ?>
-                            <div class="mensagem <?php echo $classe_css; ?>">
-                                <p style="margin:0;"><?php echo nl2br(htmlspecialchars($msg->getConteudo())); ?></p>
-                                <span class="timestamp"><?php echo $data_formatada; ?></span>
+                    <div class="mensagens-box" id="chat-messages-area">
+                        <?php if (empty($mensagens_da_conversa)): ?>
+                            <p class="sem-mensagens">Nenhuma mensagem ainda. Seja o primeiro a enviar!</p>
+                        <?php else: ?>
+                            <?php foreach ($mensagens_da_conversa as $msg): ?>
+                                <?php 
+                                $classe_css = ($msg->getRemetenteId() == $usuario_logado_id) ? 'enviada' : 'recebida';
+                                $data_formatada = date("d/m/Y H:i", strtotime($msg->getDataEnvio()));
+                                ?>
+                                <div class="mensagem <?php echo $classe_css; ?>">
+                                    <p style="margin:0;"><?php echo nl2br(htmlspecialchars($msg->getConteudo())); ?></p>
+                                    <span class="timestamp"><?php echo $data_formatada; ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="area-envio-mensagem">
+                        <form id="chatForm" action="../controllers/enviar_mensagem_controller.php" method="POST" style="display:flex; width:100%;">
+                            <textarea name="conteudo" placeholder="Digite sua mensagem..." rows="2" required></textarea>
+                            <input type="hidden" name="destinatario_id" value="<?php echo htmlspecialchars($outro_usuario_id); ?>">
+                            <input type="hidden" name="remetente_id" value="<?php echo htmlspecialchars($usuario_logado_id); ?>">
+                            <button type="submit" class="btn btn-primary">Enviar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Cadastro de Produto (Necessário para o link na side-nav) -->
+    <div class="modal fade" id="cadastroProdutoModalDashboard" tabindex="-1" aria-labelledby="cadastroProdutoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cadastroProdutoModalLabel">Cadastrar Novo Produto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="mensagemErroCadastroChat" class="alert alert-danger d-none" role="alert"></div>
+                    <div id="mensagemSucessoCadastroChat" class="alert alert-success d-none" role="alert"></div>
+                    <form id="formCadastroProdutoChat" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="cadastroNomeChat" class="form-label">Nome do Produto *</label>
+                                <input type="text" class="form-control" id="cadastroNomeChat" name="nome" required>
                             </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
-
-                <div class="area-envio-mensagem"> <!-- Usando .area-envio-mensagem de estilo_mensagens.css -->
-                    <form action="../controllers/enviar_mensagem_controller.php" method="POST" style="display:flex; width:100%;">
-                        <textarea name="conteudo" placeholder="Digite sua mensagem..." rows="2" required></textarea>
-                        <input type="hidden" name="destinatario_id" value="<?php echo htmlspecialchars($outro_usuario_id); ?>">
-                        <input type="hidden" name="remetente_id" value="<?php echo htmlspecialchars($usuario_logado_id); ?>">
-                        <button type="submit" class="btn btn-primary">Enviar</button> <!-- Adicionando classe Bootstrap -->
+                            <div class="col-md-6 mb-3">
+                                <label for="cadastroPrecoChat" class="form-label">Preço *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" class="form-control" id="cadastroPrecoChat" name="preco" min="0" step="0.01" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cadastroDescricaoChat" class="form-label">Descrição</label>
+                            <textarea class="form-control" id="cadastroDescricaoChat" name="descricao" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="cadastroFotoChat" class="form-label">Foto do Produto</label>
+                            <input type="file" class="form-control" id="cadastroFotoChat" name="foto" accept="image/*">
+                            <div class="form-text">Formatos aceitos: JPG, PNG, GIF.</div>
+                        </div>
                     </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" id="btnSalvarCadastroProdutoChat" class="btn btn-primary">Cadastrar Produto</button>
                 </div>
             </div>
         </div>
@@ -210,25 +251,35 @@ if (isset($_SESSION['usuario_id'])) { // Redundante, mas mantém a estrutura ori
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        window.usuarioLogadoId = <?php echo json_encode(isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : null); ?>;
+        window.usuarioLogadoId = <?php echo json_encode($usuario_logado_id); ?>; // Usar a variável correta do escopo do chat
         window.isAdmin = <?php echo json_encode(isset($_SESSION['is_admin']) && $_SESSION['is_admin']); ?>;
+        const outroUsuarioId = <?php echo json_encode($outro_usuario_id); ?>;
 
-        function marcarTodasComoLidasClientSide(event) {
+        function marcarTodasComoLidasClientSide(event, prefix = '') {
             event.preventDefault();
-            const contadorNotificacoes = document.getElementById('contadorNotificacoes');
-            const listaNotificacoes = document.getElementById('listaNotificacoesDropdown');
+            const contadorNotificacoes = document.getElementById('contadorNotificacoesSideNav'); 
+            const listaNotificacoes = document.getElementById('listaNotificacoesDropdown' + prefix);
+            
             if (contadorNotificacoes) {
-                contadorNotificacoes.classList.add('d-none');
-                contadorNotificacoes.textContent = '0';
+                contadorNotificacoes.style.display = 'none';
             }
-            const itensNotificacao = listaNotificacoes.querySelectorAll('.notificacao-nao-lida');
-            itensNotificacao.forEach(item => item.classList.remove('notificacao-nao-lida'));
-            document.getElementById('notificacaoItemLoading').classList.add('d-none');
-            document.getElementById('notificacaoItemNenhuma').classList.remove('d-none');
-            const marcarLidasLink = document.getElementById('marcarTodasLidasLink');
-            const verTodasLink = document.getElementById('verTodasNotificacoesLink');
-            if(marcarLidasLink) marcarLidasLink.classList.add('d-none');
-            if(verTodasLink) verTodasLink.classList.add('d-none');
+            
+            if(listaNotificacoes){
+                const itensNotificacao = listaNotificacoes.querySelectorAll('.notificacao-nao-lida'); 
+                itensNotificacao.forEach(item => item.classList.remove('notificacao-nao-lida'));
+
+                const loadingItem = listaNotificacoes.querySelector('#notificacaoItemLoading' + prefix);
+                const nenhumaItem = listaNotificacoes.querySelector('#notificacaoItemNenhuma' + prefix);
+                const dividerFinal = listaNotificacoes.querySelector('#notificacoesDividerFinal' + prefix);
+                const verTodasLink = listaNotificacoes.querySelector('#verTodasNotificacoesLink' + prefix);
+                const marcarLidasLink = listaNotificacoes.querySelector('#marcarTodasLidasLink' + prefix);
+
+                if(loadingItem) loadingItem.classList.add('d-none');
+                if(nenhumaItem) nenhumaItem.classList.remove('d-none');
+                if(dividerFinal) dividerFinal.classList.add('d-none');
+                if(verTodasLink) verTodasLink.classList.add('d-none');
+                if(marcarLidasLink) marcarLidasLink.classList.add('d-none');
+            }
         }
 
         const chatMessagesArea = document.getElementById('chat-messages-area');
@@ -236,8 +287,7 @@ if (isset($_SESSION['usuario_id'])) { // Redundante, mas mantém a estrutura ori
             chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
         }
         
-        // Adaptação para o envio de formulário AJAX (opcional, mas melhora UX)
-        const chatForm = document.querySelector('.area-envio-mensagem form');
+        const chatForm = document.getElementById('chatForm');
         if (chatForm) {
             chatForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
@@ -245,41 +295,79 @@ if (isset($_SESSION['usuario_id'])) { // Redundante, mas mantém a estrutura ori
                 const textarea = chatForm.querySelector('textarea[name="conteudo"]');
                 const conteudoMensagem = textarea.value.trim();
 
-                if (!conteudoMensagem) return; // Não envia mensagem vazia
+                if (!conteudoMensagem) return;
 
-                // Adiciona a mensagem à UI instantaneamente (otimista)
-                const agora = new Date();
-                const dataFormatada = `${agora.getDate().toString().padStart(2, '0')}/${(agora.getMonth()+1).toString().padStart(2, '0')}/${agora.getFullYear()} ${agora.getHours().toString().padStart(2, '0')}:${agora.getMinutes().toString().padStart(2, '0')}`;
+                const tempId = 'temp_' + Date.now();
+                const dataAtual = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'});
+
+                // Adiciona à UI
+                const mensagemDiv = document.createElement('div');
+                mensagemDiv.classList.add('mensagem', 'enviada'); // Todas as mensagens enviadas pelo usuário atual são 'enviada'
+                mensagemDiv.id = tempId;
+                mensagemDiv.innerHTML = `<p style="margin:0;">${conteudoMensagem.replace(/\n/g, '<br>')}</p><span class="timestamp">Enviando... (${dataAtual})</span>`;
+                chatMessagesArea.appendChild(mensagemDiv);
+                textarea.value = '';
+                chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
                 
-                const novaMensagemDiv = document.createElement('div');
-                novaMensagemDiv.classList.add('message', 'sent'); // 'mensagem', 'enviada' conforme estilo_mensagens.css
-                novaMensagemDiv.innerHTML = `<p style="margin:0;">${conteudoMensagem.replace(/\n/g, '<br>')}</p><span class="timestamp">${dataFormatada}</span>`;
-                chatMessagesArea.appendChild(novaMensagemDiv);
-                chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight; // Rola para a nova mensagem
-                textarea.value = ''; // Limpa o textarea
-                textarea.focus();
-
                 try {
-                    const response = await fetch(chatForm.action, {
+                    const response = await fetch('../controllers/enviar_mensagem_controller.php', {
                         method: 'POST',
                         body: formData
                     });
-                    const result = await response.json(); // Espera-se um JSON do controller
-                    if (!result.success) {
-                        console.error('Erro ao enviar mensagem:', result.error);
-                        // Poderia remover a mensagem otimista ou marcar como erro
-                        novaMensagemDiv.style.opacity = '0.5'; 
-                        novaMensagemDiv.title = 'Erro ao enviar: ' + result.error;
-                    } else {
-                        // Mensagem enviada com sucesso, ID retornado pelo servidor
-                        if(result.mensagem_id) {
-                           novaMensagemDiv.dataset.id = result.mensagem_id; // Armazena o ID se necessário
-                        }
+                    const result = await response.json();
+                    const msgElement = document.getElementById(tempId);
+
+                    if (result.success && msgElement) {
+                        msgElement.querySelector('.timestamp').textContent = dataAtual; // Atualiza para a data real ou a data do servidor se retornada
+                    } else if (msgElement) {
+                        msgElement.querySelector('.timestamp').textContent = `Falha ao enviar (${dataAtual})`;
+                        msgElement.classList.add('mensagem-falha'); // Adiciona uma classe para indicar falha visualmente
                     }
                 } catch (error) {
-                    console.error('Falha na requisição de envio de mensagem:', error);
-                    novaMensagemDiv.style.opacity = '0.5';
-                    novaMensagemDiv.title = 'Falha ao enviar. Verifique sua conexão.';
+                    console.error('Erro ao enviar mensagem:', error);
+                    const msgElement = document.getElementById(tempId);
+                    if (msgElement) {
+                         msgElement.querySelector('.timestamp').textContent = `Erro de rede (${dataAtual})`;
+                         msgElement.classList.add('mensagem-falha');
+                    }
+                }
+            });
+        }
+
+        // Lógica para o modal de cadastro de produto na página de chat
+        const btnSalvarCadastroProdutoChat = document.getElementById('btnSalvarCadastroProdutoChat');
+        if(btnSalvarCadastroProdutoChat) {
+            btnSalvarCadastroProdutoChat.addEventListener('click', async function() {
+                const form = document.getElementById('formCadastroProdutoChat');
+                const formData = new FormData(form);
+                const msgErroCadastro = document.getElementById('mensagemErroCadastroChat');
+                const msgSucessoCadastro = document.getElementById('mensagemSucessoCadastroChat');
+
+                msgErroCadastro.classList.add('d-none');
+                msgSucessoCadastro.classList.add('d-none');
+
+                try {
+                    const response = await fetch('../controllers/cadastrar_produto.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        msgSucessoCadastro.textContent = result.message || 'Produto cadastrado com sucesso!';
+                        msgSucessoCadastro.classList.remove('d-none');
+                        form.reset();
+                        // setTimeout(() => { // Não precisa de reload ou esconder modal se a side nav continua visível.
+                        //     const modalInstance = bootstrap.Modal.getInstance(document.getElementById('cadastroProdutoModalDashboard'));
+                        //     if(modalInstance) modalInstance.hide();
+                        // }, 1500);
+                    } else {
+                        msgErroCadastro.textContent = result.error || 'Erro desconhecido ao cadastrar produto.';
+                        msgErroCadastro.classList.remove('d-none');
+                    }
+                } catch (error) {
+                    console.error('Erro ao cadastrar produto via chat page:', error);
+                    msgErroCadastro.textContent = 'Erro de comunicação ao cadastrar. Tente novamente.';
+                    msgErroCadastro.classList.remove('d-none');
                 }
             });
         }

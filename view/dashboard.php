@@ -41,7 +41,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - ECOxchange</title>
+    <title>Dashboard - ECOxChange</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="dashboard.css">
@@ -49,12 +49,12 @@ try {
 <body>
     <div class="side-nav-bar">
         <div class="logo-container">
-            <div class="logo">ECO<span>xchange</span></div>
+            <div class="logo">ECO<span>Exchange</span></div>
         </div>
 
         <a href="dashboard.php" class="active">
             <i class="bi bi-speedometer2"></i>
-            <span>Dashboard</span>
+            <span>Pagina Inicial</span>
         </a>
         
         <?php if ($id_usuario_logado): ?>
@@ -82,28 +82,26 @@ try {
             </a> 
         <?php endif; ?>
 
-        <!-- Notificações na Side Nav -->
+        <!-- Seção de Notificações Visível na Side Nav -->
         <?php if ($id_usuario_logado): ?>
-        <div class="nav-item-notificacao dropdown">
-            <button class="btn-notificacao dropdown-toggle" type="button" id="notificacoesDropdownBtnSideNav" data-bs-toggle="dropdown" aria-expanded="false">
+        <div class="notifications-section-container">
+            <div class="notifications-header">
                 <i class="bi bi-bell"></i>
                 <span>Notificações</span>
-                <span id="contadorNotificacoesSideNav" class="badge bg-danger position-absolute top-50 start-100 translate-middle-y ms-2" style="font-size: 0.65em; padding: 0.3em 0.5em; <?php echo ($contador_mensagens_nao_lidas > 0 ? '' : 'display:none;'); ?>">
+                <span id="contadorNotificacoesSideNav" class="badge bg-danger ms-2" style="font-size: 0.7em; padding: 0.3em 0.5em; <?php echo ($contador_mensagens_nao_lidas > 0 ? '' : 'display:none;'); ?>">
                     <?php echo $contador_mensagens_nao_lidas; ?> 
                 </span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="notificacoesDropdownBtnSideNav" id="listaNotificacoesDropdown">
-                <li><h6 class="dropdown-header">Notificações</h6></li>
-                <li><hr class="dropdown-divider"></li>
-                <li id="notificacaoItemLoading" class="dropdown-item text-muted">Carregando...</li>
-                <li id="notificacaoItemNenhuma" class="dropdown-item text-muted d-none">Nenhuma notificação nova.</li>
-                <li><hr class="dropdown-divider d-none" id="notificacoesDividerFinal"></li>
-                <li><a class="dropdown-item text-center d-none" href="#" id="verTodasNotificacoesLink">Ver todas</a></li> 
-                <li><a class="dropdown-item text-center d-none" href="#" id="marcarTodasLidasLink" onclick="marcarTodasComoLidasClientSide(event)">Marcar todas como lidas</a></li>
+            </div>
+            <ul class="notifications-list" id="listaNotificacoesSideNav">
+                <!-- O dropdown-header não é mais necessário aqui, pois o notifications-header já existe -->
+                <li id="notificacaoItemLoadingSideNav" class="dropdown-item text-muted">Carregando...</li>
+                <li id="notificacaoItemNenhumaSideNav" class="dropdown-item text-muted d-none">Nenhuma notificação nova.</li>
+                <!-- As notificações serão inseridas aqui pelo JavaScript -->
+                <li id="marcarTodasLidasContainerSideNav" class="d-none"><a class="dropdown-item text-center" href="#" id="marcarTodasLidasLinkSideNav" onclick="marcarTodasComoLidas(event)">Marcar todas como lidas</a></li> 
             </ul>
         </div>
         <?php endif; ?>
-        <!-- Fim Notificações na Side Nav -->
+        <!-- Fim Seção de Notificações Visível -->
 
         <div class="user-info-nav">
             <?php if ($id_usuario_logado): ?>
@@ -442,7 +440,6 @@ try {
         //     });
         // });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="./dashboard.js"></script>
 </html>

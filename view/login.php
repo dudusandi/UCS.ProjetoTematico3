@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - ECOxchange</title>
+    <title>Login - ECOxChange</title>
     <link rel="stylesheet" href="login.css">
 </head>
 <body>
     <div class="login-container">
-        <div class="logo">ECO<span>xchange</span></div>
+        <div class="logo">ECO<span>Exchange</span></div>
     
         <?php if (isset($_GET['erro'])): ?>
             <p class="error-message">Email ou senha inválidos.</p>

@@ -60,7 +60,7 @@ try {
     // Usar o nome do usuário logado na mensagem
     // Acessar como array
     $mensagem = htmlspecialchars($nome_usuario_logado) . " demonstrou interesse no seu produto: " . htmlspecialchars($produto['nome']);
-    $link = "view/produto_detalhes.php?id=" . $produto_id; // Exemplo de link, pode ser ajustado
+    $link = "../view/chat.php?usuario_id=" . $usuario_id_origem; // Link para o chat com o interessado
 
     $notificacao = new Notificacao(
         $usuario_id_destino,

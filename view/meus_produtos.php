@@ -53,7 +53,7 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meus Produtos - ECOxchange</title>
+    <title>Meus Produtos - ECOxChange</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="dashboard.css"> <!-- CSS unificado -->
@@ -85,7 +85,7 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
 <body>
     <div class="side-nav-bar">
         <div class="logo-container">
-            <div class="logo">ECO<span>xchange</span></div>
+            <div class="logo">ECO<span>Exchange</span></div>
         </div>
 
         <a href="dashboard.php">
@@ -118,28 +118,24 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
             </a> 
         <?php endif; ?>
 
-        <!-- Notificações na Side Nav -->
+        <!-- Seção de Notificações Visível na Side Nav -->
         <?php if ($id_usuario_logado): ?>
-        <div class="nav-item-notificacao dropdown">
-            <button class="btn-notificacao dropdown-toggle" type="button" id="notificacoesDropdownBtnSideNav" data-bs-toggle="dropdown" aria-expanded="false">
+        <div class="notifications-section-container">
+            <div class="notifications-header">
                 <i class="bi bi-bell"></i>
                 <span>Notificações</span>
-                <span id="contadorNotificacoesSideNav" class="badge bg-danger position-absolute top-50 start-100 translate-middle-y ms-2" style="font-size: 0.65em; padding: 0.3em 0.5em; <?php echo ($contador_mensagens_nao_lidas > 0 ? '' : 'display:none;'); ?>">
+                <span id="contadorNotificacoesSideNav" class="badge bg-danger ms-2" style="font-size: 0.7em; padding: 0.3em 0.5em; <?php echo ($contador_mensagens_nao_lidas > 0 ? '' : 'display:none;'); ?>">
                     <?php echo $contador_mensagens_nao_lidas; ?> 
                 </span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="notificacoesDropdownBtnSideNav" id="listaNotificacoesDropdownMeusProdutos">
-                <li><h6 class="dropdown-header">Notificações</h6></li>
-                <li><hr class="dropdown-divider"></li>
-                <li id="notificacaoItemLoadingMeusProdutos" class="dropdown-item text-muted">Carregando...</li>
-                <li id="notificacaoItemNenhumaMeusProdutos" class="dropdown-item text-muted d-none">Nenhuma notificação nova.</li>
-                <li><hr class="dropdown-divider d-none" id="notificacoesDividerFinalMeusProdutos"></li>
-                <li><a class="dropdown-item text-center d-none" href="#" id="verTodasNotificacoesLinkMeusProdutos">Ver todas</a></li> 
-                <li><a class="dropdown-item text-center d-none" href="#" id="marcarTodasLidasLinkMeusProdutos" onclick="marcarTodasComoLidasClientSide(event, 'MeusProdutos')">Marcar todas como lidas</a></li>
+            </div>
+            <ul class="notifications-list" id="listaNotificacoesSideNav">
+                <li id="notificacaoItemLoadingSideNav" class="dropdown-item text-muted">Carregando...</li>
+                <li id="notificacaoItemNenhumaSideNav" class="dropdown-item text-muted d-none">Nenhuma notificação nova.</li>
+                <li id="marcarTodasLidasContainerSideNav" class="d-none"><a class="dropdown-item text-center" href="#" id="marcarTodasLidasLinkSideNav" onclick="marcarTodasComoLidas(event)">Marcar todas como lidas</a></li> 
             </ul>
         </div>
         <?php endif; ?>
-        <!-- Fim Notificações na Side Nav -->
+        <!-- Fim Seção de Notificações Visível -->
 
         <div class="user-info-nav">
             <?php if ($id_usuario_logado): ?>
@@ -158,39 +154,8 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
     </div>
 
     <div class="main-content">
-        <div class="header">
-            <!-- Logo e user options principais movidos para a side-nav -->
-            <div class="flex-grow-1"></div> <!-- Espaçador -->
-            <div class="user-options">
-                 <?php if (isset($_SESSION['usuario_id'])): ?>
-                    <div class="dropdown me-2" id="notificacoesDropdownContainer" style="display: inline-block;">
-                        <button class="btn btn-outline-light position-relative" type="button" id="notificacoesDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-bell"></i>
-                            <span id="contadorNotificacoesHeader" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger <?php echo $contador_mensagens_nao_lidas > 0 ? '' : 'd-none'; ?>">
-                                <?php echo $contador_mensagens_nao_lidas; ?> 
-                                <span class="visually-hidden">notificações não lidas</span>
-                            </span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificacoesDropdownBtn" id="listaNotificacoesDropdown">
-                            <li><h6 class="dropdown-header">Notificações</h6></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li id="notificacaoItemLoadingHeader" class="dropdown-item text-muted">Carregando...</li>
-                            <li id="notificacaoItemNenhumaHeader" class="dropdown-item text-muted d-none">Nenhuma notificação nova.</li>
-                            <li><hr class="dropdown-divider d-none" id="notificacoesDividerFinalHeader"></li>
-                            <li><a class="dropdown-item text-center d-none" href="#" id="verTodasNotificacoesLinkHeader">Ver todas</a></li> 
-                            <li><a class="dropdown-item text-center d-none" href="#" id="marcarTodasLidasLinkHeader" onclick="marcarTodasComoLidasClientSide(event)">Marcar todas como lidas</a></li>
-                        </ul>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-
         <!-- Conteúdo específico de Meus Produtos -->
-        <div class="products-section container-fluid mt-3"> <!-- Ajustado para container-fluid e margem -->
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h2>Meus Produtos</h2>
-                <!-- O botão de cadastrar novo produto foi para a side-nav -->
-            </div>
+        <div class="products-section container-fluid mt-3" style="max-width: 70%; margin-left: auto; margin-right: auto;">
             
             <!-- Nova Barra de pesquisa MD3 específica para "Meus Produtos" -->
             <div class="search-bar-container mb-3">

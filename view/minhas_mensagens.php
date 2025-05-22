@@ -47,7 +47,7 @@ if ($id_usuario_logado) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minhas Mensagens - ECOxchange</title>
+    <title>Minhas Mensagens - ECOxChange</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="dashboard.css"> <!-- CSS Unificado -->
@@ -59,7 +59,7 @@ if ($id_usuario_logado) {
 <body>
     <div class="side-nav-bar">
         <div class="logo-container">
-            <div class="logo">ECO<span>xchange</span></div>
+            <div class="logo">ECO<span>Exchange</span></div>
         </div>
 
         <a href="dashboard.php">
@@ -95,28 +95,24 @@ if ($id_usuario_logado) {
             </a> 
         <?php endif; ?>
 
-        <!-- Notificações na Side Nav -->
+        <!-- Seção de Notificações Visível na Side Nav -->
         <?php if ($id_usuario_logado): ?>
-        <div class="nav-item-notificacao dropdown">
-            <button class="btn-notificacao dropdown-toggle" type="button" id="notificacoesDropdownBtnSideNav" data-bs-toggle="dropdown" aria-expanded="false">
+        <div class="notifications-section-container">
+            <div class="notifications-header">
                 <i class="bi bi-bell"></i>
                 <span>Notificações</span>
-                 <span id="contadorNotificacoesSideNav" class="badge bg-danger position-absolute top-50 start-100 translate-middle-y ms-2" style="font-size: 0.65em; padding: 0.3em 0.5em; <?php echo ($contador_mensagens_nao_lidas_geral > 0 ? '' : 'display:none;'); ?>">
+                <span id="contadorNotificacoesSideNav" class="badge bg-danger ms-2" style="font-size: 0.7em; padding: 0.3em 0.5em; <?php echo ($contador_mensagens_nao_lidas_geral > 0 ? '' : 'display:none;'); ?>">
                     <?php echo $contador_mensagens_nao_lidas_geral; ?> 
                 </span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="notificacoesDropdownBtnSideNav" id="listaNotificacoesDropdownMensagens">
-                <li><h6 class="dropdown-header">Notificações</h6></li>
-                <li><hr class="dropdown-divider"></li>
-                <li id="notificacaoItemLoadingMensagens" class="dropdown-item text-muted">Carregando...</li>
-                <li id="notificacaoItemNenhumaMensagens" class="dropdown-item text-muted d-none">Nenhuma notificação nova.</li>
-                <li><hr class="dropdown-divider d-none" id="notificacoesDividerFinalMensagens"></li>
-                <li><a class="dropdown-item text-center d-none" href="#" id="verTodasNotificacoesLinkMensagens">Ver todas</a></li> 
-                <li><a class="dropdown-item text-center d-none" href="#" id="marcarTodasLidasLinkMensagens" onclick="marcarTodasComoLidasClientSide(event, 'Mensagens')">Marcar todas como lidas</a></li>
+            </div>
+            <ul class="notifications-list" id="listaNotificacoesSideNav">
+                <li id="notificacaoItemLoadingSideNav" class="dropdown-item text-muted">Carregando...</li>
+                <li id="notificacaoItemNenhumaSideNav" class="dropdown-item text-muted d-none">Nenhuma notificação nova.</li>
+                <li id="marcarTodasLidasContainerSideNav" class="d-none"><a class="dropdown-item text-center" href="#" id="marcarTodasLidasLinkSideNav" onclick="marcarTodasComoLidas(event)">Marcar todas como lidas</a></li> 
             </ul>
         </div>
         <?php endif; ?>
-        <!-- Fim Notificações na Side Nav -->
+        <!-- Fim Seção de Notificações Visível -->
 
         <div class="user-info-nav">
             <?php if ($id_usuario_logado): ?>
@@ -138,11 +134,8 @@ if ($id_usuario_logado) {
         <!-- HEADER ROXO REMOVIDO -->
 
         <!-- Conteúdo específico da página de mensagens -->
-        <div class="messages-section container-fluid mt-3"> <!-- Usando a classe genérica e container-fluid -->
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                 <h2>Minhas Conversas</h2>
-            </div>
-
+        <div class="messages-section container-fluid mt-3" style="max-width: 70%; margin-left: auto; margin-right: auto;"> 
+            
             <div class="container-mensagens" style="background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"> <!-- Mantendo esta div para estilos específicos de `estilo_mensagens.css` -->
                 <?php if (!empty($conversas_formatadas)): ?>
                     <div class="list-group lista-conversas"> <!-- Usando list-group do Bootstrap para melhor estilização base -->

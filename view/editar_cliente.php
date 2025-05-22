@@ -37,7 +37,7 @@ if ($endereco && $endereco->getEstado()) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Cliente - ECOxchange</title>
+    <title>Editar Cliente - ECOxChange</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="editar.css">
@@ -46,7 +46,7 @@ if ($endereco && $endereco->getEstado()) {
 </head>
 <body>
     <div class="header">
-        <div class="logo">ECO<span>xchange</span></div>
+        <div class="logo">ECO<span>Exchange</span></div>
     </div>
 
     <div class="container">

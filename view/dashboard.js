@@ -209,19 +209,13 @@ function confirmarExclusao() {
     confirmModal.show();
 }
 
-// Configurar eventos
+// Event Listener para o formulário de cadastro de produto no MODAL DO DASHBOARD
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("[DOMContentLoaded] Página carregada.");
-    console.log("[DOMContentLoaded] ID Usuário Logado (window.usuarioLogadoId):", window.usuarioLogadoId);
-    console.log("[DOMContentLoaded] É Admin? (window.isAdmin):", window.isAdmin);
-
-    const formCadastro = document.getElementById('formCadastroProduto');
-    if (formCadastro) {
-        formCadastro.addEventListener('submit', function(e) {
+    const formCadastroDashboard = document.getElementById('formCadastroProduto'); // ID do form no dashboard.php
+    if (formCadastroDashboard) {
+        formCadastroDashboard.addEventListener('submit', function(e) {
             e.preventDefault();
-            
             const formData = new FormData(this);
-            
             fetch('../controllers/cadastrar_produto.php', {
                 method: 'POST',
                 body: formData
@@ -229,27 +223,30 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('cadastroProdutoModal'));
-                    modal.hide();
-                    formCadastro.reset();
-                    window.location.reload();
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('cadastroProdutoModal')); // ID do modal no dashboard.php
+                    if (modal) modal.hide();
+                    formCadastroDashboard.reset();
+                    window.location.href = 'dashboard.php?mensagem=' + encodeURIComponent(data.message || 'Produto cadastrado com sucesso!') + '&tipo_mensagem=sucesso';
                 } else {
                     alert(data.error || 'Erro ao cadastrar produto');
                 }
             })
             .catch(error => {
-                console.error('Erro:', error);
-                alert('Erro ao cadastrar produto');
+                console.error('Erro no cadastro de produto (Dashboard):', error);
+                alert('Erro de comunicação ao cadastrar produto.');
             });
         });
     }
 
-    if (document.getElementById('notificacoesDropdownContainer')) {
-        console.log("[DOMContentLoaded] Iniciando carregamento de notificações.");
-        carregarNotificacoes();
-        setInterval(carregarNotificacoes, 60000);
+    // Inicialização e carregamento periódico de notificações
+    // A verificação agora se baseia apenas se o usuário está logado
+    if (typeof window.usuarioLogadoId !== 'undefined' && window.usuarioLogadoId) {
+        console.log("[DOMContentLoaded] Usuário logado. Carregando notificações pela primeira vez e configurando intervalo.");
+        carregarNotificacoes(); // Carrega ao iniciar
+        setInterval(carregarNotificacoes, 60000); // Recarrega a cada 60 segundos
     } else {
-        console.warn("[DOMContentLoaded] Dropdown de notificações não encontrado na página, notificações não serão carregadas.");
+        console.log("[DOMContentLoaded] Usuário não logado ou ID não definido. Notificações não serão carregadas automaticamente.");
+        // A seção de notificações no HTML já deve ser condicionalmente renderizada pelo PHP com base no login.
     }
 });
 
@@ -268,20 +265,10 @@ function exibirProduto(produto) {
 async function carregarNotificacoes() {
     console.log("[carregarNotificacoes] Verificando ID do usuário logado (window.usuarioLogadoId):", window.usuarioLogadoId);
     if (!window.usuarioLogadoId) {
-        const container = document.getElementById('notificacoesDropdownContainer');
-        if (container) {
-            console.log("[carregarNotificacoes] Usuário não logado, escondendo dropdown de notificações.");
-            container.style.display = 'none';
-        } else {
-            console.warn("[carregarNotificacoes] Container do dropdown de notificações não encontrado.");
-        }
+        // A seção de notificações no HTML já é condicionalmente renderizada pelo PHP.
+        // Não é mais necessário esconder/mostrar o container via JS aqui.
+        console.warn("[carregarNotificacoes] Usuário não logado, notificações não serão carregadas.");
         return;
-    } else {
-        const container = document.getElementById('notificacoesDropdownContainer');
-        if (container) {
-             console.log("[carregarNotificacoes] Usuário logado, garantindo que dropdown de notificações esteja visível (display: inline-block).");
-            container.style.display = 'inline-block'; // Garante que está visível se o usuário estiver logado
-        }
     }
 
     try {
@@ -295,59 +282,54 @@ async function carregarNotificacoes() {
         const data = await response.json();
 
         if (data.success) {
-            renderizarNotificacoesDropdown(data.notificacoes, data.contadorNaoLidas);
+            renderizarNotificacoesSideNav(data.notificacoes, data.contadorNaoLidas);
         } else {
             console.error('Erro ao buscar notificações (API):', data.error);
-            document.getElementById('notificacaoItemLoading').textContent = 'Erro ao carregar (API).';
+            document.getElementById('notificacaoItemLoadingSideNav').textContent = 'Erro ao carregar (API).';
         }
     } catch (error) {
         console.error('Erro no fetch de notificações:', error);
-        document.getElementById('notificacaoItemLoading').textContent = 'Falha na comunicação.';
+        document.getElementById('notificacaoItemLoadingSideNav').textContent = 'Falha na comunicação.';
     }
 }
 
-function renderizarNotificacoesDropdown(notificacoes, contadorNaoLidas) {
-    const listaDropdown = document.getElementById('listaNotificacoesDropdown');
-    const contadorBadge = document.getElementById('contadorNotificacoes');
-    const loadingItem = document.getElementById('notificacaoItemLoading');
-    const nenhumaItem = document.getElementById('notificacaoItemNenhuma');
+function renderizarNotificacoesSideNav(notificacoes, contadorNaoLidas) {
+    const listaDropdown = document.getElementById('listaNotificacoesSideNav');
+    const contadorBadge = document.getElementById('contadorNotificacoesSideNav');
+    const loadingItem = document.getElementById('notificacaoItemLoadingSideNav');
+    const nenhumaItem = document.getElementById('notificacaoItemNenhumaSideNav');
     
-    // Obter os elementos LI pais para referência
-    const notificacoesDividerFinalElement = document.getElementById('notificacoesDividerFinal');
-    const liDividerFinal = notificacoesDividerFinalElement ? notificacoesDividerFinalElement.closest('li') : null;
-    
-    const verTodasNotificacoesLinkElement = document.getElementById('verTodasNotificacoesLink');
-    const liVerTodas = verTodasNotificacoesLinkElement ? verTodasNotificacoesLinkElement.closest('li') : null;
+    const marcarTodasLidasContainer = document.getElementById('marcarTodasLidasContainerSideNav'); // Usar o container do link "Marcar todas como lidas"
 
-    const marcarTodasLidasLinkElement = document.getElementById('marcarTodasLidasLink'); // Necessário para a lógica de exibição
-    const liMarcarTodasLidas = marcarTodasLidasLinkElement ? marcarTodasLidasLinkElement.closest('li') : null;
-
-
-    // Limpar itens antigos, exceto os fixos (header, dividers, loading, nenhuma, ver todas, marcar todas)
+    // Limpar itens antigos, exceto os fixos (loading, nenhuma, marcar todas)
     const itensAtuais = listaDropdown.querySelectorAll('li.notificacao-item');
     itensAtuais.forEach(item => item.remove());
+
+    if (!loadingItem || !nenhumaItem || !listaDropdown || !marcarTodasLidasContainer) {
+        console.error("[renderizarNotificacoesSideNav] Elementos essenciais da UI de notificações não encontrados. Abortando renderização.");
+        if(loadingItem) loadingItem.textContent = 'Erro na UI.';
+        return;
+    }
 
     loadingItem.classList.add('d-none'); // Esconder "Carregando..."
 
     if (contadorNaoLidas > 0) {
-        contadorBadge.textContent = contadorNaoLidas > 9 ? '9+' : contadorNaoLidas;
-        contadorBadge.classList.remove('d-none');
-        if (liMarcarTodasLidas) {
-            const marcarTodasLink = document.getElementById('marcarTodasLidasLink');
-            if(marcarTodasLink) marcarTodasLink.classList.remove('d-none');
+        if(contadorBadge) {
+            contadorBadge.textContent = contadorNaoLidas > 9 ? '9+' : contadorNaoLidas;
+            contadorBadge.classList.remove('d-none');
+        }
+        if (marcarTodasLidasContainer) {
+            marcarTodasLidasContainer.classList.remove('d-none');
         }
     } else {
-        contadorBadge.classList.add('d-none');
-        if (liMarcarTodasLidas) {
-            const marcarTodasLink = document.getElementById('marcarTodasLidasLink');
-            if(marcarTodasLink) marcarTodasLink.classList.add('d-none');
+        if(contadorBadge) contadorBadge.classList.add('d-none');
+        if (marcarTodasLidasContainer) {
+            marcarTodasLidasContainer.classList.add('d-none');
         }
     }
 
     if (notificacoes && notificacoes.length > 0) {
         nenhumaItem.classList.add('d-none');
-        if (liDividerFinal) liDividerFinal.classList.remove('d-none'); // Mostrar o LI que contém o divider
-        // if (liVerTodas) liVerTodas.classList.remove('d-none'); // Mostrar o LI que contém o link "Ver todas"
 
         notificacoes.forEach(notif => {
             const li = document.createElement('li');
@@ -359,13 +341,13 @@ function renderizarNotificacoesDropdown(notificacoes, contadorNaoLidas) {
             }
             a.href = notif.link || '#';
             a.onclick = (event) => {
-                event.preventDefault(); // Prevenir navegação padrão se for marcar como lida
+                event.preventDefault(); 
                 marcarNotificacaoLida(notif.id, notif.link, a);
             };
 
             const textoDiv = document.createElement('div');
-            textoDiv.style.whiteSpace = 'normal'; // Permitir quebra de linha
-            textoDiv.style.maxWidth = '280px'; // Limitar largura para não estourar dropdown
+            textoDiv.style.whiteSpace = 'normal'; 
+            textoDiv.style.maxWidth = '280px'; 
             
             const msgSpan = document.createElement('span');
             msgSpan.textContent = notif.mensagem;
@@ -378,34 +360,101 @@ function renderizarNotificacoesDropdown(notificacoes, contadorNaoLidas) {
 
             a.appendChild(textoDiv);
 
-            // Pequeno círculo para não lidas
+            const wrapperDireita = document.createElement('div');
+            wrapperDireita.classList.add('d-flex', 'align-items-center', 'ms-auto'); // ms-auto para empurrar para a direita
+
             if (!notif.lida) {
                 const dotSpan = document.createElement('span');
-                dotSpan.classList.add('badge', 'bg-primary', 'rounded-pill', 'ms-2');
-                dotSpan.textContent = ' '; // Apenas um ponto visual
+                dotSpan.classList.add('badge', 'bg-primary', 'rounded-pill', 'me-2');
+                dotSpan.textContent = ' ';
                 dotSpan.style.padding = '0.3em';
-                dotSpan.style.lineHeight = '0.5'; 
-                a.appendChild(dotSpan);
+                dotSpan.style.lineHeight = '0.5';
+                wrapperDireita.appendChild(dotSpan);
             }
+
+            const btnDispensar = document.createElement('button');
+            btnDispensar.classList.add('btn', 'btn-sm', 'p-0'); // Remover padding padrão do botão
+            btnDispensar.innerHTML = '<i class="bi bi-x-lg text-danger"></i>'; // Ícone X vermelho
+            btnDispensar.style.lineHeight = '1';
+            btnDispensar.style.background = 'none';
+            btnDispensar.style.border = 'none';
+            btnDispensar.title = 'Dispensar notificação';
+            btnDispensar.onclick = (event) => {
+                event.stopPropagation();
+                event.preventDefault();
+                dispensarNotificacao(notif.id, li, !notif.lida); // Passa se estava não lida
+            };
+            wrapperDireita.appendChild(btnDispensar);
+            a.appendChild(wrapperDireita); // Adiciona o wrapper com ponto (opcional) e X
             
             li.appendChild(a);
-            // Inserir antes do LI do divider final ou do LI do "ver todas"
-            if (liDividerFinal) {
-                listaDropdown.insertBefore(li, liDividerFinal);
-            } else if (liVerTodas) {
-                 listaDropdown.insertBefore(li, liVerTodas);
-            } else {
-                listaDropdown.appendChild(li); // Fallback
-            }
+            // Inserir antes do container do link "Marcar todas como lidas"
+            listaDropdown.insertBefore(li, marcarTodasLidasContainer);
         });
     } else {
         nenhumaItem.classList.remove('d-none');
-        if (liDividerFinal) liDividerFinal.classList.add('d-none');
-        // if (liVerTodas) liVerTodas.classList.add('d-none');
-        if (liMarcarTodasLidas) {
-            const marcarTodasLink = document.getElementById('marcarTodasLidasLink');
-            if(marcarTodasLink) marcarTodasLink.classList.add('d-none');
+        // Não é mais necessário manipular a visibilidade de marcarTodasLidas aqui, pois já foi feito acima com base no contadorNaoLidas
+    }
+}
+
+async function dispensarNotificacao(notificacaoId, elementoLi, eraNaoLida) {
+    // Não pedir confirmação aqui, pois o X é uma ação direta e pequena.
+    // Se quiser confirmação, descomente a linha abaixo.
+    // if (!confirm("Tem certeza que deseja remover esta notificação?")) {
+    //     return;
+    // }
+
+    try {
+        const response = await fetch('../controllers/dispensar_notificacao_controller.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ notificacao_id: notificacaoId })
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            if (elementoLi) {
+                elementoLi.remove();
+            }
+            // Atualizar contador se uma não lida foi removida
+            if (eraNaoLida) {
+                const contadorBadge = document.getElementById('contadorNotificacoesSideNav');
+                if (contadorBadge) {
+                    let contagemAtual = parseInt(contadorBadge.textContent);
+                    if (isNaN(contagemAtual) && contadorBadge.textContent.includes('+')) { // Ex: 9+
+                        // Não podemos decrementar 9+ precisamente, então recarregamos.
+                        carregarNotificacoes(); 
+                        return;
+                    }
+                    if (!isNaN(contagemAtual) && contagemAtual > 0) {
+                        contagemAtual--;
+                        contadorBadge.textContent = contagemAtual > 9 ? '9+' : (contagemAtual === 0 ? '' : contagemAtual);
+                        if (contagemAtual === 0) {
+                            contadorBadge.classList.add('d-none');
+                            const marcarTodasLidasContainer = document.getElementById('marcarTodasLidasContainerSideNav');
+                            if(marcarTodasLidasContainer) marcarTodasLidasContainer.classList.add('d-none');
+                        }
+                    } else {
+                         // Se a contagem já era 0 ou NaN, recarregar para garantir consistência
+                        carregarNotificacoes();
+                    }
+                }
+            }
+            // Verificar se a lista está vazia após remover
+            const lista = document.getElementById('listaNotificacoesSideNav');
+            const nenhumaItem = document.getElementById('notificacaoItemNenhumaSideNav');
+            if (lista && nenhumaItem && lista.querySelectorAll('li.notificacao-item').length === 0) {
+                nenhumaItem.classList.remove('d-none');
+            }
+
+        } else {
+            alert('Erro ao remover notificação: ' + (result.error || 'Erro desconhecido.'));
         }
+    } catch (error) {
+        console.error('Erro no fetch ao dispensar notificação:', error);
+        alert('Erro de comunicação ao remover notificação.');
     }
 }
 
