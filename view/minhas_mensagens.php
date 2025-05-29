@@ -1,22 +1,16 @@
 <?php 
-// Inclui o controller que busca os dados das mensagens
 require_once __DIR__ . '/../controllers/mensagens_controller.php'; 
-
-// Requerimentos comuns
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../dao/cliente_dao.php';
-require_once __DIR__ . '/../dao/mensagem_dao.php'; // Necessário para o contador na side-nav
-// require_once __DIR__ . '/../dao/produto_dao.php'; // Não usado diretamente nesta página, mas pode ser mantido se houver dependências indiretas futuras.
-// MensagemDAO é instanciado em mensagens_controller.php e também abaixo para o header, se necessário.
+require_once __DIR__ . '/../dao/mensagem_dao.php'; 
 
-// Lógica unificada para dados do usuário e contador de mensagens (para side-nav e header)
-$nome_usuario = "Usuário"; // Default
+$nome_usuario = "Usuário"; 
 $contador_mensagens_nao_lidas_geral = 0; 
 $id_usuario_logado = $_SESSION['usuario_id'] ?? null;
 
 if ($id_usuario_logado) {
     try {
-        $pdo = Database::getConnection(); // Garante que o PDO esteja disponível.
+        $pdo = Database::getConnection();
         $clienteDAO = new ClienteDAO();
         $cliente = $clienteDAO->buscarPorId($id_usuario_logado);
         if ($cliente) {
@@ -26,8 +20,6 @@ if ($id_usuario_logado) {
             }
         }
 
-        // $contador_mensagens_nao_lidas é definido em mensagens_controller.php para o conteúdo da página.
-        // Usaremos $contador_mensagens_nao_lidas_geral para o ícone de sino e badge da side-nav.
         $mensagemDAO_nav = new MensagemDAO(); 
         $contador_mensagens_nao_lidas_geral = $mensagemDAO_nav->contarMensagensNaoLidas($id_usuario_logado);
 
@@ -35,11 +27,7 @@ if ($id_usuario_logado) {
         error_log("Erro ao buscar dados para side-nav em minhas_mensagens.php: " . $e->getMessage());
     }
 } else {
-    // Idealmente, redirecionar para login se não estiver logado e tentar acessar esta página.
-    // header("Location: login.php?erro=acesso_restrito");
-    // exit;
 }
-// Fim da lógica unificada
 ?>
 
 <!DOCTYPE html>
@@ -53,7 +41,6 @@ if ($id_usuario_logado) {
     <link rel="stylesheet" href="dashboard.css"> <!-- CSS Unificado -->
     <link rel="stylesheet" href="estilo_mensagens.css"> <!-- CSS específico para mensagens -->
     <style>
-        /* Estilos que eram da antiga nav-bar podem ser removidos se não mais aplicáveis à side-nav */
     </style>
 </head>
 <body>
@@ -80,7 +67,6 @@ if ($id_usuario_logado) {
                 <i class="bi bi-chat-left-dots"></i>
                 <span>Minhas Mensagens</span>
                 <?php 
-                // Usar o contador_mensagens_nao_lidas_geral para o badge do link de mensagens
                 if ($contador_mensagens_nao_lidas_geral > 0): 
                 ?>
                     <span class="badge bg-danger position-absolute top-50 start-100 translate-middle-y ms-2" style="font-size: 0.65em; padding: 0.3em 0.5em;"><?php echo $contador_mensagens_nao_lidas_geral; ?></span>
@@ -95,7 +81,6 @@ if ($id_usuario_logado) {
             </a> 
         <?php endif; ?>
 
-        <!-- Seção de Notificações Visível na Side Nav -->
         <?php if ($id_usuario_logado): ?>
         <div class="notifications-section-container">
             <div class="notifications-header">
@@ -112,7 +97,6 @@ if ($id_usuario_logado) {
             </ul>
         </div>
         <?php endif; ?>
-        <!-- Fim Seção de Notificações Visível -->
 
         <div class="user-info-nav">
             <?php if ($id_usuario_logado): ?>
@@ -131,9 +115,7 @@ if ($id_usuario_logado) {
     </div>
 
     <div class="main-content">
-        <!-- HEADER ROXO REMOVIDO -->
 
-        <!-- Conteúdo específico da página de mensagens -->
         <div class="messages-section container-fluid mt-3" style="max-width: 70%; margin-left: auto; margin-right: auto;"> 
             
             <div class="container-mensagens" style="background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"> <!-- Mantendo esta div para estilos específicos de `estilo_mensagens.css` -->
@@ -208,13 +190,8 @@ if ($id_usuario_logado) {
         document.addEventListener('DOMContentLoaded', () => {
             const cadastroProdutoModal = document.getElementById('cadastroProdutoModalDashboard');
             if (!cadastroProdutoModal) {
-                // console.warn("Modal #cadastroProdutoModalDashboard não encontrado nesta página.");
             }
         });
     </script>
-    <!-- Se houver um dashboard.js global que trata de inicializações como o dropdown de notificações, 
-         e ele for incluído em todas as páginas, não precisa de scripts duplicados. -->
-    <!-- Exemplo: <script src="./js/dashboard_global.js"></script> --> 
-
 </body>
 </html> 

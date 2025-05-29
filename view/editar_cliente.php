@@ -22,10 +22,8 @@ if (isset($_GET['id'])) {
     }
 }
 
-// Carregar estados
 $estados = json_decode(file_get_contents('http://servicodados.ibge.gov.br/api/v1/localidades/estados'), true);
 
-// Carregar cidades do estado selecionado
 $cidades = [];
 if ($endereco && $endereco->getEstado()) {
     $cidades = json_decode(file_get_contents('http://servicodados.ibge.gov.br/api/v1/localidades/estados/' . $endereco->getEstado() . '/municipios'), true);

@@ -5,7 +5,6 @@ let isLoading = false;
 let allLoaded = false;
 let debounceTimer;
 
-// Função para carregar clientes
 function carregarClientes(termo = '', pagina = 1, append = false) {
     if (isLoading || allLoaded) return;
     
@@ -53,7 +52,6 @@ function carregarClientes(termo = '', pagina = 1, append = false) {
         });
 }
 
-// Função para criar o card do cliente
 function criarCardCliente(cliente) {
     return `
         <div class="col">
@@ -81,7 +79,6 @@ function criarCardCliente(cliente) {
     `;
 }
 
-// Função para mostrar mensagem de erro
 function mostrarMensagemErro(mensagem) {
     document.getElementById('clientesContainer').innerHTML = `
         <div class="empty-state">
@@ -93,7 +90,6 @@ function mostrarMensagemErro(mensagem) {
     document.getElementById('sentinela').style.display = 'none';
 }
 
-// Função para mostrar mensagem quando não há clientes
 function mostrarMensagemVazia(termo) {
     const mensagem = termo 
         ? `Nenhum cliente encontrado para "${termo}"`
@@ -109,14 +105,12 @@ function mostrarMensagemVazia(termo) {
     document.getElementById('sentinela').style.display = 'none';
 }
 
-// Função para atualizar estado da paginação
 function atualizarEstadoPaginacao(total, pagina) {
     allLoaded = total <= pagina * 6;
     document.getElementById('sentinela').style.display = allLoaded ? 'none' : 'block';
     currentPage = pagina;
 }
 
-// Configurar Intersection Observer para o carregamento infinito
 document.addEventListener('DOMContentLoaded', () => {
     const sentinela = document.getElementById('sentinela');
     if (!sentinela) return;
@@ -134,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     observer.observe(sentinela);
 
-    // Evento de busca com debounce
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.addEventListener('input', function(e) {
@@ -152,6 +145,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Carregar clientes iniciais
     carregarClientes('', 1, false);
 }); 

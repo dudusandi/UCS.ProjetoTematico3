@@ -610,32 +610,31 @@ body {
     font-size: 1.1rem;
     color: #c2c7d0;
 }
-.side-nav-bar .notifications-header span:first-of-type { /* "Notificações" */
-    flex-grow: 1; /* Para empurrar o badge para a direita */
+.side-nav-bar .notifications-header span:first-of-type { 
+    flex-grow: 1; 
 }
 
 
 .side-nav-bar .notifications-list {
     list-style: none;
     padding: 0;
-    margin: 5px 0 0 0; /* Margem superior pequena, sem margens laterais pois o container já tem */
-    background-color: #e9ecef; /* Fundo claro para a lista */
-    border-radius: 6px;   /* Cantos arredondados */
-    max-height: 220px;    /* Altura máxima, com scroll */
+    margin: 5px 0 0 0; 
+    background-color: #e9ecef; 
+    border-radius: 6px;  
+    max-height: 220px;   
     overflow-y: auto;
-    border: 1px solid #ced4da; /* Borda um pouco mais visível */
+    border: 1px solid #ced4da; 
 }
 
-/* Estilo para os itens da notificação */
-.side-nav-bar .notifications-list li > a.dropdown-item, /* Link da notificação */
-.side-nav-bar .notifications-list li.dropdown-item {  /* Itens como "Carregando...", "Nenhuma..." */
-    color: #343a40; /* Texto escuro no fundo claro */
-    border-bottom: 1px solid #ced4da; /* Divisor entre itens */
-    padding: 8px 12px; /* Padding vertical um pouco menor */
+.side-nav-bar .notifications-list li > a.dropdown-item,
+.side-nav-bar .notifications-list li.dropdown-item {
+    color: #343a40; 
+    border-bottom: 1px solid #ced4da; 
+    padding: 8px 12px; 
     white-space: normal; 
-    display: block; /* Garante que ocupe toda a largura */
+    display: block; 
     text-decoration: none;
-    font-size: 0.875rem; /* <<< FONTE MENOR ADICIONADA AQUI */
+    font-size: 0.875rem; 
 }
 
 .side-nav-bar .notifications-list li:last-child > a.dropdown-item,
@@ -643,8 +642,8 @@ body {
     border-bottom: none;
 }
 
-.side-nav-bar .notifications-list li > a.dropdown-item.fw-bold { /* Não lidas */
-    background-color: #dde0e3; /* Fundo levemente diferente para não lidas */
+.side-nav-bar .notifications-list li > a.dropdown-item.fw-bold { 
+    background-color: #dde0e3; 
     font-weight: 600 !important;
 }
 
@@ -652,27 +651,24 @@ body {
     background-color: #d3d6d8;
 }
 
-.side-nav-bar .notifications-list .text-muted { /* "Carregando...", "Nenhuma..." */
+.side-nav-bar .notifications-list .text-muted { 
     color: #6c757d !important;
 }
 
-.side-nav-bar .notifications-list .dropdown-header { /* Título "Notificações" dentro da lista, se houver */
-    padding: 10px 12px;
+.side-nav-bar .notifications-list .dropdown-header {
     font-weight: bold;
     color: #495057;
-    background-color: #e9ecef; /* Mesmo fundo da lista */
+    background-color: #e9ecef; 
     border-bottom: 1px solid #ced4da;
 }
 
 
-/* Botão "Marcar todas como lidas" dentro da lista */
 .side-nav-bar .notifications-list #marcarTodasLidasLinkSideNav {
     display: block;
     padding: 10px 12px;
     text-align: center;
     color: #007bff;
-    background-color: #e9ecef; /* Mesmo fundo da lista */
-    /* border-top: 1px solid #ced4da; */ /* Já tem border-bottom no item anterior */
+    background-color: #e9ecef;
     font-size: 0.85rem;
     font-weight: 500;
 }
@@ -681,9 +677,7 @@ body {
     background-color: #dde0e3;
 }
 
-/* Badge de contador no header da seção de notificações */
 .side-nav-bar .notifications-header #contadorNotificacoesSideNav {
-    font-size: 0.7em !important;    /* Mantido como antes */
-    padding: 0.3em 0.5em !important; /* Mantido como antes */
-    /* margin-left: auto; /* Empurra para a direita se o span "Notificações" não tiver flex-grow */
+    font-size: 0.7em !important;   
+    padding: 0.3em 0.5em !important; 
 }

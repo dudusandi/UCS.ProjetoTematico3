@@ -8,7 +8,6 @@ class Produto {
     private $preco;
 
     public function __construct($nome, $descricao, $foto_param, $preco, $usuario_id) {
-        // $this->id = $id; // ID será definido depois
         $this->nome = $nome;
         $this->descricao = $descricao;
         $this->foto = $foto_param;

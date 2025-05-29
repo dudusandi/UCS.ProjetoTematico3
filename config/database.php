@@ -10,7 +10,6 @@ class Database {
             $pass = 'dsds';
 
             try {
-                // Configurar opções do PDO
                 $options = [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -28,19 +27,14 @@ class Database {
         }
         return self::$pdo;
     }
-    
-    /**
-     * Testa a conexão com o banco de dados e verifica tabelas específicas
-     */
+
     public static function testConnection($tablesToCheck = ['pedidos', 'itens_pedido']) {
         try {
             $pdo = self::getConnection();
             $result = ['success' => true, 'tables' => []];
             
-            // Verificar se o servidor está respondendo
             $pdo->query("SELECT 1");
             
-            // Verificar tabelas específicas
             foreach ($tablesToCheck as $table) {
                 try {
                     $stmt = $pdo->query("SELECT 1 FROM $table LIMIT 1");

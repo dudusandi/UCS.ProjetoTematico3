@@ -1,9 +1,8 @@
 // dashboard.js
 let currentProdutoId = null;
 let isEditando = false;
-let fornecedores = []; // Will be set by dashboard.php
+let fornecedores = []; 
 
-// Função para mostrar detalhes do produto
 function mostrarDetalhes(id) {
     currentProdutoId = id;
     console.log("[mostrarDetalhes] ID do produto clicado:", id);
@@ -24,16 +23,11 @@ function mostrarDetalhes(id) {
                 return;
             }
 
-            // const estoqueProduto = Number(produto.quantidade); // Removido, não temos mais estoque
-
-            // Elementos de visualização
             document.getElementById('produtoNome').textContent = produto.nome;
             document.getElementById('produtoDescricao').textContent = produto.descricao || 'Nenhuma';
             document.getElementById('produtoPreco').textContent = `R$ ${(produto.preco ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
             document.getElementById('produtoAnuncianteNome').textContent = produto.proprietario_nome || 'Não informado';
             document.getElementById('produtoFoto').src = produto.foto ? `data:image/jpeg;base64,${produto.foto}` : 'https://via.placeholder.com/200';
-
-            // Elementos do formulário de edição
             document.getElementById('produtoId').value = id; 
             document.getElementById('produtoNomeInput').value = produto.nome;
             document.getElementById('produtoDescricaoInput').value = produto.descricao || '';
@@ -49,7 +43,6 @@ function mostrarDetalhes(id) {
             const btnSalvar = document.getElementById('btnSalvar');
             const btnTenhoInteresse = document.getElementById('btnTenhoInteresse');
 
-            // Lógica para o botão "Enviar Mensagem ao Vendedor"
             const btnEnviarMensagem = document.getElementById('btnEnviarMensagemVendedor');
             const proprietarioIdDoProduto = produto.usuario_id; // Assumindo que o backend envia usuario_id como o ID do dono
 
@@ -63,14 +56,12 @@ function mostrarDetalhes(id) {
                 console.log("[mostrarDetalhes] Escondendo botão Enviar Mensagem (usuário é o dono ou não logado ou proprietário não definido).");
                 btnEnviarMensagem.classList.add('d-none');
             }
-            // Fim da lógica do botão Enviar Mensagem
 
             console.log("[mostrarDetalhes] Verificando condições de exibição dos botões:");
             console.log("[mostrarDetalhes] ID Usuário Logado:", window.usuarioLogadoId, "(tipo:", typeof window.usuarioLogadoId, ")");
             console.log("[mostrarDetalhes] ID Dono do Produto:", produto.usuario_id, "(tipo:", typeof produto.usuario_id, ")");
             console.log("[mostrarDetalhes] É Admin? (window.isAdmin):", window.isAdmin);
 
-            // Garantir que os IDs sejam comparados como números se vierem de fontes diferentes
             const usuarioLogadoIdNum = Number(window.usuarioLogadoId);
             const produtoUsuarioIdNum = Number(produto.usuario_id);
 
@@ -110,7 +101,6 @@ function mostrarDetalhes(id) {
         });
 }
 
-// Função para registrar interesse no produto
 async function registrarInteresseProduto() {
     if (!currentProdutoId) {
         alert('ID do produto não encontrado para registrar interesse.');
@@ -118,7 +108,6 @@ async function registrarInteresseProduto() {
     }
     if (!window.usuarioLogadoId) {
         alert('Você precisa estar logado para demonstrar interesse.');
-        // Poderia redirecionar para login aqui
         return;
     }
 
@@ -135,15 +124,12 @@ async function registrarInteresseProduto() {
 
         if (result.success) {
             alert(result.message || 'Interesse registrado com sucesso! O vendedor será notificado.');
-            // Opcional: desabilitar o botão ou mudar o texto após o clique
             const btnTenhoInteresse = document.getElementById('btnTenhoInteresse');
             if (btnTenhoInteresse) {
                 btnTenhoInteresse.disabled = true;
                 btnTenhoInteresse.innerHTML = '<i class="bi bi-check-lg"></i> Interesse Enviado';
             }
-            // Fechar o modal após um tempo ou deixar aberto
-            // const modal = bootstrap.Modal.getInstance(document.getElementById('produtoModal'));
-            // modal.hide();
+
         } else {
             alert('Erro ao registrar interesse: ' + (result.error || 'Ocorreu um problema.'));
         }
@@ -153,7 +139,6 @@ async function registrarInteresseProduto() {
     }
 }
 
-// Função para alternar modo de edição
 function alternarEdicao() {
     isEditando = !isEditando;
     document.getElementById('visualizacao').classList.toggle('d-none');
@@ -163,7 +148,6 @@ function alternarEdicao() {
     document.getElementById('produtoFotoInput').classList.toggle('d-none');
 }
 
-// Função para salvar produto
 function salvarProduto() {
     const form = document.getElementById('editarForm');
     const formData = new FormData(form);
@@ -200,7 +184,6 @@ function salvarProduto() {
         });
 }
 
-// Função para confirmar exclusão
 function confirmarExclusao() {
     document.getElementById('confirmProdutoNome').textContent = document.getElementById('produtoNome').textContent;
     const detalhesModal = bootstrap.Modal.getInstance(document.getElementById('produtoModal'));
@@ -209,7 +192,6 @@ function confirmarExclusao() {
     confirmModal.show();
 }
 
-// Event Listener para o formulário de cadastro de produto no MODAL DO DASHBOARD
 document.addEventListener('DOMContentLoaded', () => {
     const formCadastroDashboard = document.getElementById('formCadastroProduto'); // ID do form no dashboard.php
     if (formCadastroDashboard) {
@@ -238,15 +220,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Inicialização e carregamento periódico de notificações
-    // A verificação agora se baseia apenas se o usuário está logado
     if (typeof window.usuarioLogadoId !== 'undefined' && window.usuarioLogadoId) {
         console.log("[DOMContentLoaded] Usuário logado. Carregando notificações pela primeira vez e configurando intervalo.");
         carregarNotificacoes(); // Carrega ao iniciar
         setInterval(carregarNotificacoes, 60000); // Recarrega a cada 60 segundos
     } else {
         console.log("[DOMContentLoaded] Usuário não logado ou ID não definido. Notificações não serão carregadas automaticamente.");
-        // A seção de notificações no HTML já deve ser condicionalmente renderizada pelo PHP com base no login.
     }
 });
 
@@ -259,14 +238,10 @@ function exibirProduto(produto) {
     }
 }
 
-// --- Funções de Notificação ---
 
-// Função para buscar e renderizar notificações
 async function carregarNotificacoes() {
     console.log("[carregarNotificacoes] Verificando ID do usuário logado (window.usuarioLogadoId):", window.usuarioLogadoId);
     if (!window.usuarioLogadoId) {
-        // A seção de notificações no HTML já é condicionalmente renderizada pelo PHP.
-        // Não é mais necessário esconder/mostrar o container via JS aqui.
         console.warn("[carregarNotificacoes] Usuário não logado, notificações não serão carregadas.");
         return;
     }
@@ -275,7 +250,6 @@ async function carregarNotificacoes() {
         const response = await fetch('../controllers/get_notificacoes_controller.php');
         if (!response.ok) {
             console.error('Erro HTTP ao buscar notificações:', response.status, response.statusText);
-            // Não exibir alerta para não ser intrusivo, apenas logar.
             document.getElementById('notificacaoItemLoading').textContent = 'Erro ao carregar.';
             return;
         }
@@ -301,7 +275,6 @@ function renderizarNotificacoesSideNav(notificacoes, contadorNaoLidas) {
     
     const marcarTodasLidasContainer = document.getElementById('marcarTodasLidasContainerSideNav'); // Usar o container do link "Marcar todas como lidas"
 
-    // Limpar itens antigos, exceto os fixos (loading, nenhuma, marcar todas)
     const itensAtuais = listaDropdown.querySelectorAll('li.notificacao-item');
     itensAtuais.forEach(item => item.remove());
 
@@ -311,7 +284,7 @@ function renderizarNotificacoesSideNav(notificacoes, contadorNaoLidas) {
         return;
     }
 
-    loadingItem.classList.add('d-none'); // Esconder "Carregando..."
+    loadingItem.classList.add('d-none'); 
 
     if (contadorNaoLidas > 0) {
         if(contadorBadge) {
@@ -333,11 +306,11 @@ function renderizarNotificacoesSideNav(notificacoes, contadorNaoLidas) {
 
         notificacoes.forEach(notif => {
             const li = document.createElement('li');
-            li.classList.add('notificacao-item'); // Classe para facilitar a remoção
+            li.classList.add('notificacao-item'); 
             const a = document.createElement('a');
             a.classList.add('dropdown-item', 'd-flex', 'justify-content-between', 'align-items-start');
             if (!notif.lida) {
-                a.classList.add('fw-bold'); // Destaque para não lidas
+                a.classList.add('fw-bold'); 
             }
             a.href = notif.link || '#';
             a.onclick = (event) => {
@@ -361,7 +334,7 @@ function renderizarNotificacoesSideNav(notificacoes, contadorNaoLidas) {
             a.appendChild(textoDiv);
 
             const wrapperDireita = document.createElement('div');
-            wrapperDireita.classList.add('d-flex', 'align-items-center', 'ms-auto'); // ms-auto para empurrar para a direita
+            wrapperDireita.classList.add('d-flex', 'align-items-center', 'ms-auto');
 
             if (!notif.lida) {
                 const dotSpan = document.createElement('span');
@@ -373,8 +346,8 @@ function renderizarNotificacoesSideNav(notificacoes, contadorNaoLidas) {
             }
 
             const btnDispensar = document.createElement('button');
-            btnDispensar.classList.add('btn', 'btn-sm', 'p-0'); // Remover padding padrão do botão
-            btnDispensar.innerHTML = '<i class="bi bi-x-lg text-danger"></i>'; // Ícone X vermelho
+            btnDispensar.classList.add('btn', 'btn-sm', 'p-0'); 
+            btnDispensar.innerHTML = '<i class="bi bi-x-lg text-danger"></i>'; 
             btnDispensar.style.lineHeight = '1';
             btnDispensar.style.background = 'none';
             btnDispensar.style.border = 'none';
@@ -382,27 +355,22 @@ function renderizarNotificacoesSideNav(notificacoes, contadorNaoLidas) {
             btnDispensar.onclick = (event) => {
                 event.stopPropagation();
                 event.preventDefault();
-                dispensarNotificacao(notif.id, li, !notif.lida); // Passa se estava não lida
+                dispensarNotificacao(notif.id, li, !notif.lida); 
             };
             wrapperDireita.appendChild(btnDispensar);
-            a.appendChild(wrapperDireita); // Adiciona o wrapper com ponto (opcional) e X
+            a.appendChild(wrapperDireita); 
             
             li.appendChild(a);
-            // Inserir antes do container do link "Marcar todas como lidas"
+
             listaDropdown.insertBefore(li, marcarTodasLidasContainer);
         });
     } else {
         nenhumaItem.classList.remove('d-none');
-        // Não é mais necessário manipular a visibilidade de marcarTodasLidas aqui, pois já foi feito acima com base no contadorNaoLidas
     }
 }
 
 async function dispensarNotificacao(notificacaoId, elementoLi, eraNaoLida) {
-    // Não pedir confirmação aqui, pois o X é uma ação direta e pequena.
-    // Se quiser confirmação, descomente a linha abaixo.
-    // if (!confirm("Tem certeza que deseja remover esta notificação?")) {
-    //     return;
-    // }
+
 
     try {
         const response = await fetch('../controllers/dispensar_notificacao_controller.php', {
@@ -418,13 +386,12 @@ async function dispensarNotificacao(notificacaoId, elementoLi, eraNaoLida) {
             if (elementoLi) {
                 elementoLi.remove();
             }
-            // Atualizar contador se uma não lida foi removida
+
             if (eraNaoLida) {
                 const contadorBadge = document.getElementById('contadorNotificacoesSideNav');
                 if (contadorBadge) {
                     let contagemAtual = parseInt(contadorBadge.textContent);
                     if (isNaN(contagemAtual) && contadorBadge.textContent.includes('+')) { // Ex: 9+
-                        // Não podemos decrementar 9+ precisamente, então recarregamos.
                         carregarNotificacoes(); 
                         return;
                     }
@@ -437,12 +404,10 @@ async function dispensarNotificacao(notificacaoId, elementoLi, eraNaoLida) {
                             if(marcarTodasLidasContainer) marcarTodasLidasContainer.classList.add('d-none');
                         }
                     } else {
-                         // Se a contagem já era 0 ou NaN, recarregar para garantir consistência
                         carregarNotificacoes();
                     }
                 }
             }
-            // Verificar se a lista está vazia após remover
             const lista = document.getElementById('listaNotificacoesSideNav');
             const nenhumaItem = document.getElementById('notificacaoItemNenhumaSideNav');
             if (lista && nenhumaItem && lista.querySelectorAll('li.notificacao-item').length === 0) {
@@ -469,20 +434,16 @@ async function marcarNotificacaoLida(notificacaoId, linkNotificacao, elementoA) 
         });
         const result = await response.json();
         if (result.success) {
-            // Remover destaque visual e o "ponto azul"
             if (elementoA) {
                 elementoA.classList.remove('fw-bold');
                 const dot = elementoA.querySelector('.badge.bg-primary.rounded-pill');
                 if(dot) dot.remove();
             }
-            // Atualizar contador (poderia chamar carregarNotificacoes() ou decrementar localmente)
-            carregarNotificacoes(); // Recarrega para ter a contagem certa
+            carregarNotificacoes(); 
             
-            // Redirecionar para o link da notificação
             if (linkNotificacao && linkNotificacao !== '#') {
                 window.location.href = linkNotificacao;
             } else {
-                // Se não houver link, apenas recarrega as notificações para atualizar a lista
             }
         } else {
             console.error('Erro ao marcar notificação como lida:', result.error);
@@ -509,7 +470,7 @@ async function marcarTodasComoLidas(event) {
         });
         const result = await response.json();
         if (result.success) {
-            carregarNotificacoes(); // Recarrega tudo para atualizar a UI
+            carregarNotificacoes(); 
         } else {
             alert('Erro ao marcar todas as notificações como lidas: ' + (result.error || 'Erro desconhecido'));
         }

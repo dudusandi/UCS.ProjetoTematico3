@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-// Verificar se o usuário está logado
 if (!isset($_SESSION['usuario_id'])) {
     header("Location: login.php?erro=login_necessario");
     exit;
@@ -13,35 +12,29 @@ require_once __DIR__ . '/../dao/mensagem_dao.php';
 require_once __DIR__ . '/../dao/cliente_dao.php';
 
 $id_usuario_logado = $_SESSION['usuario_id'];
-$nome_usuario = "Usuário"; // Default
+$nome_usuario = "Usuário"; 
 $contador_mensagens_nao_lidas = 0;
 
 try {
-    $pdo = Database::getConnection(); // Assegura que a conexão PDO seja obtida primeiro.
+    $pdo = Database::getConnection(); 
 
     $clienteDAO = new ClienteDAO();
     $cliente_logado_info = $clienteDAO->buscarPorId($id_usuario_logado);
     if ($cliente_logado_info) {
         $nome_usuario = $cliente_logado_info->getNome();
-        // Atualizar nome na sessão se não estiver lá ou for diferente
         if (!isset($_SESSION['usuario_nome']) || $_SESSION['usuario_nome'] !== $nome_usuario) {
              $_SESSION['usuario_nome'] = $nome_usuario;
         }
     } else {
-        // error_log("Cliente não encontrado para o ID: " . $id_usuario_logado . " em meus_produtos.php");
-        // Se o cliente não for encontrado, mas a sessão existir, talvez usar um nome genérico ou invalidar a sessão.
-        // Por agora, mantém $nome_usuario como "Usuário" se $cliente_logado_info for nulo.
     }
 
     $mensagemDAO = new MensagemDAO();
     $contador_mensagens_nao_lidas = $mensagemDAO->contarMensagensNaoLidas($id_usuario_logado);
     
-    $produtoDao = new ProdutoDAO(); // Instanciado aqui pois depende do PDO e não há mais lógica de header conflitante antes.
+    $produtoDao = new ProdutoDAO(); 
 
 } catch (Exception $e) {
     error_log("Erro na inicialização de dados em meus_produtos.php: " . $e->getMessage());
-    // Considerar definir uma mensagem de erro para ser exibida ao usuário.
-    // Por exemplo, $mensagem_feedback_geral = "Ocorreu um erro ao carregar a página. Tente novamente.";
 }
 
 $mensagem_feedback = $_GET['mensagem'] ?? '';
@@ -58,9 +51,8 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="dashboard.css"> <!-- CSS unificado -->
     <style>
-        /* Estilos específicos que não foram para dashboard.css (se houver) */
         .list-group-item img {
-            width: 70px; /* Ajuste leve */
+            width: 70px; 
             height: 70px; 
             object-fit: cover; 
             margin-right: 15px; 
@@ -77,7 +69,7 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
             justify-content: center;
         }
          .list-group-item .btn-group .btn {
-            padding: 0.25rem 0.5rem; /* Botões de ação menores */
+            padding: 0.25rem 0.5rem;
             font-size: 0.8rem;
         }
     </style>
@@ -94,11 +86,11 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
         </a>
         
         <?php if ($id_usuario_logado): ?>
-            <a href="#" data-bs-toggle="modal" data-bs-target="#cadastroProdutoModalDashboard"> <!-- Mesmo modal do dashboard -->
+            <a href="#" data-bs-toggle="modal" data-bs-target="#cadastroProdutoModalDashboard"> 
                 <i class="bi bi-plus-circle"></i>
                 <span>Cadastrar Produto</span>
             </a>
-            <a href="meus_produtos.php" class="active"> <!-- Link ativo -->
+            <a href="meus_produtos.php" class="active"> 
                 <i class="bi bi-archive"></i>
                 <span>Meus Produtos</span>
             </a>
@@ -118,7 +110,6 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
             </a> 
         <?php endif; ?>
 
-        <!-- Seção de Notificações Visível na Side Nav -->
         <?php if ($id_usuario_logado): ?>
         <div class="notifications-section-container">
             <div class="notifications-header">
@@ -135,7 +126,6 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
             </ul>
         </div>
         <?php endif; ?>
-        <!-- Fim Seção de Notificações Visível -->
 
         <div class="user-info-nav">
             <?php if ($id_usuario_logado): ?>
@@ -154,10 +144,8 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
     </div>
 
     <div class="main-content">
-        <!-- Conteúdo específico de Meus Produtos -->
         <div class="products-section container-fluid mt-3" style="max-width: 70%; margin-left: auto; margin-right: auto;">
             
-            <!-- Nova Barra de pesquisa MD3 específica para "Meus Produtos" -->
             <div class="search-bar-container mb-3">
                 <div class="search-bar-md3">
                     <form id="searchFormMeusProdutos" method="GET" action="meus_produtos.php" class="d-flex flex-grow-1">
@@ -178,13 +166,13 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
 
             <div id="meusProdutosContainer">
                 <?php
-                if ($produtoDao) { // Só prossegue se o DAO foi inicializado
+                if ($produtoDao) { 
                     try {
                         $itensPorPagina = 8;
                         $paginaAtual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
                         if ($paginaAtual < 1) $paginaAtual = 1;
                         $offset = ($paginaAtual - 1) * $itensPorPagina;
-                        $termo_busca_meus_produtos = $_GET['termo'] ?? ''; // Usar a variável específica da busca local
+                        $termo_busca_meus_produtos = $_GET['termo'] ?? ''; 
 
                         $produtos = $produtoDao->buscarPorUsuarioId($id_usuario_logado, $termo_busca_meus_produtos, $itensPorPagina, $offset);
                         $totalProdutos = $produtoDao->contarProdutosPorUsuarioId($id_usuario_logado, $termo_busca_meus_produtos);
@@ -204,7 +192,6 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
                                 echo '<li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">';
                                 echo '    <div class="d-flex align-items-center me-3 mb-2 mb-md-0" style="flex-grow: 1; min-width: 200px; cursor:pointer;" onclick="abrirModalEdicao(' . $produto['id'] . ')">'; // Adicionado flex-grow e min-width
                                 
-                                // Lógica para exibir imagem ou ícone
                                 if (!empty($produto['foto'])) {
                                     $fotoUrl = 'data:image/jpeg;base64,' . base64_encode($produto['foto']);
                                     echo '        <img src="' . $fotoUrl . '" alt="' . htmlspecialchars($produto['nome']) . '">';
@@ -213,7 +200,6 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
                                     echo '            <i class="bi bi-card-image" style="font-size: 2.5rem; color: #6c757d;"></i>';
                                     echo '        </div>';
                                 }
-                                // Fim da lógica imagem/ícone
 
                                 echo '        <div>';
                                 echo '            <h5 class="mb-1 text-truncate" title="' . htmlspecialchars($produto['nome']) . '">' . htmlspecialchars($produto['nome']) . '</h5>';
@@ -263,7 +249,6 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
         </div>
     </div>
 
-    <!-- Modal de Edição de Produto (usaremos este para edições) -->
     <div class="modal fade" id="produtoModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -309,7 +294,6 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
         </div>
     </div>
 
-    <!-- Modal de Confirmação de Exclusão -->
     <div class="modal fade" id="confirmExcluirModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -328,7 +312,6 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
         </div>
     </div>
 
-    <!-- Modal de Cadastro de Produto (copiado do dashboard.php para consistência) -->
     <div class="modal fade" id="cadastroProdutoModalDashboard" tabindex="-1" aria-labelledby="cadastroProdutoModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -375,7 +358,7 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         window.usuarioLogadoId = <?= json_encode($_SESSION['usuario_id'] ?? null); ?>;
-        window.isAdmin = <?= json_encode(isset($_SESSION['is_admin']) && $_SESSION['is_admin']); ?>; // Adicionado para consistência
+        window.isAdmin = <?= json_encode(isset($_SESSION['is_admin']) && $_SESSION['is_admin']); ?>; 
 
         const produtoModalElement = document.getElementById('produtoModal');
         const produtoModalInstance = new bootstrap.Modal(produtoModalElement);
@@ -383,7 +366,6 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
         const confirmExcluirModalInstance = new bootstrap.Modal(confirmExcluirModalElement);
         let produtoIdParaExcluir = null;
 
-        // Modal de Cadastro (do Dashboard)
         const cadastroProdutoModalDashboardElement = document.getElementById('cadastroProdutoModalDashboard');
         let cadastroProdutoModalDashboardInstance = null;
         if (cadastroProdutoModalDashboardElement) {
@@ -526,7 +508,6 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
             }
         });
 
-        // Função para o dropdown de notificações do header
         function marcarTodasComoLidasClientSide(event, prefix = '') {
             event.preventDefault();
             const contadorNotificacoes = document.getElementById('contadorNotificacoesSideNav'); // Usar o ID unificado da SideNav
@@ -534,7 +515,6 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
             
             if (contadorNotificacoes) {
                 contadorNotificacoes.style.display = 'none';
-                // contadorNotificacoes.textContent = '0'; // Não precisa zerar o texto se vai esconder
             }
             
             if(listaNotificacoes){
@@ -553,11 +533,7 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
                 if(verTodasLink) verTodasLink.classList.add('d-none');
                 if(marcarLidasLink) marcarLidasLink.classList.add('d-none');
             }
-            // Adicionar chamada AJAX para backend se necessário: fetch('../controllers/marcar_notificacoes_lidas_controller.php', { method: 'POST' }) ...
         }
-        // Adicionar aqui a lógica para carregar notificações no dropdown do header, se for usar.
-        // Ex: document.addEventListener('DOMContentLoaded', () => { if (window.usuarioLogadoId) carregarNotificacoes(); });
-        // A função carregarNotificacoes precisaria ser definida ou importada.
     </script>
 </body>
 </html> 

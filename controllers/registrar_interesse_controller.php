@@ -6,19 +6,19 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../dao/produto_dao.php';
 require_once __DIR__ . '/../dao/NotificacaoDAO.php';
 require_once __DIR__ . '/../model/Notificacao.php';
-require_once __DIR__ . '/../dao/cliente_dao.php'; // Para buscar nome do interessado
+require_once __DIR__ . '/../dao/cliente_dao.php'; 
 
 if (!isset($_SESSION['usuario_id'])) {
-    http_response_code(401); // Unauthorized
+    http_response_code(401);
     echo json_encode(['success' => false, 'error' => 'Usuário não autenticado.']);
     exit;
 }
 
 $usuario_id_origem = (int)$_SESSION['usuario_id'];
-$nome_usuario_logado = $_SESSION['usuario_nome'] ?? 'Um usuário'; // Pega o nome da sessão se disponível
+$nome_usuario_logado = $_SESSION['usuario_nome'] ?? 'Um usuário';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405); // Method Not Allowed
+    http_response_code(405); 
     echo json_encode(['success' => false, 'error' => 'Método não permitido.']);
     exit;
 }
@@ -36,7 +36,6 @@ try {
     $pdo = Database::getConnection();
     $produtoDao = new ProdutoDAO();
     $notificacaoDao = new NotificacaoDAO($pdo);
-    // $clienteDao = new ClienteDAO($pdo); // Já instanciado se precisar do nome do interessado de forma mais robusta
 
     $produto = $produtoDao->buscarPorId($produto_id);
 
@@ -46,7 +45,6 @@ try {
         exit;
     }
 
-    // Acessar como array, pois buscarPorId agora retorna array
     $usuario_id_destino = $produto['usuario_id']; 
 
     if ($usuario_id_origem === $usuario_id_destino) {
@@ -55,10 +53,7 @@ try {
         exit;
     }
 
-    // Criar a notificação
     $tipo_notificacao = 'interesse_compra';
-    // Usar o nome do usuário logado na mensagem
-    // Acessar como array
     $mensagem = htmlspecialchars($nome_usuario_logado) . " demonstrou interesse no seu produto: " . htmlspecialchars($produto['nome']);
     $link = "../view/chat.php?usuario_id=" . $usuario_id_origem; // Link para o chat com o interessado
 

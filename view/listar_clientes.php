@@ -9,7 +9,6 @@ require_once '../config/database.php';
 require_once '../dao/cliente_dao.php';
 require_once '../model/cliente.php';
 
-// Busca todos os clientes (inicialmente)
 try {
     $clienteDAO = new ClienteDAO(Database::getConnection());
     $itensPorPagina = 6;
@@ -25,7 +24,6 @@ try {
     $tipoMensagem = 'erro';
 }
 
-// Mensagens
 $mensagem = $_GET['mensagem'] ?? '';
 $tipoMensagem = $_GET['tipo_mensagem'] ?? '';
 ?>
@@ -58,7 +56,6 @@ $tipoMensagem = $_GET['tipo_mensagem'] ?? '';
             </div>
         <?php endif; ?>
 
-        <!-- Botões de Navegação -->
         <div class="d-flex justify-content-between mb-4">
             <h2>Gerenciar Clientes</h2>
             <div>
@@ -68,13 +65,9 @@ $tipoMensagem = $_GET['tipo_mensagem'] ?? '';
             </div>
         </div>
 
-        <!-- Listagem de Clientes -->
         <div id="clientesContainer">
-            <!-- Clientes serão carregados dinamicamente -->
         </div>
-        <!-- Sentinela para carregamento infinito -->
         <div id="sentinela" style="height: 20px;"></div>
-        <!-- Indicador de carregamento -->
         <div id="loading" class="text-center my-3 d-none">
             <div class="spinner-border" role="status">
                 <span class="visually-hidden">Carregando...</span>

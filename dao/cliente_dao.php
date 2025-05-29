@@ -343,7 +343,6 @@ class ClienteDAO {
         try {
             $this->pdo->beginTransaction();
 
-            // Verifica se o cliente existe antes de prosseguir
             $sqlGetEndereco = "SELECT endereco_id FROM clientes WHERE id = :id";
             $stmtGet = $this->pdo->prepare($sqlGetEndereco);
             $stmtGet->bindParam(":id", $id, PDO::PARAM_INT);

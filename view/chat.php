@@ -27,11 +27,9 @@ if ($usuario_logado_id === $outro_usuario_id) {
 $mensagemDAO = new MensagemDAO();
 $clienteDAO = new ClienteDAO();
 
-// Buscar detalhes do usuário logado para o corpo da página (já usado abaixo)
 $usuario_logado = $clienteDAO->buscarPorId($usuario_logado_id);
 $nome_usuario_logado = ($usuario_logado && method_exists($usuario_logado, 'getNome')) ? $usuario_logado->getNome() : "Você";
 
-// Buscar detalhes do outro usuário para o corpo da página
 $outro_usuario = $clienteDAO->buscarPorId($outro_usuario_id);
 if (!$outro_usuario) {
     $_SESSION['erro_chat'] = "Usuário não encontrado.";
@@ -40,21 +38,18 @@ if (!$outro_usuario) {
 }
 $nome_outro_usuario = ($outro_usuario && method_exists($outro_usuario, 'getNome')) ? $outro_usuario->getNome() : "Usuário #{$outro_usuario_id}";
 
-// Marcar mensagens desta conversa como lidas
 $mensagemDAO->marcarMensagensComoLidas($usuario_logado_id, $outro_usuario_id);
 
-// Buscar todas as mensagens da conversa
 $mensagens_da_conversa = $mensagemDAO->buscarConversa($usuario_logado_id, $outro_usuario_id);
 
-// --- Lógica para Side Nav Bar ---
 $nome_usuario_sidenav = "Usuário"; 
 $contador_mensagens_nao_lidas_geral = 0;
-$id_usuario_logado_s = $_SESSION['usuario_id'] ?? null; // Usar uma variável diferente para evitar conflito se $id_usuario_logado já foi usado
+$id_usuario_logado_s = $_SESSION['usuario_id'] ?? null;
 
 if ($id_usuario_logado_s) {
     try {
         $pdo_s = Database::getConnection(); 
-        $clienteDAO_s = new ClienteDAO(); // Nova instância ou reutilizar se o escopo permitir
+        $clienteDAO_s = new ClienteDAO();
         $cliente_s = $clienteDAO_s->buscarPorId($id_usuario_logado_s);
         if ($cliente_s) {
             $nome_usuario_sidenav = $cliente_s->getNome();
@@ -70,7 +65,6 @@ if ($id_usuario_logado_s) {
         error_log("Erro ao buscar dados para side-nav em chat.php: " . $e->getMessage());
     }
 }
-// --- Fim da lógica para Side Nav Bar ---
 ?>
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -83,12 +77,11 @@ if ($id_usuario_logado_s) {
     <link rel="stylesheet" href="dashboard.css"> 
     <link rel="stylesheet" href="estilo_mensagens.css"> 
     <style>
-        /* Estilos específicos para chat.php se necessário */
         .main-content .products-section {
-            padding-top: 10px; /* Menor padding no topo para a seção de chat */
+            padding-top: 10px; 
         }
         .chat-container-wrapper {
-            height: calc(100vh - 70px); /* Ajustar altura: 100vh menos um espaço para o topo da main-content */
+            height: calc(100vh - 70px); 
             display: flex; 
             flex-direction: column;
         }
@@ -130,7 +123,6 @@ if ($id_usuario_logado_s) {
             </a> 
         <?php endif; ?>
 
-        <!-- Seção de Notificações Visível na Side Nav -->
         <?php if ($id_usuario_logado_s): ?>
         <div class="notifications-section-container">
             <div class="notifications-header">
@@ -147,7 +139,6 @@ if ($id_usuario_logado_s) {
             </ul>
         </div>
         <?php endif; ?>
-        <!-- Fim Seção de Notificações Visível -->
 
         <div class="user-info-nav">
             <?php if ($id_usuario_logado_s): ?>
@@ -166,8 +157,6 @@ if ($id_usuario_logado_s) {
     </div>
 
     <div class="main-content">
-        <!-- O header roxo e a nav-bar antiga foram removidos -->
-        <!-- Conteúdo do Chat -->
         <div class="products-section container-fluid mt-0" style="max-width: 70%; margin-left: auto; margin-right: auto; padding-top: 15px;"> 
             <div class="chat-container-wrapper"> 
                 <div class="chat-container"> 
@@ -205,7 +194,6 @@ if ($id_usuario_logado_s) {
         </div>
     </div>
 
-    <!-- Modal de Cadastro de Produto (Necessário para o link na side-nav) -->
     <div class="modal fade" id="cadastroProdutoModalDashboard" tabindex="-1" aria-labelledby="cadastroProdutoModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -334,7 +322,6 @@ if ($id_usuario_logado_s) {
             });
         }
 
-        // Lógica para o modal de cadastro de produto na página de chat
         const btnSalvarCadastroProdutoChat = document.getElementById('btnSalvarCadastroProdutoChat');
         if(btnSalvarCadastroProdutoChat) {
             btnSalvarCadastroProdutoChat.addEventListener('click', async function() {
@@ -356,10 +343,6 @@ if ($id_usuario_logado_s) {
                         msgSucessoCadastro.textContent = result.message || 'Produto cadastrado com sucesso!';
                         msgSucessoCadastro.classList.remove('d-none');
                         form.reset();
-                        // setTimeout(() => { // Não precisa de reload ou esconder modal se a side nav continua visível.
-                        //     const modalInstance = bootstrap.Modal.getInstance(document.getElementById('cadastroProdutoModalDashboard'));
-                        //     if(modalInstance) modalInstance.hide();
-                        // }, 1500);
                     } else {
                         msgErroCadastro.textContent = result.error || 'Erro desconhecido ao cadastrar produto.';
                         msgErroCadastro.classList.remove('d-none');

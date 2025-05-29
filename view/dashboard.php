@@ -1,6 +1,5 @@
 <?php
-session_start(); // Adicionado para iniciar a sessão
-
+session_start(); 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../dao/produto_dao.php';
 require_once __DIR__ . '/../model/produto.php';
@@ -26,13 +25,11 @@ try {
         $mensagemDAO = new MensagemDAO(); 
         $contador_mensagens_nao_lidas = $mensagemDAO->contarMensagensNaoLidas($id_usuario_logado);
     }
-    // $produtoDao será instanciado depois, pois não é necessário para o código PHP do cabeçalho/side-nav
     $mensagem_feedback = $_GET['mensagem'] ?? ''; // Renomeado para feedback
     $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? ''; // Renomeado para feedback
 
 } catch (Exception $e) {
     error_log("Erro na inicialização do dashboard (dados de usuário/mensagens): " . $e->getMessage());
-    // Não definir $mensagem_feedback aqui, pois ele é para feedback de ações, não erro de carregamento geral
 }
 ?>
 
@@ -82,7 +79,6 @@ try {
             </a> 
         <?php endif; ?>
 
-        <!-- Seção de Notificações Visível na Side Nav -->
         <?php if ($id_usuario_logado): ?>
         <div class="notifications-section-container">
             <div class="notifications-header">
@@ -93,15 +89,12 @@ try {
                 </span>
             </div>
             <ul class="notifications-list" id="listaNotificacoesSideNav">
-                <!-- O dropdown-header não é mais necessário aqui, pois o notifications-header já existe -->
                 <li id="notificacaoItemLoadingSideNav" class="dropdown-item text-muted">Carregando...</li>
                 <li id="notificacaoItemNenhumaSideNav" class="dropdown-item text-muted d-none">Nenhuma notificação nova.</li>
-                <!-- As notificações serão inseridas aqui pelo JavaScript -->
                 <li id="marcarTodasLidasContainerSideNav" class="d-none"><a class="dropdown-item text-center" href="#" id="marcarTodasLidasLinkSideNav" onclick="marcarTodasComoLidas(event)">Marcar todas como lidas</a></li> 
             </ul>
         </div>
         <?php endif; ?>
-        <!-- Fim Seção de Notificações Visível -->
 
         <div class="user-info-nav">
             <?php if ($id_usuario_logado): ?>
@@ -120,7 +113,6 @@ try {
     </div>
 
     <div class="main-content">
-        <!-- Nova Barra de Busca MD3 -->
         <div class="search-bar-container">
             <div class="search-bar-md3">
                 <form id="searchFormGlobal" method="GET" action="dashboard.php" class="d-flex flex-grow-1">
@@ -131,17 +123,12 @@ try {
                 </form>
             </div>
         </div>
-        <!-- Fim Nova Barra de Busca MD3 -->
 
-        <!-- Banner Ecológico -->
         <div class="ecological-info-banner">
             <p>Prolongar a vida útil dos produtos é um passo essencial para um futuro mais verde. Ao dar uma nova chance a itens usados, você contribui ativamente para a redução do desperdício e promove a sustentabilidade. Juntos, podemos fazer a diferença!</p>
         </div>
-        <!-- Fim Banner Ecológico -->
 
-        <!-- Seção de Produtos -->
         <div class="products-section container-fluid">
-            <!-- Mensagens de Feedback -->
             <?php if (!empty($mensagem_feedback)): ?>
                 <div class="alert alert-<?= $tipoMensagem_feedback === 'erro' ? 'danger' : 'success' ?> alert-dismissible fade show" role="alert">
                     <?= htmlspecialchars($mensagem_feedback, ENT_QUOTES, 'UTF-8') ?>
@@ -149,11 +136,9 @@ try {
                 </div>
             <?php endif; ?>
 
-            <!-- Listagem de Produtos -->
             <div id="produtosContainer">
                 <?php 
                 try {
-                    // Instanciar ProdutoDAO aqui, pois é específico para esta seção
                     if (!isset($pdo)) $pdo = Database::getConnection(); // Garante a conexão se não foi pega antes
                     $produtoDao = new ProdutoDAO();
 
@@ -184,7 +169,6 @@ try {
                                     <div class="card h-100 produto-card" ' . $onClickCard . '>
                                         <div class="card-img-half-circle-wrapper">
                                             <div class="card-img-container">';
-                            // Lógica revisada para exibir imagem ou ícone
                             if (!empty($produto['foto'])) {
                                 $fotoDataUri = 'data:image/jpeg;base64,' . base64_encode($produto['foto']);
                                 echo '<img src="' . $fotoDataUri . '" class="card-img-top" alt="Foto de ' . htmlspecialchars($produto['nome']) . '">';
@@ -204,12 +188,10 @@ try {
                         }
                         echo '</div>';
 
-                        // Renderizar controles de paginação
                         if ($totalPaginas > 1) {
                             echo '<nav aria-label="Paginação de produtos" class="mt-4">';
                             echo '<ul class="pagination justify-content-center">';
 
-                            // Botão Anterior
                             if ($paginaAtual > 1) {
                                 $linkAnterior = '?pagina=' . ($paginaAtual - 1) . ($termo_busca ? '&termo=' . urlencode($termo_busca) : '');
                                 echo '<li class="page-item"><a class="page-link" href="' . $linkAnterior . '">Anterior</a></li>';
@@ -217,7 +199,6 @@ try {
                                 echo '<li class="page-item disabled"><span class="page-link">Anterior</span></li>';
                             }
 
-                            // Links das páginas
                             for ($i = 1; $i <= $totalPaginas; $i++) {
                                 $linkPagina = '?pagina=' . $i . ($termo_busca ? '&termo=' . urlencode($termo_busca) : '');
                                 if ($i == $paginaAtual) {
@@ -227,7 +208,6 @@ try {
                                 }
                             }
 
-                            // Botão Próximo
                             if ($paginaAtual < $totalPaginas) {
                                 $linkProximo = '?pagina=' . ($paginaAtual + 1) . ($termo_busca ? '&termo=' . urlencode($termo_busca) : '');
                                 echo '<li class="page-item"><a class="page-link" href="' . $linkProximo . '">Próximo</a></li>';
@@ -247,7 +227,6 @@ try {
         </div>
     </div>
 
-    <!-- Modal de Detalhes -->
     <div class="modal fade" id="produtoModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -296,16 +275,13 @@ try {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                     
-                    <!-- Botão Tenho Interesse -->
                     <button id="btnTenhoInteresse" type="button" class="btn btn-success d-none" onclick="registrarInteresseProduto()">
                         <i class="bi bi-heart"></i> Tenho Interesse
                     </button>
 
-                    <!-- BOTÃO ENVIAR MENSAGEM ADICIONADO AQUI -->
                     <a href="#" id="btnEnviarMensagemVendedor" class="btn btn-primary d-none">
                         <i class="bi bi-send"></i> Enviar Mensagem ao Vendedor
                     </a>
-                    <!-- FIM DO BOTÃO ENVIAR MENSAGEM -->
 
                     <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
                         <button id="btnEditar" class="btn btn-primary" onclick="alternarEdicao()">
@@ -323,7 +299,6 @@ try {
         </div>
     </div>
 
-    <!-- Modal de Confirmação de Exclusão -->
     <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -342,7 +317,6 @@ try {
         </div>
     </div>
 
-    <!-- Modal de Cadastro de Produto -->
     <div class="modal fade" id="cadastroProdutoModal" tabindex="-1" aria-labelledby="cadastroProdutoModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -395,29 +369,9 @@ try {
     window.usuarioLogadoId = <?php echo json_encode(isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : null); ?>;
     window.isAdmin = <?php echo json_encode(isset($_SESSION['is_admin']) && $_SESSION['is_admin']); ?>;
 
-    // function verificarLogin() {
-    //     if (!window.usuarioLogadoId) {
-    //         if (confirm('Você precisa estar logado para adicionar produtos ao carrinho. Deseja fazer login agora?')) {
-    //             // Salvar a URL atual para retornar após o login
-    //             localStorage.setItem('returnUrl', window.location.href);
-    //             window.location.href = 'login.php';
-    //         }
-    //         return false;
-    //     }
-    //     return true;
-    // }
 
-    // function adicionarProdutoDoModalAoCarrinho() {
-    //     if (!verificarLogin()) {
-    //         return;
-    //     }
-    //     const quantidade = parseInt(document.getElementById('quantidadeModalProduto').value) || 1;
-    //     const produtoId = document.getElementById('produtoId').value;
-    //     carrinho.adicionarItem(produtoId, quantidade);
-    // }
     </script>
     <script src="./dashboard.js"></script>
-    <!-- <script src="./carrinho.js"></script> Removido pois o arquivo não existe mais -->
     <script>
         function exibirProduto(produto) {
             if (produto.foto) {
@@ -428,17 +382,6 @@ try {
             }
         }
 
-        // Debug dos formulários de adicionar ao carrinho
-        // document.querySelectorAll('form[action="carrinho.php"]').forEach(form => {
-        //     form.addEventListener('submit', function(e) {
-        //         console.log('Formulário enviado:', {
-        //             acao: this.querySelector('[name="acao"]').value,
-        //             produto_id: this.querySelector('[name="produto_id"]').value,
-        //             quantidade: this.querySelector('[name="quantidade"]').value,
-        //             redirect: this.querySelector('[name="redirect"]').value
-        //         });
-        //     });
-        // });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

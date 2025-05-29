@@ -1,25 +1,20 @@
-/* Estilos para a página de mensagens e chat */
 
-/* Estilos para a lista de conversas em minhas_mensagens.php */
 .lista-conversas .conversa-item {
-    /* Bootstrap .list-group-item-action já fornece muitos estilos base (padding, border) */
     cursor: pointer;
-    transition: background-color 0.2s ease; /* Mantém transição suave no hover */
+    transition: background-color 0.2s ease; 
 }
 
-/* Override leve do hover do Bootstrap se desejado, ou para garantir consistência */
 .lista-conversas .conversa-item:hover {
-    background-color: #f0f0f0; /* Um cinza um pouco mais claro que o padrão do Bootstrap talvez */
+    background-color: #f0f0f0; 
 }
 
 .lista-conversas .conversa-item.nao-lida {
-    font-weight: bold; /* Bootstrap pode já aplicar isso via classes, mas garantimos */
-    background-color: #e6f7ff; /* Cor de destaque para não lidas */
+    font-weight: bold; 
+    background-color: #e6f7ff; 
 }
 
-/* Estilizando os elementos internos do item da conversa */
 .lista-conversas .conversa-item .nome-usuario {
-    font-size: 1.1em; /* Ajuste fino do tamanho do nome */
+    font-size: 1.1em; 
     color: #333;
 }
 
@@ -29,8 +24,8 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 350px; /* Limite para o texto da última mensagem antes do ellipsis */
-    margin-top: 0.25rem; /* Pequeno espaço abaixo do nome/data */
+    max-width: 350px; 
+    margin-top: 0.25rem; 
 }
 
 .lista-conversas .conversa-item .data-msg {
@@ -38,31 +33,29 @@
     color: #777;
 }
 
-/* Estilos para chat.php (manter intactos) */
 .chat-container {
     margin-top: 20px;
-    /* Adicione padding ou outros estilos conforme necessário */
 }
 
 .mensagem {
     padding: 10px 15px;
     margin-bottom: 10px;
-    border-radius: 15px; /* Bordas mais arredondadas */
+    border-radius: 15px; 
     line-height: 1.4;
     max-width: 75%;
-    display: table; /* Para quebrar linha corretamente e respeitar max-width */
+    display: table; 
 }
 
 .mensagem.enviada {
-    background-color: #dcf8c6; /* Verde claro para mensagens enviadas */
+    background-color: #dcf8c6; 
     margin-left: auto;
-    text-align: left; /* Alinhar texto à esquerda dentro do balão */
+    text-align: left; 
 }
 
 .mensagem.recebida {
-    background-color: #f1f0f0; /* Cinza claro para mensagens recebidas */
+    background-color: #f1f0f0; 
     margin-right: auto;
-    text-align: left; /* Alinhar texto à esquerda dentro do balão */
+    text-align: left; 
 }
 
 .mensagem .timestamp {
@@ -70,32 +63,32 @@
     font-size: 0.75em;
     color: #888;
     margin-top: 5px;
-    text-align: right; /* Timestamp alinhado à direita dentro do balão */
+    text-align: right; 
 }
 
 .mensagem.recebida .timestamp {
-    text-align: left; /* Timestamp alinhado à esquerda para recebidas */
+    text-align: left; 
 }
 
 .area-envio-mensagem {
     margin-top: 20px;
     display: flex;
     padding: 10px;
-    background-color: #f8f9fa; /* Fundo leve para a área de input */
+    background-color: #f8f9fa; 
     border-top: 1px solid #dee2e6;
 }
 
 .area-envio-mensagem textarea {
     flex-grow: 1;
     margin-right: 10px;
-    border-radius: 20px; /* Bordas arredondadas para o textarea */
+    border-radius: 20px; 
     border: 1px solid #ced4da;
     padding: 10px 15px;
-    resize: none; /* Evitar redimensionamento manual */
+    resize: none; 
 }
 
 .area-envio-mensagem button {
-    border-radius: 20px; /* Bordas arredondadas para o botão */
+    border-radius: 20px; 
     padding: 10px 20px;
 }
 
@@ -103,7 +96,7 @@
     padding: 10px 15px;
     background-color: #007bff;
     color: white;
-    border-radius: 8px 8px 0 0; /* Arredondar cantos superiores */
+    border-radius: 8px 8px 0 0; 
 }
 
 .chat-header h5 {
@@ -112,13 +105,13 @@
 }
 
 .mensagens-box {
-    height: 400px; /* Altura fixa para a caixa de mensagens */
-    overflow-y: auto; /* Scroll vertical */
+    height: 400px; 
+    overflow-y: auto; 
     padding: 15px;
     background-color: #ffffff;
     border: 1px solid #dee2e6;
-    border-top: none; /* Remover borda superior pois o header já tem */
-    border-bottom: none; /* Remover borda inferior pois a área de envio tem a sua */
+    border-top: none; 
+    border-bottom: none; 
 }
 
 .conversa-info strong {

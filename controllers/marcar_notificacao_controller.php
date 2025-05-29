@@ -14,12 +14,11 @@ if (!isset($_SESSION['usuario_id'])) {
 $usuario_id = (int)$_SESSION['usuario_id'];
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405); // Method Not Allowed
+    http_response_code(405); 
     echo json_encode(['success' => false, 'error' => 'Método não permitido.']);
     exit;
 }
 
-// Espera um corpo JSON do tipo: {"acao": "marcar_lida", "notificacao_id": 123} ou {"acao": "marcar_todas_lidas"}
 $input = json_decode(file_get_contents('php://input'), true);
 $acao = $input['acao'] ?? null;
 $notificacao_id = isset($input['notificacao_id']) ? (int)$input['notificacao_id'] : null;
@@ -52,7 +51,6 @@ try {
     if ($sucesso) {
         echo json_encode(['success' => true, 'message' => $mensagem]);
     } else {
-        // Se não for um erro de bad request já tratado, pode ser um erro interno do DAO
         if (http_response_code() === 200) http_response_code(500);
         echo json_encode(['success' => false, 'error' => $mensagem]);
     }

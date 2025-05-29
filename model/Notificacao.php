@@ -25,8 +25,8 @@ class Notificacao {
         $this->tipo_notificacao = $tipo_notificacao;
         $this->mensagem = $mensagem;
         $this->link = $link;
-        $this->lida = false; // Nova notificação sempre começa como não lida
-        // $this->data_criacao é definida pelo banco ou setada explicitamente se necessário
+        $this->lida = false; 
+
     }
 
     // Getters
@@ -40,7 +40,6 @@ class Notificacao {
     public function isLida() { return $this->lida; }
     public function getDataCriacao() { return $this->data_criacao; }
 
-    // Setters (apenas os que fazem sentido serem alterados após a criação)
     public function setId($id) {
         $this->id = $id;
     }
@@ -53,7 +52,6 @@ class Notificacao {
         $this->data_criacao = $data_criacao;
     }
 
-    // Setters para outros campos, caso necessário para hidratação do DAO
     public function setUsuarioIdDestino($usuario_id_destino) {
         $this->usuario_id_destino = $usuario_id_destino;
     }

@@ -10,14 +10,11 @@ $usuario_id = (int)$_SESSION['usuario_id'];
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../dao/produto_dao.php';
-// require_once __DIR__ . '/../dao/estoque_dao.php';
 require_once __DIR__ . '/../model/produto.php';
-// require_once __DIR__ . '/../model/estoque.php';
 
 try {
     $pdo = Database::getConnection();
     $produtoDao = new ProdutoDAO();
-    // $estoqueDao = new EstoqueDAO($pdo);
 
     $id = (int)($_POST['id'] ?? 0);
     if ($id <= 0) {
@@ -31,9 +28,8 @@ try {
         exit;
     }
 
-    // Verificar se o produto pertence ao usuário logado
     if ($produtoExistente['usuario_id'] !== $usuario_id) {
-        http_response_code(403); // Forbidden
+        http_response_code(403); 
         echo json_encode(['error' => 'Você não tem permissão para editar este produto.']);
         exit;
     }
@@ -75,14 +71,13 @@ try {
         $foto = file_get_contents($file['tmp_name']);
     }
 
-    // Usar o usuario_id original do produto, não pode ser alterado aqui.
-    // A ordem correta dos parâmetros do construtor é: nome, descricao, imagem, preco, usuario_id
+ 
     $produtoAtualizado = new Produto(
         $nome, 
         $descricao, 
         $foto, 
-        $preco, // preco
-        $produtoExistente['usuario_id'] // usuario_id original do produto, acessado como array
+        $preco,
+        $produtoExistente['usuario_id'] 
     );
     $produtoAtualizado->setId($id);
 

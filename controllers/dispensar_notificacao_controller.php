@@ -13,9 +13,8 @@ if (!isset($_SESSION['usuario_id'])) {
     exit;
 }
 
-// Pega o corpo da requisição JSON
 $inputJSON = file_get_contents('php://input');
-$input = json_decode($inputJSON, TRUE); // Decodifica como array associativo
+$input = json_decode($inputJSON, TRUE);
 
 if (empty($input['notificacao_id'])) {
     $response['error'] = 'ID da notificação não fornecido.';
@@ -36,11 +35,9 @@ try {
     $db = Database::getConnection();
     $notificacaoDAO = new NotificacaoDAO($db);
 
-    // No DAO, vamos garantir que a notificação pertence ao usuário logado antes de deletar
     if ($notificacaoDAO->deletarNotificacao($notificacao_id, $usuario_id_logado)) {
         $response['success'] = true;
     } else {
-        // O DAO pode retornar false se a notificação não pertencer ao usuário ou não for encontrada
         $response['error'] = 'Não foi possível remover a notificação ou acesso negado.';
     }
 } catch (Exception $e) {

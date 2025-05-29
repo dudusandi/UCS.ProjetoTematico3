@@ -17,14 +17,14 @@ try {
     $produtoDao = new ProdutoDAO();
 
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        http_response_code(405); // Method Not Allowed
+        http_response_code(405); 
         echo json_encode(['success' => false, 'error' => 'Método não permitido']);
         exit;
     }
 
     $id = $_POST['id'] ?? null;
     if (!$id || !is_numeric($id)) {
-        http_response_code(400); // Bad Request
+        http_response_code(400); 
         echo json_encode(['success' => false, 'error' => 'ID do produto inválido ou não fornecido']);
         exit;
     }
@@ -33,30 +33,27 @@ try {
     $produto = $produtoDao->buscarPorId($id);
 
     if (!$produto) {
-        http_response_code(404); // Not Found
+        http_response_code(404); 
         echo json_encode(['success' => false, 'error' => 'Produto não encontrado']);
         exit;
     }
 
-    // Verificar se o produto pertence ao usuário logado
     if ($produto['usuario_id'] !== $usuario_id_logado) {
-        http_response_code(403); // Forbidden
+        http_response_code(403); 
         echo json_encode(['success' => false, 'error' => 'Você não tem permissão para excluir este produto.']);
         exit;
     }
 
-    // A remoção do produto em si não precisa de transação aqui se for uma única operação DELETE.
-    // O DAO pode ou não usar transações internamente se fizer múltiplas coisas.
     if ($produtoDao->removerProduto($id)) {
         echo json_encode(['success' => true, 'message' => 'Produto excluído com sucesso']);
     } else {
-        http_response_code(500); // Internal Server Error
+        http_response_code(500); 
         echo json_encode(['success' => false, 'error' => 'Erro ao remover o produto do banco de dados']);
     }
 
 } catch (Exception $e) {
     error_log("Erro ao excluir produto: " . $e->getMessage());
-    http_response_code(500); // Internal Server Error
+    http_response_code(500); 
     echo json_encode(['success' => false, 'error' => 'Erro interno do servidor ao tentar excluir o produto: ' . $e->getMessage()]);
 }
 ?>

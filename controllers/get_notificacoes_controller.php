@@ -8,17 +8,16 @@ session_start();
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../dao/NotificacaoDAO.php';
-require_once __DIR__ . '/../model/Notificacao.php'; // Necessário se NotificacaoDAO retornar objetos Notificacao
-
+require_once __DIR__ . '/../model/Notificacao.php'; 
 if (!isset($_SESSION['usuario_id'])) {
-    ob_clean(); // Limpar buffer antes do JSON
-    http_response_code(401); // Unauthorized
+    ob_clean(); 
+    http_response_code(401); 
     echo json_encode(['success' => false, 'error' => 'Usuário não autenticado.']);
     exit;
 }
 
 $usuario_id_destino = (int)$_SESSION['usuario_id'];
-$limite_dropdown = 5; // Quantas notificações mostrar no dropdown
+$limite_dropdown = 5; 
 
 try {
     $pdo = Database::getConnection();
@@ -26,13 +25,10 @@ try {
 
     $contadorNaoLidas = $notificacaoDao->contarNaoLidas($usuario_id_destino);
     
-    // Buscar as últimas N notificações (incluindo lidas e não lidas para popular o dropdown)
-    // O método buscarPorUsuarioIdDestino já ordena por data_criacao DESC
     $notificacoesRecentesObjs = $notificacaoDao->buscarPorUsuarioIdDestino($usuario_id_destino, false, $limite_dropdown);
 
     $notificacoesFormatadas = [];
     foreach ($notificacoesRecentesObjs as $notifObj) {
-        // Formatar data para exibição amigável (exemplo)
         $dataCriacao = new DateTime($notifObj->getDataCriacao());
         $agora = new DateTime();
         $intervalo = $agora->diff($dataCriacao);
@@ -59,10 +55,10 @@ try {
             'link' => $notifObj->getLink() ? htmlspecialchars($notifObj->getLink()) : '#',
             'lida' => $notifObj->isLida(),
             'data_formatada' => $dataFormatada,
-            'tipo' => $notifObj->getTipoNotificacao() // Para possível estilização ou ícones no futuro
+            'tipo' => $notifObj->getTipoNotificacao() 
         ];
     }
-    ob_clean(); // Limpar buffer antes do JSON
+    ob_clean(); 
     echo json_encode([
         'success' => true,
         'contadorNaoLidas' => $contadorNaoLidas,
@@ -71,7 +67,7 @@ try {
 
 } catch (Exception $e) {
     error_log("Erro ao buscar notificações: " . $e->getMessage());
-    ob_clean(); // Limpar buffer antes do JSON de erro
-    http_response_code(500); // Internal Server Error
+    ob_clean(); 
+    http_response_code(500); 
     echo json_encode(['success' => false, 'error' => 'Erro interno do servidor ao buscar notificações.']);
 }

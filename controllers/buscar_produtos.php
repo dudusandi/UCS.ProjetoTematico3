@@ -24,7 +24,7 @@ try {
     }
 
     $pdo = Database::getConnection();
-    $produtoDAO = new ProdutoDAO($pdo);
+    $produtoDAO = new ProdutoDAO();
     
     if (isset($_GET['ids'])) {
         $ids = array_map('intval', explode(',', $_GET['ids']));

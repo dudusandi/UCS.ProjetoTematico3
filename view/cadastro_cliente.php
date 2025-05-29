@@ -17,10 +17,8 @@ try {
     $tipoMensagem = 'erro';
 }
 
-// Carregar estados
 $estados = json_decode(file_get_contents('http://servicodados.ibge.gov.br/api/v1/localidades/estados'), true);
 
-// Carregar cidades se houver estado selecionado
 $cidades = [];
 if (isset($_POST['estado'])) {
     $cidades = json_decode(file_get_contents('http://servicodados.ibge.gov.br/api/v1/localidades/estados/' . $_POST['estado'] . '/municipios'), true);
