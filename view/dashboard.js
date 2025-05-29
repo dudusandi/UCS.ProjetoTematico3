@@ -390,7 +390,7 @@ async function dispensarNotificacao(notificacaoId, elementoLi, eraNaoLida) {
                 const contadorBadge = document.getElementById('contadorNotificacoesSideNav');
                 if (contadorBadge) {
                     let contagemAtual = parseInt(contadorBadge.textContent);
-                    if (isNaN(contagemAtual) && contadorBadge.textContent.includes('+')) { // Ex: 9+
+                    if (isNaN(contagemAtual) && contadorBadge.textContent.includes('+')) {
                         carregarNotificacoes(); 
                         return;
                     }

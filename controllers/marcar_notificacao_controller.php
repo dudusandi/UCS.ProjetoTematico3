@@ -6,7 +6,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../dao/NotificacaoDAO.php';
 
 if (!isset($_SESSION['usuario_id'])) {
-    http_response_code(401); // Unauthorized
+    http_response_code(401); 
     echo json_encode(['success' => false, 'error' => 'Usuário não autenticado.']);
     exit;
 }
@@ -44,7 +44,7 @@ try {
             $mensagem = 'Erro ao marcar todas as notificações como lidas.';
         }
     } else {
-        http_response_code(400); // Bad Request
+        http_response_code(400); 
         $mensagem = 'Ação inválida ou ID da notificação não fornecido.';
     }
 

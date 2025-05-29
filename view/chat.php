@@ -239,7 +239,7 @@ if ($id_usuario_logado_s) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        window.usuarioLogadoId = <?php echo json_encode($usuario_logado_id); ?>; // Usar a variável correta do escopo do chat
+        window.usuarioLogadoId = <?php echo json_encode($usuario_logado_id); ?>; 
         window.isAdmin = <?php echo json_encode(isset($_SESSION['is_admin']) && $_SESSION['is_admin']); ?>;
         const outroUsuarioId = <?php echo json_encode($outro_usuario_id); ?>;
 
@@ -289,7 +289,7 @@ if ($id_usuario_logado_s) {
                 const dataAtual = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'});
 
                 const mensagemDiv = document.createElement('div');
-                mensagemDiv.classList.add('mensagem', 'enviada'); // Todas as mensagens enviadas pelo usuário atual são 'enviada'
+                mensagemDiv.classList.add('mensagem', 'enviada');
                 mensagemDiv.id = tempId;
                 mensagemDiv.innerHTML = `<p style="margin:0;">${conteudoMensagem.replace(/\n/g, '<br>')}</p><span class="timestamp">Enviando... (${dataAtual})</span>`;
                 chatMessagesArea.appendChild(mensagemDiv);
@@ -305,10 +305,10 @@ if ($id_usuario_logado_s) {
                     const msgElement = document.getElementById(tempId);
 
                     if (result.success && msgElement) {
-                        msgElement.querySelector('.timestamp').textContent = dataAtual; // Atualiza para a data real ou a data do servidor se retornada
+                        msgElement.querySelector('.timestamp').textContent = dataAtual;
                     } else if (msgElement) {
                         msgElement.querySelector('.timestamp').textContent = `Falha ao enviar (${dataAtual})`;
-                        msgElement.classList.add('mensagem-falha'); // Adiciona uma classe para indicar falha visualmente
+                        msgElement.classList.add('mensagem-falha'); 
                     }
                 } catch (error) {
                     console.error('Erro ao enviar mensagem:', error);

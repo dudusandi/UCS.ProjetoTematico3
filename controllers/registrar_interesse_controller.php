@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $produto_id = $_POST['produto_id'] ?? null;
 
 if (!$produto_id || !is_numeric($produto_id)) {
-    http_response_code(400); // Bad Request
+    http_response_code(400); 
     echo json_encode(['success' => false, 'error' => 'ID do produto inválido ou não fornecido.']);
     exit;
 }
