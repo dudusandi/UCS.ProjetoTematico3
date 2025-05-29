@@ -3,7 +3,7 @@ header('Content-Type: application/json');
 session_start();
 
 if (!isset($_SESSION['usuario_id'])) {
-    http_response_code(401); // Unauthorized
+    http_response_code(401); 
     echo json_encode(['success' => false, 'error' => 'Usuário não autenticado']);
     exit;
 }

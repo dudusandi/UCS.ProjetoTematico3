@@ -40,7 +40,7 @@ try {
     $produto = $produtoDao->buscarPorId($produto_id);
 
     if (!$produto) {
-        http_response_code(404); // Not Found
+        http_response_code(404); 
         echo json_encode(['success' => false, 'error' => 'Produto não encontrado.']);
         exit;
     }
@@ -48,14 +48,14 @@ try {
     $usuario_id_destino = $produto['usuario_id']; 
 
     if ($usuario_id_origem === $usuario_id_destino) {
-        http_response_code(400); // Bad Request
+        http_response_code(400); 
         echo json_encode(['success' => false, 'error' => 'Você não pode demonstrar interesse no seu próprio produto.']);
         exit;
     }
 
     $tipo_notificacao = 'interesse_compra';
     $mensagem = htmlspecialchars($nome_usuario_logado) . " demonstrou interesse no seu produto: " . htmlspecialchars($produto['nome']);
-    $link = "../view/chat.php?usuario_id=" . $usuario_id_origem; // Link para o chat com o interessado
+    $link = "../view/chat.php?usuario_id=" . $usuario_id_origem; 
 
     $notificacao = new Notificacao(
         $usuario_id_destino,
@@ -69,13 +69,13 @@ try {
     if ($notificacaoDao->criar($notificacao)) {
         echo json_encode(['success' => true, 'message' => 'Interesse registrado com sucesso! O vendedor foi notificado.']);
     } else {
-        http_response_code(500); // Internal Server Error
+        http_response_code(500); 
         echo json_encode(['success' => false, 'error' => 'Erro ao salvar a notificação no banco de dados.']);
     }
 
 } catch (Exception $e) {
     error_log("Erro ao registrar interesse: " . $e->getMessage());
-    http_response_code(500); // Internal Server Error
+    http_response_code(500); 
     echo json_encode(['success' => false, 'error' => 'Erro interno do servidor: ' . $e->getMessage()]);
 }
 ?> 

@@ -1,6 +1,4 @@
 <?php
-
-
 require_once '../config/database.php';
 require_once '../dao/cliente_dao.php';
 require_once '../model/cliente.php';

@@ -38,8 +38,8 @@ if ($id_usuario_logado) {
     <title>Minhas Mensagens - ECOxChange</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="dashboard.css"> <!-- CSS Unificado -->
-    <link rel="stylesheet" href="estilo_mensagens.css"> <!-- CSS específico para mensagens -->
+    <link rel="stylesheet" href="dashboard.css"> 
+    <link rel="stylesheet" href="estilo_mensagens.css"> 
     <style>
     </style>
 </head>
@@ -120,7 +120,7 @@ if ($id_usuario_logado) {
             
             <div class="container-mensagens" style="background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"> <!-- Mantendo esta div para estilos específicos de `estilo_mensagens.css` -->
                 <?php if (!empty($conversas_formatadas)): ?>
-                    <div class="list-group lista-conversas"> <!-- Usando list-group do Bootstrap para melhor estilização base -->
+                    <div class="list-group lista-conversas"> 
                         <?php foreach ($conversas_formatadas as $conversa): ?>
                             <a href="chat.php?usuario_id=<?php echo htmlspecialchars($conversa['outro_usuario_id']); ?>" 
                                class="list-group-item list-group-item-action conversa-item <?php echo $conversa['nao_lida'] ? 'nao-lida' : ''; ?>">

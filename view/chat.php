@@ -288,7 +288,6 @@ if ($id_usuario_logado_s) {
                 const tempId = 'temp_' + Date.now();
                 const dataAtual = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'});
 
-                // Adiciona à UI
                 const mensagemDiv = document.createElement('div');
                 mensagemDiv.classList.add('mensagem', 'enviada'); // Todas as mensagens enviadas pelo usuário atual são 'enviada'
                 mensagemDiv.id = tempId;

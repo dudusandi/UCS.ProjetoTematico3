@@ -1,4 +1,3 @@
-// Variáveis globais
 let currentPage = 1;
 let searchTerm = '';
 let isLoading = false;

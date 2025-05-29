@@ -25,8 +25,8 @@ try {
         $mensagemDAO = new MensagemDAO(); 
         $contador_mensagens_nao_lidas = $mensagemDAO->contarMensagensNaoLidas($id_usuario_logado);
     }
-    $mensagem_feedback = $_GET['mensagem'] ?? ''; // Renomeado para feedback
-    $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? ''; // Renomeado para feedback
+    $mensagem_feedback = $_GET['mensagem'] ?? ''; 
+    $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? ''; 
 
 } catch (Exception $e) {
     error_log("Erro na inicialização do dashboard (dados de usuário/mensagens): " . $e->getMessage());
@@ -139,7 +139,7 @@ try {
             <div id="produtosContainer">
                 <?php 
                 try {
-                    if (!isset($pdo)) $pdo = Database::getConnection(); // Garante a conexão se não foi pega antes
+                    if (!isset($pdo)) $pdo = Database::getConnection(); 
                     $produtoDao = new ProdutoDAO();
 
                     $itensPorPagina = 8;
@@ -158,7 +158,7 @@ try {
                                 <h3 class="mt-3">' . ($termo_busca ? "Nenhum produto encontrado para \"" . htmlspecialchars($termo_busca) . "\"" : "Nenhum produto cadastrado") . '</h3>
                               </div>';
                     } else {
-                        echo '<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">'; // Aumentado de xl-4 para xl-5, md-2 para md-3, lg-3 para lg-4
+                        echo '<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">'; 
                         foreach ($produtos as $produto) {
                             $fotoUrl = $produto['foto'] ? 'data:image/jpeg;base64,' . base64_encode($produto['foto']) : 'https://via.placeholder.com/200?text=Sem+Imagem';
                             $precoFormatado = number_format($produto['preco'], 2, ',', '.');
@@ -173,7 +173,7 @@ try {
                                 $fotoDataUri = 'data:image/jpeg;base64,' . base64_encode($produto['foto']);
                                 echo '<img src="' . $fotoDataUri . '" class="card-img-top" alt="Foto de ' . htmlspecialchars($produto['nome']) . '">';
                             } else {
-                                echo '<i class="bi bi-image-alt card-img-placeholder-icon"></i>'; // Ícone placeholder
+                                echo '<i class="bi bi-image-alt card-img-placeholder-icon"></i>'; 
                             }
                             echo '            </div>
                                         </div>

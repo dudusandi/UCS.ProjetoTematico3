@@ -1,4 +1,3 @@
-// dashboard.js
 let currentProdutoId = null;
 let isEditando = false;
 let fornecedores = []; 
@@ -44,13 +43,13 @@ function mostrarDetalhes(id) {
             const btnTenhoInteresse = document.getElementById('btnTenhoInteresse');
 
             const btnEnviarMensagem = document.getElementById('btnEnviarMensagemVendedor');
-            const proprietarioIdDoProduto = produto.usuario_id; // Assumindo que o backend envia usuario_id como o ID do dono
+            const proprietarioIdDoProduto = produto.usuario_id;
 
             console.log("[mostrarDetalhes] ID Proprietário do Produto:", proprietarioIdDoProduto, "(tipo:", typeof proprietarioIdDoProduto, ")");
 
             if (proprietarioIdDoProduto && window.usuarioLogadoId && parseInt(proprietarioIdDoProduto) !== parseInt(window.usuarioLogadoId)) {
                 console.log("[mostrarDetalhes] Mostrando botão Enviar Mensagem.");
-                btnEnviarMensagem.href = `../view/chat.php?usuario_id=${proprietarioIdDoProduto}`; // Ajustado o caminho para view/chat.php
+                btnEnviarMensagem.href = `../view/chat.php?usuario_id=${proprietarioIdDoProduto}`; 
                 btnEnviarMensagem.classList.remove('d-none');
             } else {
                 console.log("[mostrarDetalhes] Escondendo botão Enviar Mensagem (usuário é o dono ou não logado ou proprietário não definido).");
@@ -193,7 +192,7 @@ function confirmarExclusao() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const formCadastroDashboard = document.getElementById('formCadastroProduto'); // ID do form no dashboard.php
+    const formCadastroDashboard = document.getElementById('formCadastroProduto');
     if (formCadastroDashboard) {
         formCadastroDashboard.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -205,7 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('cadastroProdutoModal')); // ID do modal no dashboard.php
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('cadastroProdutoModal')); 
                     if (modal) modal.hide();
                     formCadastroDashboard.reset();
                     window.location.href = 'dashboard.php?mensagem=' + encodeURIComponent(data.message || 'Produto cadastrado com sucesso!') + '&tipo_mensagem=sucesso';
@@ -222,8 +221,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (typeof window.usuarioLogadoId !== 'undefined' && window.usuarioLogadoId) {
         console.log("[DOMContentLoaded] Usuário logado. Carregando notificações pela primeira vez e configurando intervalo.");
-        carregarNotificacoes(); // Carrega ao iniciar
-        setInterval(carregarNotificacoes, 60000); // Recarrega a cada 60 segundos
+        carregarNotificacoes(); 
+        setInterval(carregarNotificacoes, 60000); 
     } else {
         console.log("[DOMContentLoaded] Usuário não logado ou ID não definido. Notificações não serão carregadas automaticamente.");
     }
@@ -273,7 +272,7 @@ function renderizarNotificacoesSideNav(notificacoes, contadorNaoLidas) {
     const loadingItem = document.getElementById('notificacaoItemLoadingSideNav');
     const nenhumaItem = document.getElementById('notificacaoItemNenhumaSideNav');
     
-    const marcarTodasLidasContainer = document.getElementById('marcarTodasLidasContainerSideNav'); // Usar o container do link "Marcar todas como lidas"
+    const marcarTodasLidasContainer = document.getElementById('marcarTodasLidasContainerSideNav'); 
 
     const itensAtuais = listaDropdown.querySelectorAll('li.notificacao-item');
     itensAtuais.forEach(item => item.remove());

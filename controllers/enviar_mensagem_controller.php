@@ -9,7 +9,7 @@ require_once __DIR__ . '/../dao/NotificacaoDAO.php';
 require_once __DIR__ . '/../model/Notificacao.php';  
 
 if (!isset($_SESSION['usuario_id'])) {
-    http_response_code(403); // Forbidden
+    http_response_code(403); 
     echo "Acesso não autorizado.";
     exit();
 }
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($remetente_id_form !== $usuario_logado_id) {
         $_SESSION['erro_mensagem'] = "Tentativa de envio de mensagem por usuário não autorizado.";
-        header('Location: ../view/minhas_mensagens.php'); // Ou logout, ou log de segurança
+        header('Location: ../view/minhas_mensagens.php'); 
         exit();
     }
     
@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 
 } else {
-    http_response_code(405); // Method Not Allowed
+    http_response_code(405); 
     echo "Método não permitido.";
     exit();
 }

@@ -103,10 +103,10 @@ class ProdutoDAO {
                 'id' => $linha['id'],
                 'nome' => $linha['nome'],
                 'descricao' => $linha['descricao'],
-                'foto' => $linha['foto'], // Assumindo que foto é BLOB e será tratado no JS/PHP para exibição
+                'foto' => $linha['foto'],
                 'preco' => $linha['preco'],
-                'usuario_id' => $linha['usuario_id'], // ID do proprietário
-                'proprietario_nome' => $linha['proprietario_nome'] ?? 'Nome não disponível' // Nome do proprietário
+                'usuario_id' => $linha['usuario_id'], 
+                'proprietario_nome' => $linha['proprietario_nome'] ?? 'Nome não disponível' 
             ];
 
 

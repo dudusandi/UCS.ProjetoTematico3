@@ -57,6 +57,6 @@ try {
 
 } catch (Exception $e) {
     error_log("Erro ao marcar notificação(ões) como lida(s): " . $e->getMessage());
-    http_response_code(500); // Internal Server Error
+    http_response_code(500);
     echo json_encode(['success' => false, 'error' => 'Erro interno do servidor.']);
 } 

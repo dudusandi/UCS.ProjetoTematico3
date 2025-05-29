@@ -206,7 +206,7 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
                                 echo '            <p class="mb-0 text-muted">R$ ' . $precoFormatado . '</p>';
                                 echo '        </div>';
                                 echo '    </div>';
-                                echo '    <div class="btn-group mt-2 mt-md-0" role="group" aria-label="Ações do produto">'; // Adicionado mt-2 mt-md-0 para espaçamento em telas menores
+                                echo '    <div class="btn-group mt-2 mt-md-0" role="group" aria-label="Ações do produto">'; 
                                 echo '        <button class="btn btn-sm btn-outline-primary" onclick="abrirModalEdicao(' . $produto['id'] . ')">';
                                 echo '            <i class="bi bi-pencil-square"></i> Editar';
                                 echo '        </button>';
@@ -510,7 +510,7 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
 
         function marcarTodasComoLidasClientSide(event, prefix = '') {
             event.preventDefault();
-            const contadorNotificacoes = document.getElementById('contadorNotificacoesSideNav'); // Usar o ID unificado da SideNav
+            const contadorNotificacoes = document.getElementById('contadorNotificacoesSideNav'); 
             const listaNotificacoes = document.getElementById('listaNotificacoesDropdown' + prefix); 
             
             if (contadorNotificacoes) {

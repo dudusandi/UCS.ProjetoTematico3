@@ -27,7 +27,7 @@ foreach ($ultimas_conversas_raw as $mensagem) {
     $outro_cliente = $clienteDAO->buscarPorId($outro_usuario_id);
     
     $nome_outro_usuario = "Cliente Desconhecido"; 
-    if ($outro_cliente && method_exists($outro_cliente, 'getNome')) { // Verifica se o método existe
+    if ($outro_cliente && method_exists($outro_cliente, 'getNome')) { 
         $nome_outro_usuario = $outro_cliente->getNome(); 
     } else {
         $nome_outro_usuario = "Cliente #{$outro_usuario_id}";
