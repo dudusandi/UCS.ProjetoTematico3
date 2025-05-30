@@ -299,6 +299,9 @@ if ($id_usuario_logado_s) {
                 try {
                     const response = await fetch('../controllers/enviar_mensagem_controller.php', {
                         method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
                         body: formData
                     });
                     const result = await response.json();

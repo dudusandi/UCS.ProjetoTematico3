@@ -51,7 +51,7 @@ try {
 
         $notificacoesFormatadas[] = [
             'id' => $notifObj->getId(),
-            'mensagem' => htmlspecialchars($notifObj->getMensagem()),
+            'mensagem' => $notifObj->getMensagem(),
             'link' => $notifObj->getLink() ? htmlspecialchars($notifObj->getLink()) : '#',
             'lida' => $notifObj->isLida(),
             'data_formatada' => $dataFormatada,

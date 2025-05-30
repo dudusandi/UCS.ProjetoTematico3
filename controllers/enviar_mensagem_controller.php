@@ -8,10 +8,31 @@ require_once __DIR__ . '/../dao/cliente_dao.php';
 require_once __DIR__ . '/../dao/NotificacaoDAO.php'; 
 require_once __DIR__ . '/../model/Notificacao.php';  
 
-if (!isset($_SESSION['usuario_id'])) {
-    http_response_code(403); 
-    echo "Acesso não autorizado.";
+// Função para detectar se é uma requisição AJAX
+function isAjaxRequest() {
+    return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 
+           strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+}
+
+// Função para retornar resposta JSON
+function sendJsonResponse($success, $message = '', $data = []) {
+    header('Content-Type: application/json');
+    echo json_encode([
+        'success' => $success,
+        'message' => $message,
+        'data' => $data
+    ]);
     exit();
+}
+
+if (!isset($_SESSION['usuario_id'])) {
+    if (isAjaxRequest()) {
+        sendJsonResponse(false, 'Acesso não autorizado.');
+    } else {
+        http_response_code(403); 
+        echo "Acesso não autorizado.";
+        exit();
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -22,28 +43,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $usuario_logado_id = (int)$_SESSION['usuario_id'];
 
     if (empty($conteudo)) {
-        $_SESSION['erro_mensagem'] = "O conteúdo da mensagem não pode estar vazio.";
-        header('Location: ../view/chat.php?usuario_id=' . $destinatario_id);
-        exit();
+        if (isAjaxRequest()) {
+            sendJsonResponse(false, 'O conteúdo da mensagem não pode estar vazio.');
+        } else {
+            $_SESSION['erro_mensagem'] = "O conteúdo da mensagem não pode estar vazio.";
+            header('Location: ../view/chat.php?usuario_id=' . $destinatario_id);
+            exit();
+        }
     }
 
     if (!$destinatario_id || !$remetente_id_form) {
-        $_SESSION['erro_mensagem'] = "ID do destinatário ou remetente inválido.";
-        header('Location: ../view/minhas_mensagens.php');
-        exit();
+        if (isAjaxRequest()) {
+            sendJsonResponse(false, 'ID do destinatário ou remetente inválido.');
+        } else {
+            $_SESSION['erro_mensagem'] = "ID do destinatário ou remetente inválido.";
+            header('Location: ../view/minhas_mensagens.php');
+            exit();
+        }
     }
 
     if ($remetente_id_form !== $usuario_logado_id) {
-        $_SESSION['erro_mensagem'] = "Tentativa de envio de mensagem por usuário não autorizado.";
-        header('Location: ../view/minhas_mensagens.php'); 
-        exit();
+        if (isAjaxRequest()) {
+            sendJsonResponse(false, 'Tentativa de envio de mensagem por usuário não autorizado.');
+        } else {
+            $_SESSION['erro_mensagem'] = "Tentativa de envio de mensagem por usuário não autorizado.";
+            header('Location: ../view/minhas_mensagens.php'); 
+            exit();
+        }
     }
     
     $clienteDAO = new ClienteDAO();
     if (!$clienteDAO->buscarPorId($destinatario_id)) {
-        $_SESSION['erro_mensagem'] = "Destinatário não encontrado.";
-        header('Location: ../view/minhas_mensagens.php');
-        exit();
+        if (isAjaxRequest()) {
+            sendJsonResponse(false, 'Destinatário não encontrado.');
+        } else {
+            $_SESSION['erro_mensagem'] = "Destinatário não encontrado.";
+            header('Location: ../view/minhas_mensagens.php');
+            exit();
+        }
     }
 
     $mensagem = new Mensagem();
@@ -53,8 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $mensagemDAO = new MensagemDAO();
     if ($mensagemDAO->enviarMensagem($mensagem)) {
-        $_SESSION['sucesso_mensagem'] = "Mensagem enviada!";
-
+        // Criar notificação
         $nome_remetente = $_SESSION['usuario_nome'] ?? 'Alguém'; 
         $notificacaoDao = new NotificacaoDAO(Database::getConnection()); 
         $tipo_notificacao = 'nova_mensagem_chat';
@@ -73,15 +109,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             error_log("Falha ao criar notificação para nova mensagem de chat. Destinatário: $destinatario_id, Remetente: $usuario_logado_id");
         }
 
+        if (isAjaxRequest()) {
+            sendJsonResponse(true, 'Mensagem enviada com sucesso!');
+        } else {
+            $_SESSION['sucesso_mensagem'] = "Mensagem enviada!";
+            header('Location: ../view/chat.php?usuario_id=' . $destinatario_id);
+            exit();
+        }
     } else {
-        $_SESSION['erro_mensagem'] = "Erro ao enviar a mensagem. Tente novamente.";
+        if (isAjaxRequest()) {
+            sendJsonResponse(false, 'Erro ao enviar a mensagem. Tente novamente.');
+        } else {
+            $_SESSION['erro_mensagem'] = "Erro ao enviar a mensagem. Tente novamente.";
+            header('Location: ../view/chat.php?usuario_id=' . $destinatario_id);
+            exit();
+        }
     }
 
-    header('Location: ../view/chat.php?usuario_id=' . $destinatario_id);
-    exit();
-
 } else {
-    http_response_code(405); 
-    echo "Método não permitido.";
-    exit();
+    if (isAjaxRequest()) {
+        sendJsonResponse(false, 'Método não permitido.');
+    } else {
+        http_response_code(405); 
+        echo "Método não permitido.";
+        exit();
+    }
 }

@@ -279,6 +279,10 @@ try {
                         <i class="bi bi-heart"></i> Tenho Interesse
                     </button>
 
+                    <button id="btnProporTroca" type="button" class="btn btn-info d-none" onclick="abrirModalPropostaTroca()">
+                        <i class="bi bi-arrow-repeat"></i> Propor Troca
+                    </button>
+
                     <a href="#" id="btnEnviarMensagemVendedor" class="btn btn-primary d-none">
                         <i class="bi bi-send"></i> Enviar Mensagem ao Vendedor
                     </a>
@@ -294,6 +298,30 @@ try {
                             <i class="bi bi-trash"></i> Excluir
                         </button>
                     <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Proposta de Troca -->
+    <div class="modal fade" id="propostaTrocaModal" tabindex="-1" aria-labelledby="propostaTrocaModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="propostaTrocaModalLabel">Selecione um produto para propor a troca</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="listaProdutosUsuarioParaTroca" class="list-group">
+                        <!-- Produtos do usuário serão listados aqui -->
+                    </div>
+                    <div id="nenhumProdutoParaTroca" class="alert alert-info d-none" role="alert">
+                        Você não possui produtos cadastrados para propor uma troca.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <!-- Botão para confirmar a seleção do produto e enviar a proposta será adicionado dinamicamente ou ter uma lógica específica -->
                 </div>
             </div>
         </div>

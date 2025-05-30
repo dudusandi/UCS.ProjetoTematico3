@@ -41,6 +41,7 @@ function mostrarDetalhes(id) {
             const btnExcluir = document.getElementById('btnExcluir');
             const btnSalvar = document.getElementById('btnSalvar');
             const btnTenhoInteresse = document.getElementById('btnTenhoInteresse');
+            const btnProporTroca = document.getElementById('btnProporTroca');
 
             const btnEnviarMensagem = document.getElementById('btnEnviarMensagemVendedor');
             const proprietarioIdDoProduto = produto.usuario_id;
@@ -70,18 +71,21 @@ function mostrarDetalhes(id) {
                 if (btnExcluir) btnExcluir.classList.remove('d-none');
                 if (btnSalvar) btnSalvar.classList.add('d-none'); 
                 if (btnTenhoInteresse) btnTenhoInteresse.classList.add('d-none');
+                if (btnProporTroca) btnProporTroca.classList.add('d-none');
             } else if (usuarioLogadoIdNum && usuarioLogadoIdNum !== produtoUsuarioIdNum) {
                  console.log("[mostrarDetalhes] Condição: Usuário logado, NÃO é o dono.");
                 if (btnEditar) btnEditar.classList.add('d-none');
                 if (btnExcluir) btnExcluir.classList.add('d-none');
                 if (btnSalvar) btnSalvar.classList.add('d-none');
                 if (btnTenhoInteresse) btnTenhoInteresse.classList.remove('d-none');
+                if (btnProporTroca) btnProporTroca.classList.remove('d-none');
             } else {
                 console.log("[mostrarDetalhes] Condição: Não logado ou outra situação (esconder todos os botões de ação específica).");
                 if (btnEditar) btnEditar.classList.add('d-none');
                 if (btnExcluir) btnExcluir.classList.add('d-none');
                 if (btnSalvar) btnSalvar.classList.add('d-none');
                 if (btnTenhoInteresse) btnTenhoInteresse.classList.add('d-none');
+                if (btnProporTroca) btnProporTroca.classList.add('d-none');
             }
 
             isEditando = false;
@@ -476,5 +480,133 @@ async function marcarTodasComoLidas(event) {
     } catch (error) {
         console.error('Erro ao marcar todas como lidas:', error);
         alert('Erro de comunicação.');
+    }
+}
+
+async function abrirModalPropostaTroca() {
+    if (!window.usuarioLogadoId) {
+        alert('Você precisa estar logado para propor uma troca.');
+        return;
+    }
+    if (!currentProdutoId) {
+        alert('Produto alvo da troca não identificado.');
+        return;
+    }
+
+    const listaProdutosDiv = document.getElementById('listaProdutosUsuarioParaTroca');
+    const nenhumProdutoDiv = document.getElementById('nenhumProdutoParaTroca');
+    listaProdutosDiv.innerHTML = ''; // Limpa lista anterior
+    nenhumProdutoDiv.classList.add('d-none');
+
+    try {
+        const response = await fetch('../controllers/get_meus_produtos_controller.php'); // Reutilizando controller existente, se aplicável, ou criar um específico
+        const data = await response.json();
+
+        if (data.success && data.produtos && data.produtos.length > 0) {
+            data.produtos.forEach(produto => {
+                const item = document.createElement('a');
+                item.href = '#';
+                item.classList.add('list-group-item', 'list-group-item-action', 'd-flex', 'justify-content-between', 'align-items-center');
+                item.onclick = (event) => {
+                    event.preventDefault();
+                    enviarPropostaDeTroca(produto.id, data.produto_desejado_proprietario_id); // Passar ID do proprietário do produto desejado
+                };
+
+                const fotoUrl = produto.foto ? `data:image/jpeg;base64,${produto.foto}` : 'https://via.placeholder.com/50';
+                const precoFormatado = (produto.preco ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+                item.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <img src="${fotoUrl}" alt="${produto.nome}" style="width: 50px; height: 50px; object-fit: cover; margin-right: 15px;">
+                        <div>
+                            <h6 class="my-0">${produto.nome}</h6>
+                            <small class="text-muted">${precoFormatado}</small>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm btn-primary">Oferecer este</button>
+                `;
+                listaProdutosDiv.appendChild(item);
+            });
+        } else if (data.success && data.produtos && data.produtos.length === 0) {
+            nenhumProdutoDiv.classList.remove('d-none');
+        } else {
+            alert(data.error || 'Erro ao buscar seus produtos.');
+            return;
+        }
+
+        const modalProposta = new bootstrap.Modal(document.getElementById('propostaTrocaModal'));
+        modalProposta.show();
+
+    } catch (error) {
+        console.error('Erro ao abrir modal de proposta de troca:', error);
+        alert('Erro ao carregar seus produtos para troca. Tente novamente.');
+    }
+}
+
+async function enviarPropostaDeTroca(idProdutoOferecido, idProdutoDesejadoOriginal) {
+    if (!window.usuarioLogadoId) {
+        alert('Você precisa estar logado para enviar uma proposta.');
+        return;
+    }
+    if (!currentProdutoId) { // currentProdutoId é o ID do produto que o usuário está visualizando e quer trocar
+        alert('Não foi possível identificar o produto desejado para a troca.');
+        return;
+    }
+    if (!idProdutoOferecido) {
+        alert('Produto oferecido para troca não selecionado.');
+        return;
+    }
+
+    // Precisamos buscar o ID do proprietário do produto DESEJADO (currentProdutoId)
+    // Esta informação já deve estar disponível quando 'mostrarDetalhes' é chamado,
+    // mas vamos garantir que temos o ID do proprietário do produto atual.
+    // A forma mais simples é buscar novamente ou passar essa informação para 'abrirModalPropostaTroca' e depois para cá.
+    // Por agora, vou assumir que 'produto.usuario_id' de 'mostrarDetalhes' é o ID do proprietário do produto DESEJADO.
+    // Para isso, precisaremos buscar o produto novamente ou armazenar o proprietário_id de forma acessível.
+
+    // Vamos simplificar e buscar o produto desejado novamente para pegar o proprietário_id
+    let proprietarioProdutoDesejadoId;
+    try {
+        const resProdutoDesejado = await fetch(`../controllers/get_produto.php?id=${currentProdutoId}`);
+        const dataProdutoDesejado = await resProdutoDesejado.json();
+        if(dataProdutoDesejado.success && dataProdutoDesejado.produto) {
+            proprietarioProdutoDesejadoId = dataProdutoDesejado.produto.usuario_id;
+        } else {
+            alert('Não foi possível obter informações do proprietário do produto desejado.');
+            return;
+        }
+    } catch (e) {
+        alert('Erro ao buscar informações do proprietário do produto desejado.');
+        return;
+    }
+
+
+    console.log(`Propondo troca: Produto Oferecido ID: ${idProdutoOferecido}, Produto Desejado ID: ${currentProdutoId}, ID Proprietário do Produto Desejado: ${proprietarioProdutoDesejadoId}`);
+
+    try {
+        const response = await fetch('../controllers/enviar_proposta_troca_chat_controller.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `id_produto_oferecido=${idProdutoOferecido}&id_produto_desejado=${currentProdutoId}&id_destinatario=${proprietarioProdutoDesejadoId}`
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            alert(result.message || 'Proposta de troca enviada com sucesso!');
+            const modalProposta = bootstrap.Modal.getInstance(document.getElementById('propostaTrocaModal'));
+            if (modalProposta) {
+                modalProposta.hide();
+            }
+            // Opcional: Redirecionar para o chat ou atualizar a interface
+            // window.location.href = `../view/chat.php?usuario_id=${proprietarioProdutoDesejadoId}`;
+
+        } else {
+            alert('Erro ao enviar proposta de troca: ' + (result.error || 'Ocorreu um problema.'));
+        }
+    } catch (error) {
+        console.error('Erro no fetch ao enviar proposta de troca:', error);
+        alert('Erro de comunicação ao enviar proposta. Tente novamente.');
     }
 }

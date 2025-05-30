@@ -35,11 +35,31 @@ body {
 .side-nav-bar .logo-container .logo {
     font-size: 28px; /* Aumenta o logo */
     font-weight: bold;
-    color: #00ff1a; /* Mantém a cor original, pode ser ajustada */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .side-nav-bar .logo-container .logo span {
-    color: #9bb3a5; /* Mantém a cor original */
+    background: repeating-linear-gradient(
+        90deg,
+        #f093fb 0%,
+        #f5576c 25%,
+        #764ba2 50%,
+        #667eea 75%,
+        #f093fb 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientFlow 2s linear infinite;
+}
+
+@keyframes gradientFlow {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
 }
 
 .side-nav-bar a {
@@ -103,11 +123,26 @@ body {
 .logo {
     font-size: 24px;
     font-weight: bold;
-    color: #00ff1a;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .logo span {
-    color: #9bb3a5;
+    background: repeating-linear-gradient(
+        90deg,
+        #f093fb 0%,
+        #f5576c 25%,
+        #764ba2 50%,
+        #667eea 75%,
+        #f093fb 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientFlow 2s linear infinite;
 }
 
 .search-bar {
