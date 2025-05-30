@@ -215,7 +215,7 @@ if (!$is_modal_view) {
                                 $classe_css = ($msg->getRemetenteId() == $id_usuario_logado) ? 'enviada' : 'recebida';
                                 $data_formatada = date("d/m/Y H:i", strtotime($msg->getDataEnvio()));
                                 ?>
-                                <div class="mensagem <?php echo $classe_css; ?>">
+                                <div class="mensagem <?php echo $classe_css; ?>" data-mensagem-id="<?php echo $msg->getId(); /* Ou $msg['id'] se for array */ ?>">
                                     <p style="margin:0;"><?php echo nl2br(htmlspecialchars($msg->getConteudo())); ?></p>
                                     <span class="timestamp"><?php echo $data_formatada; ?></span>
                                 </div>
@@ -242,11 +242,19 @@ if (!$is_modal_view) {
         window.isAdmin = <?php echo json_encode(isset($_SESSION['is_admin']) && $_SESSION['is_admin']); ?>;
         const outroUsuarioId = <?php echo json_encode($outro_usuario_id); ?>;
         const isModalView = <?php echo json_encode($is_modal_view); ?>;
+        let ultimaMensagemIdConhecida = 0;
+        const chatMessagesArea = document.getElementById('chat-messages-area');
 
         window.onload = function() {
             const params = new URLSearchParams(window.location.search);
             const scrollToBottomParam = params.get('scroll_to_bottom');
-            const chatMessagesArea = document.getElementById('chat-messages-area');
+
+            // Pega o ID da última mensagem renderizada inicialmente
+            const todasAsMensagens = chatMessagesArea ? chatMessagesArea.querySelectorAll('.mensagem[data-mensagem-id]') : [];
+            if (todasAsMensagens.length > 0) {
+                ultimaMensagemIdConhecida = parseInt(todasAsMensagens[todasAsMensagens.length - 1].getAttribute('data-mensagem-id'));
+            }
+            console.log('[Chat.php] ID da última mensagem conhecida inicialmente:', ultimaMensagemIdConhecida);
 
             function doScroll() {
                 if(chatMessagesArea) {
@@ -276,7 +284,7 @@ if (!$is_modal_view) {
                 const textarea = chatForm.querySelector('textarea[name="conteudo"]');
                 const conteudoMensagem = textarea.value.trim();
 
-                if (!conteudoMensagem) return;
+                if (!conteudoMensagem || !chatMessagesArea) return;
 
                 const tempId = 'temp_' + Date.now();
                 const dataAtual = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'});
@@ -338,16 +346,91 @@ if (!$is_modal_view) {
                 this.style.height = 'auto';
                 this.style.height = (this.scrollHeight) + 'px';
             });
+
+            // Enviar mensagem com Enter (Shift+Enter para nova linha)
+            textarea.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault(); // Previne nova linha no textarea
+                    // Dispara o evento submit do formulário
+                    if (chatForm) {
+                        // Verifica se o conteúdo não é apenas espaços em branco antes de enviar
+                        if (this.value.trim() !== '') {
+                            chatForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                        } else {
+                            // Opcional: limpar o textarea se só tiver espaços e o usuário tentar enviar
+                            this.value = ''; 
+                        }
+                    }
+                }
+            });
         }
 
-        // Se estiver no modal, e o modal for redimensionado, pode ser útil reajustar o scroll.
-        // No entanto, com flexbox crescendo corretamente, isso pode não ser mais necessário.
-        // if (isModalView && window.parent && window.parent.document) {
-        //     const modalElement = window.parent.document.getElementById('chatModal');
-        //     if (modalElement) {
-        //         // Exemplo: Ouvir um evento customizado ou redimensionamento do modal se possível
-        //     }
-        // }
+        // Função para buscar e renderizar novas mensagens
+        async function buscarEAdicionarNovasMensagens() {
+            if (!window.usuarioLogadoId || !outroUsuarioId) return;
+
+            console.log(`[Chat.php] Polling: Buscando novas. Último ID conhecido: ${ultimaMensagemIdConhecida}, Outro Usuário: ${outroUsuarioId}`);
+            try {
+                const response = await fetch(`../controllers/get_novas_mensagens_controller.php?outro_usuario_id=${outroUsuarioId}&ultimo_id_conhecido=${ultimaMensagemIdConhecida}`);
+                
+                const responseText = await response.clone().text(); 
+                console.log('[Chat.php] Polling: Resposta bruta:', responseText);
+
+                const data = await response.json();
+                console.log('[Chat.php] Polling: Dados JSON parseados:', data);
+
+                if (data.success && data.mensagens && data.mensagens.length > 0) {
+                    console.log(`[Chat.php] Polling: ${data.mensagens.length} nova(s) mensagem(ns) recebida(s).`);
+                    const chatMessagesArea = document.getElementById('chat-messages-area');
+                    let novasMensagensAdicionadas = false;
+
+                    data.mensagens.forEach(msg => {
+                        if (document.querySelector(`.mensagem[data-mensagem-id="${msg.id}"]`)) return;
+                        console.log('[Chat.php] Polling: Adicionando mensagem ID:', msg.id, 'Conteúdo:', msg.conteudo);
+
+                        const mensagemDiv = document.createElement('div');
+                        mensagemDiv.classList.add('mensagem');
+                        mensagemDiv.classList.add(parseInt(msg.remetente_id) === parseInt(window.usuarioLogadoId) ? 'enviada' : 'recebida');
+                        mensagemDiv.setAttribute('data-mensagem-id', msg.id);
+                        
+                        const p = document.createElement('p');
+                        p.style.margin = '0';
+                        p.innerHTML = msg.conteudo.replace(/\n/g, '<br>');
+                        mensagemDiv.appendChild(p);
+
+                        const span = document.createElement('span');
+                        span.classList.add('timestamp');
+                        span.textContent = msg.data_formatada;
+                        mensagemDiv.appendChild(span);
+                        
+                        chatMessagesArea.appendChild(mensagemDiv);
+                        novasMensagensAdicionadas = true;
+                        ultimaMensagemIdConhecida = Math.max(ultimaMensagemIdConhecida, parseInt(msg.id));
+                    });
+
+                    if (novasMensagensAdicionadas) {
+                        chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
+                        console.log('[Chat.php] Polling: Novas mensagens adicionadas. Último ID agora:', ultimaMensagemIdConhecida);
+                        
+                        if (typeof window.parent.carregarNotificacoesAPI === 'function') {
+                            window.parent.carregarNotificacoesAPI();
+                        }
+                    }
+                } else if (data.success && data.mensagens && data.mensagens.length === 0) {
+                    // console.log('[Chat.php] Polling: Nenhuma mensagem nova.'); // Opcional
+                } else if (!data.success && data.error) {
+                    console.warn('[Chat.php] Polling: Erro da API ao buscar novas mensagens:', data.error);
+                }
+            } catch (error) {
+                console.error('[Chat.php] Polling: Erro de rede ou JSON.parse ao buscar novas mensagens:', error);
+            }
+        }
+
+        // Iniciar o polling para novas mensagens
+        if (window.usuarioLogadoId && outroUsuarioId) {
+            setInterval(buscarEAdicionarNovasMensagens, 3000); // Verificar a cada 3 segundos
+            console.log('[Chat.php] Polling para novas mensagens iniciado.');
+        }
 
     </script>
 </body>

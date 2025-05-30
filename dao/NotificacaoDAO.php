@@ -1,15 +1,15 @@
 <?php
 require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../model/Notificacao.php';
+require_once __DIR__ . '/../model/notificacao.php';
 
-class NotificacaoDAO {
+class notificacaodao {
     private $pdo;
 
     public function __construct($pdo) {
         $this->pdo = $pdo;
     }
 
-    public function criar(Notificacao $notificacao) {
+    public function criar(notificacao $notificacao) {
         $sql = "INSERT INTO notificacoes 
                 (usuario_id_destino, usuario_id_origem, produto_id, tipo_notificacao, mensagem, link) 
                 VALUES (:uid_destino, :uid_origem, :pid, :tipo, :msg, :link) RETURNING id, data_criacao";
@@ -19,7 +19,7 @@ class NotificacaoDAO {
             $stmt->bindValue(':uid_destino', $notificacao->getUsuarioIdDestino(), PDO::PARAM_INT);
             $stmt->bindValue(':uid_origem', $notificacao->getUsuarioIdOrigem(), PDO::PARAM_INT);
             $stmt->bindValue(':pid', $notificacao->getProdutoId(), PDO::PARAM_INT);
-            $stmt->bindValue(':tipo', $notificacao->getTipoNotificacao(), PDO::PARAM_STR);
+            $stmt->bindValue(':tipo', $notificacao->getTiponotificacao(), PDO::PARAM_STR);
             $stmt->bindValue(':msg', $notificacao->getMensagem(), PDO::PARAM_STR);
             $stmt->bindValue(':link', $notificacao->getLink(), PDO::PARAM_STR);
             
@@ -53,7 +53,7 @@ class NotificacaoDAO {
             $stmt->execute();
             
             while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $notif = new Notificacao(
+                $notif = new notificacao(
                     $row['usuario_id_destino'],
                     $row['tipo_notificacao'],
                     $row['mensagem'],
@@ -118,7 +118,7 @@ class NotificacaoDAO {
             $stmt->execute();
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($row) {
-                $notif = new Notificacao(
+                $notif = new notificacao(
                     $row['usuario_id_destino'],
                     $row['tipo_notificacao'],
                     $row['mensagem'],
@@ -137,7 +137,7 @@ class NotificacaoDAO {
         return null;
     }
 
-    public function deletarNotificacao($notificacao_id, $usuario_id_destino) {
+    public function deletarnotificacao($notificacao_id, $usuario_id_destino) {
         $sql = "DELETE FROM notificacoes WHERE id = :nid AND usuario_id_destino = :uid_destino";
         try {
             $stmt = $this->pdo->prepare($sql);

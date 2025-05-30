@@ -109,5 +109,37 @@ class MensagemDAO {
         }
     }
 
+    public function buscarNovasMensagens($usuario1_id, $usuario2_id, $ultimo_id_conhecido) {
+        $mensagens = [];
+        $query = "SELECT * FROM mensagens 
+                  WHERE ((remetente_id = :u1 AND destinatario_id = :u2) 
+                     OR (remetente_id = :u2 AND destinatario_id = :u1)) 
+                    AND id > :ultimo_id
+                  ORDER BY data_envio ASC";
+        try {
+            $stmt = $this->pdo->prepare($query);
+            $stmt->bindParam(':u1', $usuario1_id, PDO::PARAM_INT);
+            $stmt->bindParam(':u2', $usuario2_id, PDO::PARAM_INT);
+            $stmt->bindParam(':ultimo_id', $ultimo_id_conhecido, PDO::PARAM_INT);
+            $stmt->execute();
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($rows as $row) {
+                $mensagens[] = new Mensagem(
+                    $row['id'],
+                    $row['remetente_id'],
+                    $row['destinatario_id'],
+                    $row['conteudo'],
+                    $row['data_envio'],
+                    (bool)$row['lida'] 
+                );
+            }
+        } catch (PDOException $e) {
+            // Logar o erro seria uma boa prática aqui
+            // error_log("Erro em buscarNovasMensagens: " . $e->getMessage());
+        }
+        return $mensagens;
+    }
+
 }
 ?> 

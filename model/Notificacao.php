@@ -1,5 +1,5 @@
 <?php
-class Notificacao {
+class notificacao {
     private $id;
     private $usuario_id_destino;
     private $usuario_id_origem;
@@ -34,7 +34,7 @@ class Notificacao {
     public function getUsuarioIdDestino() { return $this->usuario_id_destino; }
     public function getUsuarioIdOrigem() { return $this->usuario_id_origem; }
     public function getProdutoId() { return $this->produto_id; }
-    public function getTipoNotificacao() { return $this->tipo_notificacao; }
+    public function getTiponotificacao() { return $this->tipo_notificacao; }
     public function getMensagem() { return $this->mensagem; }
     public function getLink() { return $this->link; }
     public function isLida() { return $this->lida; }
@@ -64,7 +64,7 @@ class Notificacao {
         $this->produto_id = $produto_id;
     }
 
-    public function setTipoNotificacao($tipo_notificacao) {
+    public function setTiponotificacao($tipo_notificacao) {
         $this->tipo_notificacao = $tipo_notificacao;
     }
 

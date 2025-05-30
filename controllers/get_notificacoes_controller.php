@@ -7,8 +7,8 @@ header('Content-Type: application/json');
 session_start();
 
 require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../dao/NotificacaoDAO.php';
-require_once __DIR__ . '/../model/Notificacao.php'; 
+require_once __DIR__ . '/../dao/notificacaodao.php';
+require_once __DIR__ . '/../model/notificacao.php'; 
 if (!isset($_SESSION['usuario_id'])) {
     ob_clean(); 
     http_response_code(401); 
@@ -21,11 +21,11 @@ $limite_dropdown = 5;
 
 try {
     $pdo = Database::getConnection();
-    $notificacaoDao = new NotificacaoDAO($pdo);
+    $notificacaodao = new notificacaodao($pdo);
 
-    $contadorNaoLidas = $notificacaoDao->contarNaoLidas($usuario_id_destino);
+    $contadorNaoLidas = $notificacaodao->contarNaoLidas($usuario_id_destino);
     
-    $notificacoesRecentesObjs = $notificacaoDao->buscarPorUsuarioIdDestino($usuario_id_destino, false, $limite_dropdown);
+    $notificacoesRecentesObjs = $notificacaodao->buscarPorUsuarioIdDestino($usuario_id_destino, false, $limite_dropdown);
 
     $notificacoesFormatadas = [];
     foreach ($notificacoesRecentesObjs as $notifObj) {
@@ -55,7 +55,7 @@ try {
             'link' => $notifObj->getLink() ? htmlspecialchars($notifObj->getLink()) : '#',
             'lida' => $notifObj->isLida(),
             'data_formatada' => $dataFormatada,
-            'tipo' => $notifObj->getTipoNotificacao() 
+            'tipo' => $notifObj->getTiponotificacao() 
         ];
     }
     ob_clean(); 

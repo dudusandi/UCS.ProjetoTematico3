@@ -4,8 +4,8 @@ session_start();
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../dao/produto_dao.php';
-require_once __DIR__ . '/../dao/NotificacaoDAO.php';
-require_once __DIR__ . '/../model/Notificacao.php';
+require_once __DIR__ . '/../dao/notificacaodao.php';
+require_once __DIR__ . '/../model/notificacao.php';
 require_once __DIR__ . '/../dao/cliente_dao.php'; 
 
 if (!isset($_SESSION['usuario_id'])) {
@@ -35,7 +35,7 @@ $produto_id = (int)$produto_id;
 try {
     $pdo = Database::getConnection();
     $produtoDao = new ProdutoDAO();
-    $notificacaoDao = new NotificacaoDAO($pdo);
+    $notificacaodao = new notificacaodao($pdo);
 
     $produto = $produtoDao->buscarPorId($produto_id);
 
@@ -57,7 +57,7 @@ try {
     $mensagem = htmlspecialchars($nome_usuario_logado) . " tem interesse no seu produto: " . htmlspecialchars($produto['nome']);
     $link = "../view/chat.php?usuario_id=" . $usuario_id_origem; 
 
-    $notificacao = new Notificacao(
+    $notificacao = new notificacao(
         $usuario_id_destino,
         $tipo_notificacao,
         $mensagem,
@@ -66,7 +66,7 @@ try {
         $link
     );
 
-    if ($notificacaoDao->criar($notificacao)) {
+    if ($notificacaodao->criar($notificacao)) {
         echo json_encode(['success' => true, 'message' => 'Interesse registrado com sucesso! O vendedor foi notificado.']);
     } else {
         http_response_code(500); 

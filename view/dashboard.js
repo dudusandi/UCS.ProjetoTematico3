@@ -202,7 +202,7 @@ function exibirProduto(produto) {
 // Funções carregarNotificacoes() e renderizarNotificacoesSideNav() REMOVIDAS daqui
 // pois a lógica de notificações agora é centralizada em menu.php
 
-async function marcarNotificacaoLida(notificacaoId, linkNotificacao, elementoA) {
+async function marcarnotificacaoLida(notificacaoId, linknotificacao, elementoA) {
     try {
         const response = await fetch('../controllers/marcar_notificacao_controller.php', {
             method: 'POST',
@@ -227,8 +227,8 @@ async function marcarNotificacaoLida(notificacaoId, linkNotificacao, elementoA) 
                 console.warn("Função carregarNotificacoesAPI() do menu.php não encontrada globalmente.");
             }
             
-            if (linkNotificacao && linkNotificacao !== '#') {
-                window.location.href = linkNotificacao;
+            if (linknotificacao && linknotificacao !== '#') {
+                window.location.href = linknotificacao;
             }
         } else {
             console.error('Erro ao marcar notificação como lida:', result.error);
@@ -387,5 +387,5 @@ async function enviarPropostaDeTroca(idProdutoOferecido, idProdutoDesejadoOrigin
     }
 }
 
-// A função dispensarNotificacao foi removida pois menu.php já tem sua própria lógica.
+// A função dispensarnotificacao foi removida pois menu.php já tem sua própria lógica.
 // O script em menu.php deve lidar com isso.

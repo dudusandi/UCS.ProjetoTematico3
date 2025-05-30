@@ -6,8 +6,8 @@ require_once __DIR__ . '/../dao/produto_dao.php';
 require_once __DIR__ . '/../dao/mensagem_dao.php';
 require_once __DIR__ . '/../model/mensagem.php';
 require_once __DIR__ . '/../dao/cliente_dao.php';
-require_once __DIR__ . '/../dao/NotificacaoDAO.php';
-require_once __DIR__ . '/../model/Notificacao.php';
+require_once __DIR__ . '/../dao/notificacaodao.php';
+require_once __DIR__ . '/../model/notificacao.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -52,7 +52,7 @@ try {
     $produtoDao = new ProdutoDAO();
     $mensagemDao = new MensagemDAO();
     $clienteDao = new ClienteDAO();
-    $notificacaoDao = new NotificacaoDAO($pdo); // NotificacaoDAO espera $pdo no construtor
+    $notificacaodao = new notificacaodao($pdo); // notificacaodao espera $pdo no construtor
 
     $produtoOferecido = $produtoDao->buscarPorId($id_produto_oferecido);
     $produtoDesejado = $produtoDao->buscarPorId($id_produto_desejado);
@@ -109,7 +109,7 @@ try {
         );
         $link_notif = "../view/chat.php?usuario_id=" . $id_remetente; // Leva para o chat com o remetente
 
-        $novaNotificacao = new Notificacao(
+        $novanotificacao = new notificacao(
             $id_destinatario,      // usuario_id_destino
             $tipo_notificacao,
             $mensagem_notif,
@@ -118,7 +118,7 @@ try {
             $link_notif
         );
 
-        if (!$notificacaoDao->criar($novaNotificacao)) {
+        if (!$notificacaodao->criar($novanotificacao)) {
             error_log("Falha ao criar notificação para proposta de troca. Destinatário: $id_destinatario, Remetente: $id_remetente");
             // Não tratar como erro fatal para o envio da mensagem principal
         }

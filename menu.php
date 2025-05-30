@@ -475,7 +475,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             btnRemover.addEventListener('click', function(e) {
                                 e.stopPropagation();
                                 e.preventDefault();
-                                removerNotificacao(notif.id, listItem);
+                                removernotificacao(notif.id, listItem);
                             });
                             btnContainer.appendChild(btnRemover);
                             listItem.appendChild(btnContainer);
@@ -525,8 +525,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const listaAPINotificacoes = document.getElementById('listaNotificacoesAPISideNav');
     if (listaAPINotificacoes) {
         // console.log('[Menu Notificações] Elemento listaNotificacoesAPISideNav encontrado. Chamando carregarNotificacoesAPI().');
-        carregarNotificacoesAPI();
-        // setInterval(carregarNotificacoesAPI, 60000); 
+        carregarNotificacoesAPI(); // Carrega as notificações uma vez ao iniciar
+        setInterval(carregarNotificacoesAPI, 5000); // Atualiza a cada 5 segundos
     } else {
         // Mantemos este log, pois é útil para saber se os elementos essenciais não foram encontrados
         console.warn('[Menu Notificações] Elemento listaNotificacoesAPISideNav NÃO encontrado. Notificações da API não serão carregadas.');
@@ -550,7 +550,7 @@ function htmlspecialchars(str) {
 }
 
 // Adicionar função para remover notificação
-async function removerNotificacao(notificacaoId, listItem) {
+async function removernotificacao(notificacaoId, listItem) {
     if (!confirm('Deseja realmente remover esta notificação?')) return;
     try {
         const response = await fetch('../controllers/dispensar_notificacao_controller.php', {
@@ -568,7 +568,9 @@ async function removerNotificacao(notificacaoId, listItem) {
             }
             // Recarrega notificações para atualizar badge e lista
             if (typeof carregarNotificacoesAPI === 'function') {
-                carregarNotificacoesAPI();
+                // Adicionar um pequeno delay para dar tempo ao backend de processar a dispensa
+                console.log('[Menu Notificações] Notificação removida visualmente. Aguardando 500ms para recarregar via API.');
+                setTimeout(carregarNotificacoesAPI, 500); // Atraso de 0.5 segundos
             }
         } else {
             alert('Erro ao remover notificação: ' + (result.error || 'Erro desconhecido'));

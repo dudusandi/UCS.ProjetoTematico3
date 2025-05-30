@@ -5,8 +5,8 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../dao/mensagem_dao.php';
 require_once __DIR__ . '/../model/mensagem.php';
 require_once __DIR__ . '/../dao/cliente_dao.php'; 
-require_once __DIR__ . '/../dao/NotificacaoDAO.php'; 
-require_once __DIR__ . '/../model/Notificacao.php';  
+require_once __DIR__ . '/../dao/notificacaodao.php'; 
+require_once __DIR__ . '/../model/notificacao.php';  
 
 // Função para detectar se é uma requisição AJAX
 function isAjaxRequest() {
@@ -92,12 +92,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($mensagemDAO->enviarMensagem($mensagem)) {
         // Criar notificação
         $nome_remetente = $_SESSION['usuario_nome'] ?? 'Alguém'; 
-        $notificacaoDao = new NotificacaoDAO(Database::getConnection()); 
+        $notificacaodao = new notificacaodao(Database::getConnection()); 
         $tipo_notificacao = 'nova_mensagem_chat';
         $mensagem_notif = htmlspecialchars($nome_remetente) . " enviou uma nova mensagem para você.";
         $link_notif = "../view/chat.php?usuario_id=" . $usuario_logado_id; 
 
-        $novaNotificacao = new Notificacao(
+        $novanotificacao = new notificacao(
             $destinatario_id,     
             $tipo_notificacao,
             $mensagem_notif,
@@ -105,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             null,                
             $link_notif
         );
-        if (!$notificacaoDao->criar($novaNotificacao)) {
+        if (!$notificacaodao->criar($novanotificacao)) {
             error_log("Falha ao criar notificação para nova mensagem de chat. Destinatário: $destinatario_id, Remetente: $usuario_logado_id");
         }
 

@@ -3,7 +3,7 @@ session_start();
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../config/Database.php';
-require_once __DIR__ . '/../dao/NotificacaoDAO.php';
+require_once __DIR__ . '/../dao/notificacaodao.php';
 
 $response = ['success' => false, 'error' => ''];
 
@@ -33,9 +33,9 @@ if ($notificacao_id === false || $notificacao_id <= 0) {
 
 try {
     $db = Database::getConnection();
-    $notificacaoDAO = new NotificacaoDAO($db);
+    $notificacaodao = new notificacaodao($db);
 
-    if ($notificacaoDAO->deletarNotificacao($notificacao_id, $usuario_id_logado)) {
+    if ($notificacaodao->deletarnotificacao($notificacao_id, $usuario_id_logado)) {
         $response['success'] = true;
     } else {
         $response['error'] = 'Não foi possível remover a notificação ou acesso negado.';
