@@ -2,7 +2,7 @@
 session_start();
 header('Content-Type: application/json');
 
-require_once __DIR__ . '/../config/Database.php';
+require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../dao/notificacaodao.php';
 
 $response = ['success' => false, 'error' => ''];
