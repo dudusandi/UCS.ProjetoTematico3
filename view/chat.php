@@ -319,11 +319,22 @@ if (!$is_modal_view) {
                     const msgElement = document.getElementById(tempId);
 
                     if (result.success && msgElement) {
-                        msgElement.querySelector('.timestamp').textContent = dataAtual;
-                         // Remover 'enviando' e 'falha' se houver para limpar o estado
-                        msgElement.classList.remove('mensagem-falha');
-                        // Opcional: adicionar classe de sucesso se houver
-                        // msgElement.classList.add('mensagem-sucesso'); 
+                        if (result.mensagem_id) { // Verificar se o ID da mensagem foi retornado
+                            msgElement.setAttribute('data-mensagem-id', result.mensagem_id);
+                            msgElement.querySelector('.timestamp').textContent = dataAtual; // Manter o timestamp local por enquanto
+                            msgElement.classList.remove('mensagem-falha');
+                            // msgElement.classList.add('mensagem-sucesso'); // Opcional
+
+                            const novoId = parseInt(result.mensagem_id);
+                            if (novoId > ultimaMensagemIdConhecida) {
+                                ultimaMensagemIdConhecida = novoId;
+                                console.log(`[Chat.php] Mensagem enviada ID ${novoId}. ultimaMensagemIdConhecida atualizado para: ${ultimaMensagemIdConhecida}`);
+                            }
+                        } else {
+                            console.warn('[Chat.php] Mensagem enviada com sucesso, mas o ID da mensagem não foi retornado pelo controller. A mensagem pode ser duplicada pelo polling.');
+                            msgElement.querySelector('.timestamp').textContent = dataAtual + " (Enviada)";
+                            msgElement.classList.remove('mensagem-falha');
+                        }
                     } else if (msgElement) {
                         msgElement.querySelector('.timestamp').textContent = `Falha ao enviar (${dataAtual})`;
                         msgElement.classList.add('mensagem-falha');

@@ -18,7 +18,11 @@ class MensagemDAO {
                 $mensagem->getDestinatarioId(),
                 $mensagem->getConteudo()
             ]);
-            return (bool)$result;
+            if ($result) {
+                return $this->pdo->lastInsertId();
+            } else {
+                return false;
+            }
         } catch (PDOException $e) {
 
             return false;

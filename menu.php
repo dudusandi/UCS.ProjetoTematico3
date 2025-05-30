@@ -475,7 +475,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             btnRemover.addEventListener('click', function(e) {
                                 e.stopPropagation();
                                 e.preventDefault();
-                                removernotificacao(notif.id, listItem);
+                                removerNotificacao(notif.id, listItem);
                             });
                             btnContainer.appendChild(btnRemover);
                             listItem.appendChild(btnContainer);
@@ -549,8 +549,7 @@ function htmlspecialchars(str) {
     });
 }
 
-// Adicionar função para remover notificação
-async function removernotificacao(notificacaoId, listItem) {
+async function removerNotificacao(notificacaoId, listItem) {
     if (!confirm('Deseja realmente remover esta notificação?')) return;
     try {
         const response = await fetch('../controllers/dispensar_notificacao_controller.php', {
@@ -562,10 +561,11 @@ async function removernotificacao(notificacaoId, listItem) {
         });
         const result = await response.json();
         if (result.success) {
-            // Remove o item da lista imediatamente
-            if (listItem && listItem.parentNode) {
-                listItem.parentNode.removeChild(listItem);
-            }
+            // Remove o item da lista imediatamente - Comentado para testar se carregarNotificacoesAPI() resolve
+            // if (listItem && listItem.parentNode) {
+            //     listItem.parentNode.removeChild(listItem);
+            // }
+            
             // Recarrega notificações para atualizar badge e lista
             if (typeof carregarNotificacoesAPI === 'function') {
                 // Adicionar um pequeno delay para dar tempo ao backend de processar a dispensa

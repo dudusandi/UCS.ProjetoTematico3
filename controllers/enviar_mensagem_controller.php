@@ -17,11 +17,14 @@ function isAjaxRequest() {
 // Função para retornar resposta JSON
 function sendJsonResponse($success, $message = '', $data = []) {
     header('Content-Type: application/json');
-    echo json_encode([
+    $responseData = [
         'success' => $success,
-        'message' => $message,
-        'data' => $data
-    ]);
+        'message' => $message
+    ];
+    if (!empty($data)) {
+        $responseData = array_merge($responseData, $data);
+    }
+    echo json_encode($responseData);
     exit();
 }
 
@@ -89,7 +92,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $mensagem->setConteudo($conteudo);
 
     $mensagemDAO = new MensagemDAO();
-    if ($mensagemDAO->enviarMensagem($mensagem)) {
+    $mensagem_id_enviada = $mensagemDAO->enviarMensagem($mensagem);
+
+    if ($mensagem_id_enviada) {
         // Criar notificação
         $nome_remetente = $_SESSION['usuario_nome'] ?? 'Alguém'; 
         $notificacaodao = new notificacaodao(Database::getConnection()); 
@@ -110,7 +115,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if (isAjaxRequest()) {
-            sendJsonResponse(true, 'Mensagem enviada com sucesso!');
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'message' => 'Mensagem enviada com sucesso!',
+                'mensagem_id' => $mensagem_id_enviada
+            ]);
+            exit();
         } else {
             $_SESSION['sucesso_mensagem'] = "Mensagem enviada!";
             header('Location: ../view/chat.php?usuario_id=' . $destinatario_id);
@@ -118,7 +129,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } else {
         if (isAjaxRequest()) {
-            sendJsonResponse(false, 'Erro ao enviar a mensagem. Tente novamente.');
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => false,
+                'message' => 'Erro ao enviar a mensagem. Tente novamente.'
+            ]);
+            exit();
         } else {
             $_SESSION['erro_mensagem'] = "Erro ao enviar a mensagem. Tente novamente.";
             header('Location: ../view/chat.php?usuario_id=' . $destinatario_id);
