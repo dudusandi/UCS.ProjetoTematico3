@@ -26,6 +26,7 @@ try {
              $_SESSION['usuario_nome'] = $nome_usuario;
         }
     } else {
+        error_log("Cliente com ID $id_usuario_logado não encontrado em meus_produtos.php");
     }
 
     $mensagemDAO = new MensagemDAO();
@@ -35,6 +36,7 @@ try {
 
 } catch (Exception $e) {
     error_log("Erro na inicialização de dados em meus_produtos.php: " . $e->getMessage());
+    if (!isset($produtoDao)) $produtoDao = null; 
 }
 
 $mensagem_feedback = $_GET['mensagem'] ?? '';
@@ -51,6 +53,34 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="dashboard.css"> <!-- CSS unificado -->
     <style>
+        /* Reforçando box-sizing para consistência */
+        .main-content, .main-content > *, .products-section > * {
+            box-sizing: border-box;
+        }
+        body {
+            display: flex; 
+            min-height: 100vh;
+        }
+        .main-content {
+            flex-grow: 1; 
+            padding: 0 !important; /* Garantir ausência de padding no main-content */
+        }
+        
+        /* Estilos para os filhos diretos de .main-content em meus_produtos.php */
+        .main-content > .search-bar-container {
+            margin-left: 20px !important;
+            margin-right: 20px !important;
+            padding: 20px 0 !important; /* Padding vertical, sem padding lateral */
+            width: calc(100% - 40px); /* Considera as margens laterais */
+        }
+
+        .main-content > .products-section {
+            padding: 20px !important; /* Padding geral para a seção de produtos */
+             width: calc(100% - 40px); /* Adicionado para consistência com search-bar */
+             margin-left: 20px !important; /* Adicionado para consistência */
+             margin-right: 20px !important; /* Adicionado para consistência */
+        }
+
         .list-group-item img {
             width: 70px; 
             height: 70px; 
@@ -72,89 +102,111 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
             padding: 0.25rem 0.5rem;
             font-size: 0.8rem;
         }
+        #modalCadastroProduto .modal-content {
+            border-radius: 18px;
+            background: #f6f9fb;
+            box-shadow: 0 8px 32px 0 rgba(60, 80, 120, 0.10);
+            border: none;
+        }
+        #modalCadastroProduto .modal-header {
+            border-bottom: none;
+            padding-bottom: 0;
+            justify-content: center;
+        }
+        #modalCadastroProduto .modal-title {
+            font-weight: 600;
+            color: #3a3a4a;
+            text-align: center;
+            width: 100%;
+        }
+        #modalCadastroProduto .modal-body {
+            padding-top: 0;
+        }
+        #modalCadastroProduto .form-label {
+            font-weight: 500;
+            color: #4a4a5a;
+        }
+        #modalCadastroProduto .form-control, #modalCadastroProduto .form-select {
+            border-radius: 8px;
+            border: 1px solid #e0e6ed;
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(60, 80, 120, 0.04);
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        #modalCadastroProduto .form-control:focus, #modalCadastroProduto .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102,126,234,0.10);
+        }
+        #modalCadastroProduto .image-preview-container {
+            text-align: center;
+            margin-bottom: 20px;
+            border: 2px dashed #dbeafe;
+            padding: 18px;
+            border-radius: 10px;
+            background: #f0f4fa;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+        #modalCadastroProduto .image-preview-container:hover {
+            border-color: #667eea;
+        }
+        #modalCadastroProduto .image-preview-container img {
+            max-width: 100%;
+            max-height: 160px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(60, 80, 120, 0.08);
+        }
+        #modalCadastroProduto .image-preview-text {
+            color: #7a7a8c;
+            font-style: italic;
+            font-size: 1rem;
+        }
+        #modalCadastroProduto .btn-primary {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            font-weight: 500;
+            border-radius: 8px;
+            padding: 10px 28px;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.08);
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+        #modalCadastroProduto .btn-primary:hover {
+            background: linear-gradient(90deg, #764ba2 0%, #667eea 100%);
+            box-shadow: 0 4px 16px rgba(102,126,234,0.12);
+        }
+        #modalCadastroProduto .modal-footer {
+            border-top: none;
+        }
     </style>
 </head>
 <body>
-    <div class="side-nav-bar">
-        <div class="logo-container">
-            <div class="logo">ECO<span>Exchange</span></div>
-        </div>
-
-        <a href="dashboard.php">
-            <i class="bi bi-speedometer2"></i>
-            <span>Dashboard</span>
-        </a>
-        
-        <?php if ($id_usuario_logado): ?>
-            <a href="#" data-bs-toggle="modal" data-bs-target="#cadastroProdutoModalDashboard"> 
-                <i class="bi bi-plus-circle"></i>
-                <span>Cadastrar Produto</span>
-            </a>
-            <a href="meus_produtos.php" class="active"> 
-                <i class="bi bi-archive"></i>
-                <span>Meus Produtos</span>
-            </a>
-            <a href="minhas_mensagens.php" class="position-relative">
-                <i class="bi bi-chat-left-dots"></i>
-                <span>Minhas Mensagens</span>
-                <?php if ($contador_mensagens_nao_lidas > 0): ?>
-                    <span class="badge bg-danger position-absolute top-50 start-100 translate-middle-y ms-2" style="font-size: 0.65em; padding: 0.3em 0.5em;"><?php echo $contador_mensagens_nao_lidas; ?></span>
-                <?php endif; ?>
-            </a>
-        <?php endif; ?>
-
-        <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-            <a href="../view/listar_clientes.php">
-                <i class="bi bi-people"></i>
-                <span>Gerenciar Clientes</span>
-            </a> 
-        <?php endif; ?>
-
-        <?php if ($id_usuario_logado): ?>
-        <div class="notifications-section-container">
-            <div class="notifications-header">
-                <i class="bi bi-bell"></i>
-                <span>Notificações</span>
-                <span id="contadorNotificacoesSideNav" class="badge bg-danger ms-2" style="font-size: 0.7em; padding: 0.3em 0.5em; <?php echo ($contador_mensagens_nao_lidas > 0 ? '' : 'display:none;'); ?>">
-                    <?php echo $contador_mensagens_nao_lidas; ?> 
-                </span>
-            </div>
-            <ul class="notifications-list" id="listaNotificacoesSideNav">
-                <li id="notificacaoItemLoadingSideNav" class="dropdown-item text-muted">Carregando...</li>
-                <li id="notificacaoItemNenhumaSideNav" class="dropdown-item text-muted d-none">Nenhuma notificação nova.</li>
-                <li id="marcarTodasLidasContainerSideNav" class="d-none"><a class="dropdown-item text-center" href="#" id="marcarTodasLidasLinkSideNav" onclick="marcarTodasComoLidas(event)">Marcar todas como lidas</a></li> 
-            </ul>
-        </div>
-        <?php endif; ?>
-
-        <div class="user-info-nav">
-            <?php if ($id_usuario_logado): ?>
-                <span><i class="bi bi-person-circle"></i> <?= htmlspecialchars($nome_usuario) ?></span>
-                <a href="../controllers/logout_controller.php">
-                    <i class="bi bi-box-arrow-right"></i>
-                    <span>Sair</span>
-                </a>
-            <?php else: ?>
-                <a href="login.php">
-                    <i class="bi bi-box-arrow-in-right"></i>
-                    <span>Login</span>
-                </a>
-            <?php endif; ?>
-        </div>
-    </div>
+    <?php include __DIR__ . '/../menu.php'; ?>
 
     <div class="main-content">
-        <div class="products-section container-fluid mt-3" style="max-width: 70%; margin-left: auto; margin-right: auto;">
+        <!-- Barra de Busca como filho direto de main-content -->
+        <div class="search-bar-container"> <!-- Deve herdar padding: 20px 0; e margin-left/right: 20px de dashboard.css -->
+            <div class="search-bar-md3">
+                <form id="searchFormMeusProdutos" method="GET" action="meus_produtos.php" class="d-flex flex-grow-1">
+                    <input type="text" id="searchInputMeusProdutos" name="termo" class="flex-grow-1" placeholder="Pesquisar em Meus Produtos..." value="<?= htmlspecialchars($_GET['termo'] ?? '') ?>">
+                    <button type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="products-section"> <!-- Removida classe container-fluid -->
             
-            <div class="search-bar-container mb-3">
-                <div class="search-bar-md3">
-                    <form id="searchFormMeusProdutos" method="GET" action="meus_produtos.php" class="d-flex flex-grow-1">
-                        <input type="text" id="searchInputMeusProdutos" name="termo" class="form-control flex-grow-1" placeholder="Pesquisar em Meus Produtos..." value="<?= htmlspecialchars($_GET['termo'] ?? '') ?>">
-                        <button type="submit" class="btn">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </form>
-                </div>
+            <div class="text-center mb-4">
+                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCadastroProduto">
+                    <i class="bi bi-plus-circle"></i> Cadastrar Produto
+                </button>
             </div>
 
             <?php if (!empty($mensagem_feedback)): ?>
@@ -312,47 +364,67 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
         </div>
     </div>
 
-    <div class="modal fade" id="cadastroProdutoModalDashboard" tabindex="-1" aria-labelledby="cadastroProdutoModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="cadastroProdutoModalLabel">Cadastrar Novo Produto</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+    <!-- Modal de Cadastro de Produto -->
+    <div class="modal fade" id="modalCadastroProduto" tabindex="-1" aria-labelledby="modalCadastroProdutoLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title w-100 text-center" id="modalCadastroProdutoLabel">Cadastrar Novo Produto</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body">
+            <form id="formCadastroProdutoPagina" action="../controllers/cadastrar_produto.php" method="POST" enctype="multipart/form-data">
+              <div class="mb-4">
+                <label for="foto" class="form-label">Foto do Produto</label>
+                <div class="image-preview-container" id="imagePreviewContainer">
+                  <img src="#" alt="Pré-visualização da Imagem" class="d-none" id="imagePreview">
+                  <span class="image-preview-text" id="imagePreviewText">Clique ou arraste para adicionar uma imagem (JPG, PNG, GIF)</span>
                 </div>
-                <div class="modal-body">
-                    <div id="mensagemErroCadastro" class="alert alert-danger d-none" role="alert"></div>
-                    <div id="mensagemSucessoCadastro" class="alert alert-success d-none" role="alert"></div>
-                    <form id="formCadastroProdutoDashboard" enctype="multipart/form-data">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="cadastroNome" class="form-label">Nome do Produto *</label>
-                                <input type="text" class="form-control" id="cadastroNome" name="nome" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="cadastroPreco" class="form-label">Preço *</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">R$</span>
-                                    <input type="number" class="form-control" id="cadastroPreco" name="preco" min="0" step="0.01" required>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="cadastroDescricao" class="form-label">Descrição</label>
-                            <textarea class="form-control" id="cadastroDescricao" name="descricao" rows="3"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="cadastroFoto" class="form-label">Foto do Produto</label>
-                            <input type="file" class="form-control" id="cadastroFoto" name="foto" accept="image/*">
-                            <div class="form-text">Formatos aceitos: JPG, PNG, GIF.</div>
-                        </div>
-                    </form>
+                <input type="file" class="form-control d-none" id="foto" name="foto" accept="image/jpeg,image/png,image/gif">
+                <div class="form-text">Tamanho máximo: 2MB. Uma boa imagem ajuda a vender!</div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-8">
+                  <label for="nome" class="form-label">Nome do Produto *</label>
+                  <input type="text" class="form-control" id="nome" name="nome" required>
+                  <div class="invalid-feedback">Por favor, informe o nome do produto.</div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" id="btnSalvarCadastroProdutoDashboard" class="btn btn-primary">Cadastrar Produto</button>
+                <div class="col-md-4">
+                  <label for="preco" class="form-label">Preço *</label>
+                  <div class="input-group">
+                    <span class="input-group-text">R$</span>
+                    <input type="number" class="form-control" id="preco" name="preco" min="0" step="0.01" required>
+                  </div>
+                  <div class="invalid-feedback">Por favor, informe o preço.</div>
                 </div>
-            </div>
+              </div>
+              <div class="mb-3">
+                <label for="descricao" class="form-label">Descrição Detalhada</label>
+                <textarea class="form-control" id="descricao" name="descricao" rows="4" placeholder="Descreva o estado do produto, motivo da troca/venda, etc."></textarea>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="condicao" class="form-label">Condição do Produto</label>
+                  <select class="form-select" id="condicao" name="condicao">
+                    <option value="">Selecione a condição</option>
+                    <option value="novo">Novo (nunca usado)</option>
+                    <option value="usado_como_novo">Usado - Como Novo</option>
+                    <option value="usado_bom_estado">Usado - Bom Estado</option>
+                    <option value="usado_marcas_uso">Usado - Com Marcas de Uso</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label for="categoria" class="form-label">Categoria</label>
+                  <input type="text" class="form-control" id="categoria" name="categoria" placeholder="Ex: Eletrônicos, Vestuário, Livros">
+                </div>
+              </div>
+              <div class="mt-4 text-center">
+                <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-check-circle"></i> Cadastrar Produto</button>
+              </div>
+            </form>
+          </div>
         </div>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -365,47 +437,6 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
         const confirmExcluirModalElement = document.getElementById('confirmExcluirModal');
         const confirmExcluirModalInstance = new bootstrap.Modal(confirmExcluirModalElement);
         let produtoIdParaExcluir = null;
-
-        const cadastroProdutoModalDashboardElement = document.getElementById('cadastroProdutoModalDashboard');
-        let cadastroProdutoModalDashboardInstance = null;
-        if (cadastroProdutoModalDashboardElement) {
-            cadastroProdutoModalDashboardInstance = new bootstrap.Modal(cadastroProdutoModalDashboardElement);
-        }
-        
-        document.getElementById('btnSalvarCadastroProdutoDashboard')?.addEventListener('click', async function() {
-            const form = document.getElementById('formCadastroProdutoDashboard');
-            const formData = new FormData(form);
-            const msgErroCadastro = document.getElementById('mensagemErroCadastro');
-            const msgSucessoCadastro = document.getElementById('mensagemSucessoCadastro');
-
-            msgErroCadastro.classList.add('d-none');
-            msgSucessoCadastro.classList.add('d-none');
-
-            try {
-                const response = await fetch('../controllers/cadastrar_produto.php', {
-                    method: 'POST',
-                    body: formData
-                });
-                const result = await response.json();
-                if (result.success) {
-                    msgSucessoCadastro.textContent = result.message || 'Produto cadastrado com sucesso!';
-                    msgSucessoCadastro.classList.remove('d-none');
-                    form.reset();
-                    setTimeout(() => {
-                        cadastroProdutoModalDashboardInstance.hide();
-                        window.location.reload(); 
-                    }, 1500);
-                } else {
-                    msgErroCadastro.textContent = result.error || 'Erro desconhecido ao cadastrar produto.';
-                    msgErroCadastro.classList.remove('d-none');
-                }
-            } catch (error) {
-                console.error('Erro ao cadastrar produto:', error);
-                msgErroCadastro.textContent = 'Erro de comunicação ao cadastrar. Tente novamente.';
-                msgErroCadastro.classList.remove('d-none');
-            }
-        });
-
 
         async function abrirModalEdicao(produtoId) {
             document.getElementById('mensagemErroModal').classList.add('d-none');
@@ -508,32 +539,45 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
             }
         });
 
-        function marcarTodasComoLidasClientSide(event, prefix = '') {
-            event.preventDefault();
-            const contadorNotificacoes = document.getElementById('contadorNotificacoesSideNav'); 
-            const listaNotificacoes = document.getElementById('listaNotificacoesDropdown' + prefix); 
-            
-            if (contadorNotificacoes) {
-                contadorNotificacoes.style.display = 'none';
+        // Código do preview de imagem e validação do formulário do modal de cadastro
+        (function() {
+            const fotoInput = document.getElementById('foto');
+            const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+            const imagePreview = document.getElementById('imagePreview');
+            const imagePreviewText = document.getElementById('imagePreviewText');
+            if (imagePreviewContainer && fotoInput) {
+                imagePreviewContainer.addEventListener('click', function() {
+                    fotoInput.click();
+                });
+                fotoInput.addEventListener('change', function (event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            imagePreview.src = e.target.result;
+                            imagePreview.classList.remove('d-none');
+                            imagePreviewText.classList.add('d-none');
+                        }
+                        reader.readAsDataURL(file);
+                    } else {
+                        imagePreview.src = '#';
+                        imagePreview.classList.add('d-none');
+                        imagePreviewText.classList.remove('d-none');
+                    }
+                });
             }
-            
-            if(listaNotificacoes){
-                const itensNotificacao = listaNotificacoes.querySelectorAll('.notificacao-nao-lida'); 
-                itensNotificacao.forEach(item => item.classList.remove('notificacao-nao-lida'));
-
-                const loadingItem = listaNotificacoes.querySelector('#notificacaoItemLoading' + prefix);
-                const nenhumaItem = listaNotificacoes.querySelector('#notificacaoItemNenhuma' + prefix);
-                const dividerFinal = listaNotificacoes.querySelector('#notificacoesDividerFinal' + prefix);
-                const verTodasLink = listaNotificacoes.querySelector('#verTodasNotificacoesLink' + prefix);
-                const marcarLidasLink = listaNotificacoes.querySelector('#marcarTodasLidasLink' + prefix);
-
-                if(loadingItem) loadingItem.classList.add('d-none');
-                if(nenhumaItem) nenhumaItem.classList.remove('d-none');
-                if(dividerFinal) dividerFinal.classList.add('d-none');
-                if(verTodasLink) verTodasLink.classList.add('d-none');
-                if(marcarLidasLink) marcarLidasLink.classList.add('d-none');
+            // Validação Bootstrap
+            const form = document.getElementById('formCadastroProdutoPagina');
+            if (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
             }
-        }
+        })();
     </script>
 </body>
 </html> 

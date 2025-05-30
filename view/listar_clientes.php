@@ -10,37 +10,37 @@ require_once '../dao/cliente_dao.php';
 require_once '../model/cliente.php';
 require_once '../dao/mensagem_dao.php';
 
-try {
-    $clienteDAO = new ClienteDAO(Database::getConnection());
-    $itensPorPagina = 6;
-    $pagina = isset($_GET['pagina']) ? max(1, (int)$_GET['pagina']) : 1;
-    $offset = ($pagina - 1) * $itensPorPagina;
-    
-    $clientes = $clienteDAO->listarTodos($itensPorPagina, $offset);
-    $totalClientes = $clienteDAO->contarTodos();
-    $totalPaginas = ceil($totalClientes / $itensPorPagina);
+$id_usuario_logado = $_SESSION['usuario_id'];
+$nome_usuario = $_SESSION['usuario_nome'] ?? "Usuário";
+$contador_mensagens_nao_lidas = 0; // Default, será atualizado
 
-    $id_usuario_logado = $_SESSION['usuario_id'];
-    $nome_usuario = $_SESSION['usuario_nome'] ?? "Usuário";
+try {
+    $clienteDAO = new ClienteDAO(Database::getConnection()); // Instanciação mantida pois é usada pela página
+    // $itensPorPagina = 6; // Lógica de paginação da própria página, não do menu
+    // $pagina = isset($_GET['pagina']) ? max(1, (int)$_GET['pagina']) : 1;
+    // $offset = ($pagina - 1) * $itensPorPagina;
+    // $clientes = $clienteDAO->listarTodos($itensPorPagina, $offset);
+    // $totalClientes = $clienteDAO->contarTodos();
+    // $totalPaginas = ceil($totalClientes / $itensPorPagina);
+
+    // A busca de nome e contador de mensagens para o menu
+    $cliente_info_menu = $clienteDAO->buscarPorId($id_usuario_logado); // Usar uma nova variável para não conflitar
+    if ($cliente_info_menu) {
+        $nome_usuario = $cliente_info_menu->getNome();
+        if (!isset($_SESSION['usuario_nome']) || $_SESSION['usuario_nome'] !== $nome_usuario) {
+            $_SESSION['usuario_nome'] = $nome_usuario;
+        }
+    }
     $mensagemDAO = new MensagemDAO();
     $contador_mensagens_nao_lidas = $mensagemDAO->contarMensagensNaoLidas($id_usuario_logado);
 
 } catch (Exception $e) {
-    $clientes = [];
-    $mensagem_erro_bloco = "Erro ao listar clientes: " . $e->getMessage();
+    // $clientes = []; // Lógica da página
+    $mensagem_erro_bloco = "Erro ao inicializar dados para listar clientes ou menu: " . $e->getMessage();
     $tipoMensagem_erro_bloco = 'erro';
-    
-    $id_usuario_logado = $_SESSION['usuario_id'] ?? null;
-    $nome_usuario = $_SESSION['usuario_nome'] ?? "Usuário";
-    $contador_mensagens_nao_lidas = 0;
-    if ($id_usuario_logado) {
-        try {
-            $mensagemDAO = new MensagemDAO();
-            $contador_mensagens_nao_lidas = $mensagemDAO->contarMensagensNaoLidas($id_usuario_logado);
-        } catch (Exception $eMsg) {
-            error_log("Erro ao buscar contador de mensagens em listar_clientes: " . $eMsg->getMessage());
-        }
-    }
+    // Garante que as variáveis do menu tenham um valor padrão em caso de erro grave
+    if (!isset($nome_usuario)) $nome_usuario = "Usuário";
+    if (!isset($contador_mensagens_nao_lidas)) $contador_mensagens_nao_lidas = 0;
 }
 
 $mensagem_feedback_get = $_GET['mensagem'] ?? '';
@@ -57,75 +57,18 @@ $tipoMensagem_feedback_get = $_GET['tipo_mensagem'] ?? '';
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="dashboard.css"> 
     <link rel="stylesheet" href="listar.css"> 
+    <style>
+        body {
+            display: flex; /* Para o menu e conteúdo ficarem lado a lado */
+            min-height: 100vh;
+        }
+        .main-content {
+            flex-grow: 1; /* Ocupa o espaço restante */
+        }
+    </style>
 </head>
 <body>
-    <div class="side-nav-bar">
-        <div class="logo-container">
-            <div class="logo">ECO<span>Exchange</span></div>
-        </div>
-
-        <a href="dashboard.php">
-            <i class="bi bi-speedometer2"></i>
-            <span>Pagina Inicial</span>
-        </a>
-        
-        <?php if ($id_usuario_logado): ?>
-            <a href="#" data-bs-toggle="modal" data-bs-target="#cadastroProdutoModal">
-                <i class="bi bi-plus-circle"></i>
-                <span>Cadastrar Produto</span>
-            </a>
-            <a href="meus_produtos.php">
-                <i class="bi bi-archive"></i>
-                <span>Meus Produtos</span>
-            </a>
-            <a href="minhas_mensagens.php" class="position-relative">
-                <i class="bi bi-chat-left-dots"></i>
-                <span>Minhas Mensagens</span>
-                <?php if ($contador_mensagens_nao_lidas > 0): ?>
-                    <span class="badge bg-danger position-absolute top-50 start-100 translate-middle-y ms-2" style="font-size: 0.65em; padding: 0.3em 0.5em;"><?php echo $contador_mensagens_nao_lidas; ?></span>
-                <?php endif; ?>
-            </a>
-        <?php endif; ?>
-
-        <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-            <a href="../view/listar_clientes.php" class="active">
-                <i class="bi bi-people"></i>
-                <span>Gerenciar Clientes</span>
-            </a> 
-        <?php endif; ?>
-        
-        <?php if ($id_usuario_logado): ?>
-        <div class="notifications-section-container">
-            <div class="notifications-header">
-                <i class="bi bi-bell"></i>
-                <span>Notificações</span>
-                <span id="contadorNotificacoesSideNav" class="badge bg-danger ms-2" style="font-size: 0.7em; padding: 0.3em 0.5em; <?php echo ($contador_mensagens_nao_lidas > 0 ? '' : 'display:none;'); ?>">
-                    <?php echo $contador_mensagens_nao_lidas; ?> 
-                </span>
-            </div>
-            <ul class="notifications-list" id="listaNotificacoesSideNav">
-                <li id="notificacaoItemLoadingSideNav" class="dropdown-item text-muted">Carregando...</li>
-                <li id="notificacaoItemNenhumaSideNav" class="dropdown-item text-muted d-none">Nenhuma notificação nova.</li>
-                <li id="marcarTodasLidasContainerSideNav" class="d-none"><a class="dropdown-item text-center" href="#" id="marcarTodasLidasLinkSideNav">Marcar todas como lidas</a></li>
-            </ul>
-        </div>
-        <?php endif; ?>
-
-        <div class="user-info-nav">
-            <?php if ($id_usuario_logado): ?>
-                <span><i class="bi bi-person-circle"></i> <?= htmlspecialchars($nome_usuario) ?></span>
-                <a href="../controllers/logout_controller.php">
-                    <i class="bi bi-box-arrow-right"></i>
-                    <span>Sair</span>
-                </a>
-            <?php else: ?>
-                <a href="login.php">
-                    <i class="bi bi-box-arrow-in-right"></i>
-                    <span>Login</span>
-                </a>
-            <?php endif; ?>
-        </div>
-    </div>
+    <?php include __DIR__ . '/../menu.php'; // Inclui o menu lateral padronizado ?>
 
     <div class="main-content">
         <div class="search-bar-container"> 
@@ -172,41 +115,15 @@ $tipoMensagem_feedback_get = $_GET['tipo_mensagem'] ?? '';
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="listar_clientes.js"></script>
     <script>
-        function carregarNotificacoesSideNav() {
-            const listaNotificacoes = document.getElementById('listaNotificacoesSideNav');
-            const loadingItem = document.getElementById('notificacaoItemLoadingSideNav');
-            const nenhumaItem = document.getElementById('notificacaoItemNenhumaSideNav');
-            const marcarTodasContainer = document.getElementById('marcarTodasLidasContainerSideNav');
-            const contadorBadge = document.getElementById('contadorNotificacoesSideNav');
-
-            if (!listaNotificacoes || !loadingItem || !nenhumaItem || !marcarTodasContainer || !contadorBadge) return;
-
-            loadingItem.classList.remove('d-none');
-            nenhumaItem.classList.add('d-none');
-            marcarTodasContainer.classList.add('d-none');
-            
-            setTimeout(() => {
-                loadingItem.classList.add('d-none');
-                const currentBadgeCount = parseInt(contadorBadge.textContent);
-                 if (isNaN(currentBadgeCount) || currentBadgeCount === 0) {
-                     contadorBadge.style.display = 'none';
-                     nenhumaItem.classList.remove('d-none');
-                 } else {
-                     marcarTodasContainer.classList.remove('d-none');
-                     nenhumaItem.classList.add('d-none');
-                 }
-            }, 1000); 
-        }
+        // Funções carregarNotificacoesSideNav e marcarTodasComoLidasClientSide REMOVIDAS
+        // A lógica de notificações é tratada pelo script em menu.php
         
         document.addEventListener('DOMContentLoaded', function () {
-            if (<?php echo json_encode($id_usuario_logado ? true : false); ?>) {
-                carregarNotificacoesSideNav();
-                
-                const marcarLidasLink = document.getElementById('marcarTodasLidasLinkSideNav');
-                if(marcarLidasLink && marcarLidasLink.getAttribute('onclick')){
-                } else if (marcarLidasLink) {
-                }
-            }
+            // O script de listar_clientes.js já lida com a inicialização dos clientes.
+            // Qualquer lógica específica de notificação que estava aqui foi removida.
+            // if (<?php echo json_encode($id_usuario_logado ? true : false); ?>) {
+            //     // carregarNotificacoesSideNav(); // Removido
+            // }
         });
     </script>
 </body>

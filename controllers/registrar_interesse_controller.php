@@ -54,7 +54,7 @@ try {
     }
 
     $tipo_notificacao = 'interesse_compra';
-    $mensagem = htmlspecialchars($nome_usuario_logado) . " demonstrou interesse no seu produto: " . htmlspecialchars($produto['nome']);
+    $mensagem = htmlspecialchars($nome_usuario_logado) . " tem interesse no seu produto: " . htmlspecialchars($produto['nome']);
     $link = "../view/chat.php?usuario_id=" . $usuario_id_origem; 
 
     $notificacao = new Notificacao(

@@ -12,7 +12,6 @@ $id_usuario_logado = $_SESSION['usuario_id'] ?? null;
 
 try {
     if ($id_usuario_logado) {
-        $pdo = Database::getConnection();
         $clienteDAO = new ClienteDAO();
         $cliente = $clienteDAO->buscarPorId($id_usuario_logado);
         if ($cliente) {
@@ -31,6 +30,7 @@ try {
 } catch (Exception $e) {
     error_log("Erro na inicialização do dashboard (dados de usuário/mensagens): " . $e->getMessage());
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -42,75 +42,34 @@ try {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="dashboard.css">
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+        }
+        .main-content {
+            flex-grow: 1;
+            padding: 0;
+        }
+        .main-content > .products-section {
+            padding: 20px;
+        }
+        .main-content > .search-bar-container, 
+        .main-content > .ecological-info-banner {
+             margin-left: 20px;
+             margin-right: 20px;
+        }
+    </style>
 </head>
 <body>
-    <div class="side-nav-bar">
-        <div class="logo-container">
-            <div class="logo">ECO<span>Exchange</span></div>
-        </div>
-
-        <a href="dashboard.php" class="active">
-            <i class="bi bi-speedometer2"></i>
-            <span>Pagina Inicial</span>
-        </a>
-        
-        <?php if ($id_usuario_logado): ?>
-            <a href="#" data-bs-toggle="modal" data-bs-target="#cadastroProdutoModal">
-                <i class="bi bi-plus-circle"></i>
-                <span>Cadastrar Produto</span>
-            </a>
-            <a href="meus_produtos.php">
-                <i class="bi bi-archive"></i>
-                <span>Meus Produtos</span>
-            </a>
-            <a href="minhas_mensagens.php" class="position-relative">
-                <i class="bi bi-chat-left-dots"></i>
-                <span>Minhas Mensagens</span>
-                <?php if ($contador_mensagens_nao_lidas > 0): ?>
-                    <span class="badge bg-danger position-absolute top-50 start-100 translate-middle-y ms-2" style="font-size: 0.65em; padding: 0.3em 0.5em;"><?php echo $contador_mensagens_nao_lidas; ?></span>
-                <?php endif; ?>
-            </a>
-        <?php endif; ?>
-
-        <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-            <a href="../view/listar_clientes.php">
-                <i class="bi bi-people"></i>
-                <span>Gerenciar Clientes</span>
-            </a> 
-        <?php endif; ?>
-
-        <?php if ($id_usuario_logado): ?>
-        <div class="notifications-section-container">
-            <div class="notifications-header">
-                <i class="bi bi-bell"></i>
-                <span>Notificações</span>
-                <span id="contadorNotificacoesSideNav" class="badge bg-danger ms-2" style="font-size: 0.7em; padding: 0.3em 0.5em; <?php echo ($contador_mensagens_nao_lidas > 0 ? '' : 'display:none;'); ?>">
-                    <?php echo $contador_mensagens_nao_lidas; ?> 
-                </span>
-            </div>
-            <ul class="notifications-list" id="listaNotificacoesSideNav">
-                <li id="notificacaoItemLoadingSideNav" class="dropdown-item text-muted">Carregando...</li>
-                <li id="notificacaoItemNenhumaSideNav" class="dropdown-item text-muted d-none">Nenhuma notificação nova.</li>
-                <li id="marcarTodasLidasContainerSideNav" class="d-none"><a class="dropdown-item text-center" href="#" id="marcarTodasLidasLinkSideNav" onclick="marcarTodasComoLidas(event)">Marcar todas como lidas</a></li> 
-            </ul>
-        </div>
-        <?php endif; ?>
-
-        <div class="user-info-nav">
-            <?php if ($id_usuario_logado): ?>
-                <span><i class="bi bi-person-circle"></i> <?= htmlspecialchars($nome_usuario) ?></span>
-                <a href="../controllers/logout_controller.php">
-                    <i class="bi bi-box-arrow-right"></i>
-                    <span>Sair</span>
-                </a>
-            <?php else: ?>
-                <a href="login.php">
-                    <i class="bi bi-box-arrow-in-right"></i>
-                    <span>Login</span>
-                </a>
-            <?php endif; ?>
-        </div>
-    </div>
+    <?php 
+    // DEBUG: Para ter certeza absoluta do valor de $id_usuario_logado que o menu.php VAI ver:
+    // echo "<div style='background:yellow; color:black; padding:5px; position:fixed; top:0; left:0; z-index:9999;'>DEBUG menu include: id_usuario_logado = ";
+    // var_dump($id_usuario_logado);
+    // echo "</div>";
+    
+    include __DIR__ . '/../menu.php'; 
+    ?>
 
     <div class="main-content">
         <div class="search-bar-container">
@@ -275,10 +234,6 @@ try {
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                     
-                    <button id="btnTenhoInteresse" type="button" class="btn btn-success d-none" onclick="registrarInteresseProduto()">
-                        <i class="bi bi-heart"></i> Tenho Interesse
-                    </button>
-
                     <button id="btnProporTroca" type="button" class="btn btn-info d-none" onclick="abrirModalPropostaTroca()">
                         <i class="bi bi-arrow-repeat"></i> Propor Troca
                     </button>
@@ -345,53 +300,6 @@ try {
         </div>
     </div>
 
-    <div class="modal fade" id="cadastroProdutoModal" tabindex="-1" aria-labelledby="cadastroProdutoModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="cadastroProdutoModalLabel">Cadastro de Produto</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="formCadastroProduto" enctype="multipart/form-data">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="nome" class="form-label">Nome do Produto</label>
-                                <input type="text" class="form-control" id="nome" name="nome" required>
-                                <div class="invalid-feedback">
-                                    Por favor, informe o nome do produto.
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="preco" class="form-label">Preço</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">R$</span>
-                                    <input type="number" class="form-control" id="preco" name="preco" min="0" step="0.01" required>
-                                </div>
-                                <div class="invalid-feedback">
-                                    Por favor, informe o preço.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="descricao" class="form-label">Descrição</label>
-                            <textarea class="form-control" id="descricao" name="descricao" rows="3"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="foto" class="form-label">Foto do Produto</label>
-                            <input type="file" class="form-control" id="foto" name="foto" accept="image/*">
-                            <div class="form-text">Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 2MB</div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" form="formCadastroProduto" class="btn btn-primary">Cadastrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     window.usuarioLogadoId = <?php echo json_encode(isset($_SESSION['usuario_id']) ? $_SESSION['usuario_id'] : null); ?>;
@@ -411,6 +319,5 @@ try {
         }
 
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -6,63 +6,72 @@ require_once __DIR__ . '/../dao/mensagem_dao.php';
 require_once __DIR__ . '/../dao/cliente_dao.php';
 require_once __DIR__ . '/../model/cliente.php';
 
-if (!isset($_SESSION['usuario_id'])) {
+$is_modal_view = isset($_GET['is_modal']) && $_GET['is_modal'] === 'true';
+
+if (!$is_modal_view && !isset($_SESSION['usuario_id'])) {
     header('Location: login.php');
+    exit();
+} elseif ($is_modal_view && !isset($_SESSION['usuario_id'])) {
+    echo "<p>Sessão expirada. Por favor, recarregue a página principal e tente novamente.</p>";
     exit();
 }
 
 if (!isset($_GET['usuario_id']) || !filter_var($_GET['usuario_id'], FILTER_VALIDATE_INT)) {
-    header('Location: minhas_mensagens.php');
+    if (!$is_modal_view) header('Location: minhas_mensagens.php');
+    else echo "<p>ID de usuário inválido.</p>";
     exit();
 }
 
-$usuario_logado_id = (int)$_SESSION['usuario_id'];
+$id_usuario_logado = (int)$_SESSION['usuario_id'];
 $outro_usuario_id = (int)$_GET['usuario_id'];
+$nome_outro_usuario_param = $_GET['nome_usuario'] ?? null;
 
-if ($usuario_logado_id === $outro_usuario_id) {
-    header('Location: minhas_mensagens.php');
+if ($id_usuario_logado === $outro_usuario_id) {
+    if (!$is_modal_view) header('Location: minhas_mensagens.php');
+    else echo "<p>Não é possível conversar consigo mesmo.</p>";
     exit();
 }
 
 $mensagemDAO = new MensagemDAO();
 $clienteDAO = new ClienteDAO();
 
-$usuario_logado = $clienteDAO->buscarPorId($usuario_logado_id);
-$nome_usuario_logado = ($usuario_logado && method_exists($usuario_logado, 'getNome')) ? $usuario_logado->getNome() : "Você";
+$usuario_logado_obj = $clienteDAO->buscarPorId($id_usuario_logado);
 
-$outro_usuario = $clienteDAO->buscarPorId($outro_usuario_id);
-if (!$outro_usuario) {
-    $_SESSION['erro_chat'] = "Usuário não encontrado.";
-    header('Location: minhas_mensagens.php');
-    exit();
-}
-$nome_outro_usuario = ($outro_usuario && method_exists($outro_usuario, 'getNome')) ? $outro_usuario->getNome() : "Usuário #{$outro_usuario_id}";
-
-$mensagemDAO->marcarMensagensComoLidas($usuario_logado_id, $outro_usuario_id);
-
-$mensagens_da_conversa = $mensagemDAO->buscarConversa($usuario_logado_id, $outro_usuario_id);
-
-$nome_usuario_sidenav = "Usuário"; 
-$contador_mensagens_nao_lidas_geral = 0;
-$id_usuario_logado_s = $_SESSION['usuario_id'] ?? null;
-
-if ($id_usuario_logado_s) {
-    try {
-        $pdo_s = Database::getConnection(); 
-        $clienteDAO_s = new ClienteDAO();
-        $cliente_s = $clienteDAO_s->buscarPorId($id_usuario_logado_s);
-        if ($cliente_s) {
-            $nome_usuario_sidenav = $cliente_s->getNome();
-            if (!isset($_SESSION['usuario_nome']) || $_SESSION['usuario_nome'] !== $nome_usuario_sidenav) {
-                 $_SESSION['usuario_nome'] = $nome_usuario_sidenav;
-            }
+if ($is_modal_view && $nome_outro_usuario_param) {
+    $nome_outro_usuario = htmlspecialchars(urldecode($nome_outro_usuario_param));
+} else {
+    $outro_usuario = $clienteDAO->buscarPorId($outro_usuario_id);
+    if (!$outro_usuario) {
+        if (!$is_modal_view) {
+            $_SESSION['erro_chat'] = "Usuário não encontrado.";
+            header('Location: minhas_mensagens.php');
+        } else {
+            echo "<p>Usuário não encontrado.</p>";
         }
+        exit();
+    }
+    $nome_outro_usuario = ($outro_usuario && method_exists($outro_usuario, 'getNome')) ? $outro_usuario->getNome() : "Usuário #{$outro_usuario_id}";
+}
 
-        $mensagemDAO_s = new MensagemDAO(); 
-        $contador_mensagens_nao_lidas_geral = $mensagemDAO_s->contarMensagensNaoLidas($id_usuario_logado_s);
+$mensagemDAO->marcarMensagensComoLidas($id_usuario_logado, $outro_usuario_id);
+$mensagens_da_conversa = $mensagemDAO->buscarConversa($id_usuario_logado, $outro_usuario_id);
 
-    } catch (Exception $e) {
-        error_log("Erro ao buscar dados para side-nav em chat.php: " . $e->getMessage());
+if (!$is_modal_view) {
+    $nome_usuario = $_SESSION['usuario_nome'] ?? 'Usuário';
+    $contador_mensagens_nao_lidas = 0;
+    if ($id_usuario_logado) {
+        try {
+            $cliente_menu = $clienteDAO->buscarPorId($id_usuario_logado);
+            if ($cliente_menu) {
+                if (!isset($_SESSION['usuario_nome']) || $_SESSION['usuario_nome'] !== $cliente_menu->getNome()) {
+                     $_SESSION['usuario_nome'] = $cliente_menu->getNome();
+                     $nome_usuario = $cliente_menu->getNome();
+                }
+            }
+            $contador_mensagens_nao_lidas = $mensagemDAO->contarMensagensNaoLidas($id_usuario_logado);
+        } catch (Exception $e) {
+            error_log("Erro ao buscar dados para side-nav em chat.php: " . $e->getMessage());
+        }
     }
 }
 ?>
@@ -74,103 +83,136 @@ if ($id_usuario_logado_s) {
     <title>Chat com <?php echo htmlspecialchars($nome_outro_usuario); ?> - ECOxChange</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="dashboard.css"> 
-    <link rel="stylesheet" href="estilo_mensagens.css"> 
+    <?php if (!$is_modal_view): ?>
+    <link rel="stylesheet" href="dashboard.css">
+    <?php endif; ?>
+    <link rel="stylesheet" href="estilo_mensagens.css">
     <style>
-        .main-content .products-section {
-            padding-top: 10px; 
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            <?php if ($is_modal_view): ?>
+            overflow: hidden; /* Evitar scrollbars no próprio iframe se o conteúdo couber */
+            <?php endif; ?>
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            <?php if ($is_modal_view): ?>
+            background-color: #f8f9fa; /* Cor de fundo suave para o chat no modal */
+            <?php else: ?>
+            min-height: 100vh; /* Para view normal, garantir altura mínima */
+            <?php endif; ?>
+        }
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0; /* Essencial para flex children com overflow/scroll */
+            <?php if (!$is_modal_view): ?>
+            /* padding-top: 10px; // Estilo específico para view normal, se necessário */
+            <?php else: ?>
+            padding-top: 0;
+            <?php endif; ?>
+        }
+        .products-section { /* Container do chat ou da página */
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            <?php if ($is_modal_view): ?>
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            <?php else: ?>
+            /* Estilos para view normal, mantendo o que estava antes se aplicável */
+            max-width: 70%; 
+            margin-left: auto; 
+            margin-right: auto; 
+            padding-top: 15px;
+            <?php endif; ?>
         }
         .chat-container-wrapper {
-            height: calc(100vh - 70px); 
-            display: flex; 
+            flex-grow: 1;
+            display: flex;
             flex-direction: column;
+            min-height: 0;
+            <?php if (!$is_modal_view): ?>
+            height: calc(100vh - 70px); /* Altura para visualização normal */
+            <?php endif; ?>
+            /* Se for modal, a altura é determinada pelo flex-grow */
+        }
+        .chat-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* CRUCIAL: impede que este container role ou se expanda além do seu espaço flexível */
+            min-height: 0;   /* Permite encolher */
+            background-color: #fff;
+        }
+        .chat-header {
+            flex-shrink: 0; /* Não encolher */
+            <?php if ($is_modal_view): ?>
+            /* O header do chat não é mostrado no modal, o título do modal já serve. */
+            /* Se fosse mostrado, teria padding menor: padding: 8px 12px; */
+            /* font-size: 1rem; */
+            <?php else: ?>
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            <?php endif; ?>
+        }
+        .mensagens-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            min-height: 0;
+            word-break: break-word;
+            padding: 10px 12px;
+        }
+        .area-envio-mensagem {
+            flex-shrink: 0;
+            border-top: 1px solid #dee2e6;
+            <?php if ($is_modal_view): ?>
+            padding: 8px 12px;
+            background-color: #f8f9fa;
+            <?php else: ?>
+            padding: 10px 15px;
+            /* background-color: #f1f1f1; // Exemplo de cor para view normal */
+            <?php endif; ?>
+        }
+        .area-envio-mensagem form {
+            display: flex; /* Mantém o layout flexível para textarea e botão */
+            align-items: center; /* Alinha verticalmente os itens no centro */
+            width: 100%; /* FAZ O FORMULÁRIO OCUPAR TODA A LARGURA DISPONÍVEL */
+        }
+        .area-envio-mensagem textarea {
+            flex-grow: 1;
+            margin-right: 8px;
         }
     </style>
 </head>
 <body>
-    <div class="side-nav-bar">
-        <div class="logo-container">
-            <div class="logo">ECO<span>xchange</span></div>
-        </div>
-
-        <a href="dashboard.php">
-            <i class="bi bi-speedometer2"></i>
-            <span>Dashboard</span>
-        </a>
-        
-        <?php if ($id_usuario_logado_s): ?>
-            <a href="#" data-bs-toggle="modal" data-bs-target="#cadastroProdutoModalDashboard"> 
-                <i class="bi bi-plus-circle"></i>
-                <span>Cadastrar Produto</span>
-            </a>
-            <a href="meus_produtos.php">
-                <i class="bi bi-archive"></i>
-                <span>Meus Produtos</span>
-            </a>
-            <a href="minhas_mensagens.php" class="active position-relative"> 
-                <i class="bi bi-chat-left-dots"></i>
-                <span>Minhas Mensagens</span>
-                <?php if ($contador_mensagens_nao_lidas_geral > 0): ?>
-                    <span class="badge bg-danger position-absolute top-50 start-100 translate-middle-y ms-2" style="font-size: 0.65em; padding: 0.3em 0.5em;"><?php echo $contador_mensagens_nao_lidas_geral; ?></span>
-                <?php endif; ?>
-            </a>
-        <?php endif; ?>
-
-        <?php if (isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true): ?>
-            <a href="../view/listar_clientes.php">
-                <i class="bi bi-people"></i>
-                <span>Gerenciar Clientes</span>
-            </a> 
-        <?php endif; ?>
-
-        <?php if ($id_usuario_logado_s): ?>
-        <div class="notifications-section-container">
-            <div class="notifications-header">
-                <i class="bi bi-bell"></i>
-                <span>Notificações</span>
-                <span id="contadorNotificacoesSideNav" class="badge bg-danger ms-2" style="font-size: 0.7em; padding: 0.3em 0.5em; <?php echo ($contador_mensagens_nao_lidas_geral > 0 ? '' : 'display:none;'); ?>">
-                    <?php echo $contador_mensagens_nao_lidas_geral; ?> 
-                </span>
-            </div>
-            <ul class="notifications-list" id="listaNotificacoesSideNav">
-                <li id="notificacaoItemLoadingSideNav" class="dropdown-item text-muted">Carregando...</li>
-                <li id="notificacaoItemNenhumaSideNav" class="dropdown-item text-muted d-none">Nenhuma notificação nova.</li>
-                <li id="marcarTodasLidasContainerSideNav" class="d-none"><a class="dropdown-item text-center" href="#" id="marcarTodasLidasLinkSideNav" onclick="marcarTodasComoLidas(event)">Marcar todas como lidas</a></li> 
-            </ul>
-        </div>
-        <?php endif; ?>
-
-        <div class="user-info-nav">
-            <?php if ($id_usuario_logado_s): ?>
-                <span><i class="bi bi-person-circle"></i> <?= htmlspecialchars($nome_usuario_sidenav) ?></span>
-                <a href="../controllers/logout_controller.php">
-                    <i class="bi bi-box-arrow-right"></i>
-                    <span>Sair</span>
-                </a>
-            <?php else: ?>
-                <a href="login.php">
-                    <i class="bi bi-box-arrow-in-right"></i>
-                    <span>Login</span>
-                </a>
-            <?php endif; ?>
-        </div>
-    </div>
+    <?php if (!$is_modal_view): ?>
+        <?php include __DIR__ . '/../menu.php'; ?>
+    <?php endif; ?>
 
     <div class="main-content">
-        <div class="products-section container-fluid mt-0" style="max-width: 70%; margin-left: auto; margin-right: auto; padding-top: 15px;"> 
-            <div class="chat-container-wrapper"> 
-                <div class="chat-container"> 
+        <div class="products-section">
+            <div class="chat-container-wrapper">
+                <div class="chat-container">
+                    <?php if (!$is_modal_view): ?>
                     <div class="chat-header">
                         <h5>Chat com <?php echo htmlspecialchars($nome_outro_usuario); ?></h5>
                     </div>
+                    <?php endif; ?>
 
                     <div class="mensagens-box" id="chat-messages-area">
                         <?php if (empty($mensagens_da_conversa)): ?>
                             <p class="sem-mensagens">Nenhuma mensagem ainda. Seja o primeiro a enviar!</p>
                         <?php else: ?>
                             <?php foreach ($mensagens_da_conversa as $msg): ?>
-                                <?php 
-                                $classe_css = ($msg->getRemetenteId() == $usuario_logado_id) ? 'enviada' : 'recebida';
+                                <?php
+                                $classe_css = ($msg->getRemetenteId() == $id_usuario_logado) ? 'enviada' : 'recebida';
                                 $data_formatada = date("d/m/Y H:i", strtotime($msg->getDataEnvio()));
                                 ?>
                                 <div class="mensagem <?php echo $classe_css; ?>">
@@ -182,10 +224,10 @@ if ($id_usuario_logado_s) {
                     </div>
 
                     <div class="area-envio-mensagem">
-                        <form id="chatForm" action="../controllers/enviar_mensagem_controller.php" method="POST" style="display:flex; width:100%;">
+                        <form id="chatForm" action="../controllers/enviar_mensagem_controller.php" method="POST">
                             <textarea name="conteudo" placeholder="Digite sua mensagem..." rows="2" required></textarea>
                             <input type="hidden" name="destinatario_id" value="<?php echo htmlspecialchars($outro_usuario_id); ?>">
-                            <input type="hidden" name="remetente_id" value="<?php echo htmlspecialchars($usuario_logado_id); ?>">
+                            <input type="hidden" name="remetente_id" value="<?php echo htmlspecialchars($id_usuario_logado); ?>">
                             <button type="submit" class="btn btn-primary">Enviar</button>
                         </form>
                     </div>
@@ -194,87 +236,38 @@ if ($id_usuario_logado_s) {
         </div>
     </div>
 
-    <div class="modal fade" id="cadastroProdutoModalDashboard" tabindex="-1" aria-labelledby="cadastroProdutoModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="cadastroProdutoModalLabel">Cadastrar Novo Produto</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="mensagemErroCadastroChat" class="alert alert-danger d-none" role="alert"></div>
-                    <div id="mensagemSucessoCadastroChat" class="alert alert-success d-none" role="alert"></div>
-                    <form id="formCadastroProdutoChat" enctype="multipart/form-data">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="cadastroNomeChat" class="form-label">Nome do Produto *</label>
-                                <input type="text" class="form-control" id="cadastroNomeChat" name="nome" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="cadastroPrecoChat" class="form-label">Preço *</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">R$</span>
-                                    <input type="number" class="form-control" id="cadastroPrecoChat" name="preco" min="0" step="0.01" required>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="cadastroDescricaoChat" class="form-label">Descrição</label>
-                            <textarea class="form-control" id="cadastroDescricaoChat" name="descricao" rows="3"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="cadastroFotoChat" class="form-label">Foto do Produto</label>
-                            <input type="file" class="form-control" id="cadastroFotoChat" name="foto" accept="image/*">
-                            <div class="form-text">Formatos aceitos: JPG, PNG, GIF.</div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" id="btnSalvarCadastroProdutoChat" class="btn btn-primary">Cadastrar Produto</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        window.usuarioLogadoId = <?php echo json_encode($usuario_logado_id); ?>; 
+        window.usuarioLogadoId = <?php echo json_encode($id_usuario_logado); ?>;
         window.isAdmin = <?php echo json_encode(isset($_SESSION['is_admin']) && $_SESSION['is_admin']); ?>;
         const outroUsuarioId = <?php echo json_encode($outro_usuario_id); ?>;
+        const isModalView = <?php echo json_encode($is_modal_view); ?>;
 
-        function marcarTodasComoLidasClientSide(event, prefix = '') {
-            event.preventDefault();
-            const contadorNotificacoes = document.getElementById('contadorNotificacoesSideNav'); 
-            const listaNotificacoes = document.getElementById('listaNotificacoesDropdown' + prefix);
-            
-            if (contadorNotificacoes) {
-                contadorNotificacoes.style.display = 'none';
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+            const scrollToBottomParam = params.get('scroll_to_bottom');
+            const chatMessagesArea = document.getElementById('chat-messages-area');
+
+            function doScroll() {
+                if(chatMessagesArea) {
+                    chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
+                    console.log('[Chat.php] Tentativa de rolagem para o final. ScrollTop:', chatMessagesArea.scrollTop, 'ScrollHeight:', chatMessagesArea.scrollHeight);
+                } else {
+                    console.warn('[Chat.php] Área de mensagens (chat-messages-area) não encontrada para rolagem.');
+                }
             }
-            
-            if(listaNotificacoes){
-                const itensNotificacao = listaNotificacoes.querySelectorAll('.notificacao-nao-lida'); 
-                itensNotificacao.forEach(item => item.classList.remove('notificacao-nao-lida'));
 
-                const loadingItem = listaNotificacoes.querySelector('#notificacaoItemLoading' + prefix);
-                const nenhumaItem = listaNotificacoes.querySelector('#notificacaoItemNenhuma' + prefix);
-                const dividerFinal = listaNotificacoes.querySelector('#notificacoesDividerFinal' + prefix);
-                const verTodasLink = listaNotificacoes.querySelector('#verTodasNotificacoesLink' + prefix);
-                const marcarLidasLink = listaNotificacoes.querySelector('#marcarTodasLidasLink' + prefix);
-
-                if(loadingItem) loadingItem.classList.add('d-none');
-                if(nenhumaItem) nenhumaItem.classList.remove('d-none');
-                if(dividerFinal) dividerFinal.classList.add('d-none');
-                if(verTodasLink) verTodasLink.classList.add('d-none');
-                if(marcarLidasLink) marcarLidasLink.classList.add('d-none');
+            if (scrollToBottomParam === 'true') {
+                // Tenta rolar imediatamente e depois com um pequeno delay para garantir
+                doScroll(); 
+                setTimeout(doScroll, 100); // Delay de 100ms
+                setTimeout(doScroll, 300); // Delay adicional para casos mais lentos
+            } else {
+                 // Comportamento padrão (que já rola para o final)
+                doScroll();
             }
-        }
+        };
 
-        const chatMessagesArea = document.getElementById('chat-messages-area');
-        if(chatMessagesArea) {
-            chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
-        }
-        
         const chatForm = document.getElementById('chatForm');
         if (chatForm) {
             chatForm.addEventListener('submit', async function(e) {
@@ -291,11 +284,21 @@ if ($id_usuario_logado_s) {
                 const mensagemDiv = document.createElement('div');
                 mensagemDiv.classList.add('mensagem', 'enviada');
                 mensagemDiv.id = tempId;
-                mensagemDiv.innerHTML = `<p style="margin:0;">${conteudoMensagem.replace(/\n/g, '<br>')}</p><span class="timestamp">Enviando... (${dataAtual})</span>`;
+                // Usar textContent para segurança e nl2br manual para quebra de linha
+                const p = document.createElement('p');
+                p.style.margin = '0';
+                p.innerHTML = conteudoMensagem.replace(/\n/g, '<br>'); // nl2br via JS
+                mensagemDiv.appendChild(p);
+
+                const span = document.createElement('span');
+                span.classList.add('timestamp');
+                span.textContent = `Enviando... (${dataAtual})`;
+                mensagemDiv.appendChild(span);
+                
                 chatMessagesArea.appendChild(mensagemDiv);
                 textarea.value = '';
                 chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
-                
+
                 try {
                     const response = await fetch('../controllers/enviar_mensagem_controller.php', {
                         method: 'POST',
@@ -309,9 +312,13 @@ if ($id_usuario_logado_s) {
 
                     if (result.success && msgElement) {
                         msgElement.querySelector('.timestamp').textContent = dataAtual;
+                         // Remover 'enviando' e 'falha' se houver para limpar o estado
+                        msgElement.classList.remove('mensagem-falha');
+                        // Opcional: adicionar classe de sucesso se houver
+                        // msgElement.classList.add('mensagem-sucesso'); 
                     } else if (msgElement) {
                         msgElement.querySelector('.timestamp').textContent = `Falha ao enviar (${dataAtual})`;
-                        msgElement.classList.add('mensagem-falha'); 
+                        msgElement.classList.add('mensagem-falha');
                     }
                 } catch (error) {
                     console.error('Erro ao enviar mensagem:', error);
@@ -324,38 +331,24 @@ if ($id_usuario_logado_s) {
             });
         }
 
-        const btnSalvarCadastroProdutoChat = document.getElementById('btnSalvarCadastroProdutoChat');
-        if(btnSalvarCadastroProdutoChat) {
-            btnSalvarCadastroProdutoChat.addEventListener('click', async function() {
-                const form = document.getElementById('formCadastroProdutoChat');
-                const formData = new FormData(form);
-                const msgErroCadastro = document.getElementById('mensagemErroCadastroChat');
-                const msgSucessoCadastro = document.getElementById('mensagemSucessoCadastroChat');
-
-                msgErroCadastro.classList.add('d-none');
-                msgSucessoCadastro.classList.add('d-none');
-
-                try {
-                    const response = await fetch('../controllers/cadastrar_produto.php', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const result = await response.json();
-                    if (result.success) {
-                        msgSucessoCadastro.textContent = result.message || 'Produto cadastrado com sucesso!';
-                        msgSucessoCadastro.classList.remove('d-none');
-                        form.reset();
-                    } else {
-                        msgErroCadastro.textContent = result.error || 'Erro desconhecido ao cadastrar produto.';
-                        msgErroCadastro.classList.remove('d-none');
-                    }
-                } catch (error) {
-                    console.error('Erro ao cadastrar produto via chat page:', error);
-                    msgErroCadastro.textContent = 'Erro de comunicação ao cadastrar. Tente novamente.';
-                    msgErroCadastro.classList.remove('d-none');
-                }
+        // Auto-ajuste da altura da textarea
+        const textarea = document.querySelector('.area-envio-mensagem textarea');
+        if (textarea) {
+            textarea.addEventListener('input', function () {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
             });
         }
+
+        // Se estiver no modal, e o modal for redimensionado, pode ser útil reajustar o scroll.
+        // No entanto, com flexbox crescendo corretamente, isso pode não ser mais necessário.
+        // if (isModalView && window.parent && window.parent.document) {
+        //     const modalElement = window.parent.document.getElementById('chatModal');
+        //     if (modalElement) {
+        //         // Exemplo: Ouvir um evento customizado ou redimensionamento do modal se possível
+        //     }
+        // }
+
     </script>
 </body>
 </html> 

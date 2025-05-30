@@ -7,143 +7,23 @@
 
 body {
     background-color: #f5f5f5;
-    height: 100vh; /* Ocupa toda a altura da viewport */
-    overflow: hidden; /* Impede o scroll do body */
-    display: flex;
-    flex-direction: row; /* GARANTIR que seja row para side-nav e main-content lado a lado */
+    height: 100vh; 
+
 }
 
-.side-nav-bar {
-    width: 260px; /* Largura da barra lateral */
-    height: 100vh; /* Altura total */
-    background-color: #343a40; /* Cor de fundo escura para um visual moderno */
-    padding: 20px 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Centraliza os ícones/texto se não houver texto */
-    border-right: 1px solid #444;
-    flex-shrink: 0; /* Impede que a side-nav encolha */
-    color: #f8f9fa; /* Cor do texto clara */
-}
-
-.side-nav-bar .logo-container {
-    padding: 10px 20px;
-    margin-bottom: 30px;
-    text-align: center;
-}
-
-.side-nav-bar .logo-container .logo {
-    font-size: 28px; /* Aumenta o logo */
-    font-weight: bold;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.side-nav-bar .logo-container .logo span {
-    background: repeating-linear-gradient(
-        90deg,
-        #f093fb 0%,
-        #f5576c 25%,
-        #764ba2 50%,
-        #667eea 75%,
-        #f093fb 100%
-    );
-    background-size: 200% 100%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: gradientFlow 2s linear infinite;
-}
-
-@keyframes gradientFlow {
-    0% { background-position: 0% 0%; }
-    100% { background-position: 200% 0%; }
-}
-
-.side-nav-bar a {
-    text-decoration: none;
-    color: #adb5bd; /* Cor dos links */
-    font-size: 16px; /* Tamanho da fonte dos links */
-    padding: 15px 25px; /* Espaçamento interno dos links */
-    display: flex; /* Para alinhar ícones e texto */
-    align-items: center;
-    width: 100%; /* Faz o link ocupar toda a largura */
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.side-nav-bar a i {
-    margin-right: 15px; /* Espaço entre o ícone e o texto */
-    font-size: 20px; /* Tamanho dos ícones */
-    width: 20px; /* Largura fixa para alinhamento */
-    text-align: center;
-}
-
-.side-nav-bar a:hover,
-.side-nav-bar a.active { /* Estilo para link ativo */
-    background-color: #495057; /* Cor de fundo ao passar o mouse/ativo */
-    color: #f8f9fa; /* Cor do texto ao passar o mouse/ativo */
-    border-left: 3px solid #00ff1a; /* Destaque lateral para o item ativo/hover */
-    padding-left: 22px; /* Ajuste para compensar a borda */
-}
-
-.side-nav-bar .user-info-nav {
-    margin-top: auto; /* Empurra para o final da barra lateral */
-    padding: 20px;
-    border-top: 1px solid #444;
-    width: 100%;
-    text-align: center;
-}
-
-.side-nav-bar .user-info-nav span {
-    display: block;
-    margin-bottom: 10px;
-    font-size: 14px;
-}
-
-.side-nav-bar .user-info-nav a {
-    font-size: 14px;
-    padding: 10px 25px;
-    justify-content: center; /* Centraliza o texto do link de logout */
-}
 
 .main-content {
-    flex-grow: 1; /* Ocupa o espaço restante */
-    height: 100vh; /* Ocupa toda a altura */
-    overflow-y: hidden; /* O scroll principal será dentro das seções */
+    flex-grow: 1; 
+    overflow-y: auto; 
     display: flex;
     flex-direction: column;
 }
 
 #loading {
-    color: #ff6f00; /* Cor do spinner */
+    color: #ff6f00; 
 }
 
-.logo {
-    font-size: 24px;
-    font-weight: bold;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
 
-.logo span {
-    background: repeating-linear-gradient(
-        90deg,
-        #f093fb 0%,
-        #f5576c 25%,
-        #764ba2 50%,
-        #667eea 75%,
-        #f093fb 100%
-    );
-    background-size: 200% 100%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: gradientFlow 2s linear infinite;
-}
 
 .search-bar {
     flex-grow: 1;
@@ -208,51 +88,43 @@ body {
 
 .products-section {
     padding: 20px;
-    flex-grow: 1; /* Faz a seção ocupar o espaço vertical restante */
-    overflow-y: auto; /* Habilita o scroll vertical APENAS para esta seção */
-    min-height: 0; /* Necessário para flex-grow funcionar corretamente com overflow em alguns casos */
+    flex-grow: 1; 
+    overflow-y: auto; 
+    min-height: 0;
 }
 
-#produtosContainer {
-    /* min-height: 100%;  Pode não ser mais necessário ou desejável com flex-grow na parent */
-    /* Considere remover ou ajustar se causar problemas com o scroll da products-section */
-}
+
 
 .produto-card {
     border: 1px solid #e0e0e0;
     background: #ffffff; 
-    border-radius: 50%; /* Card continua totalmente redondo */
-    aspect-ratio: 1 / 1; /* Força o card a ser um quadrado, que vira círculo */
-    overflow: hidden; /* MUITO IMPORTANTE para o efeito */
+    border-radius: 50%; 
+    aspect-ratio: 1 / 1; 
+    overflow: hidden; 
     display: flex;
-    flex-direction: column; /* Empilha a imagem (wrapper) e o corpo */
-    /* Removido padding geral, será controlado por seções internas */
+    flex-direction: column; 
 }
 
 .produto-card:hover {
     box-shadow: 0 6px 20px rgba(0,0,0,0.12);
 }
 
-/* Nova div para envolver a imagem e controlar sua forma na metade superior */
 .card-img-half-circle-wrapper {
     width: 100%;
-    height: 70%; /* Ocupa 70% da altura do card para a imagem */
-    overflow: hidden; /* Essencial para cortar a imagem */
-    position: relative; /* Para posicionamento da imagem interna */
-    /* Não precisa de border-radius aqui, o card pai já corta em círculo */
+    height: 70%; 
+    overflow: hidden; 
+    position: relative; 
 }
 
-.card-img-container { /* Reutilizado, mas com novo propósito */
+.card-img-container { 
     width: 100%;
-    height: 100%; /* Preenche o card-img-half-circle-wrapper */
-    /* background-color: #e9ecef; */ /* Movido para o card-img-top ou pode ser removido se a imagem sempre cobrir */
+    height: 100%; 
     display: flex; 
     align-items: center; 
     justify-content: center; 
-    position: absolute; /* Para garantir que a imagem preencha corretamente */
+    position: absolute; 
     top: 0;
     left: 0;
-    /* border-radius e overflow removidos daqui, controlados pelo wrapper e card pai */
 }
 
 .card-img-top {
@@ -260,26 +132,24 @@ body {
     height: 100%;
     object-fit: cover; 
     object-position: center; 
-    /* Não precisa de position absolute se o .card-img-container já é absoluto e preenche o wrapper */
 }
 
 .card-img-placeholder-icon {
-    font-size: 2.5rem; /* Ajuste para caber na metade do círculo */
+    font-size: 2.5rem; 
     color: #adb5bd; 
-    /* Centralizado pelo flex do .card-img-container */
 }
 
 .card-body {
     width: 100%;
-    height: 30%; /* Ocupa os 30% restantes da altura para o texto */
-    padding: 8px 12px 12px 12px; /* Padding ajustado para menos altura */
+    height: 30%; 
+    padding: 8px 12px 12px 12px; 
     text-align: center; 
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Centraliza o conteúdo do corpo verticalmente */
-    align-items: center;   /* Centraliza o conteúdo do corpo horizontalmente */
-    box-sizing: border-box; /* Para padding não aumentar a altura */
-    background-color: #f7f7f7; /* Fundo para a parte do texto, se desejado */
+    justify-content: center; 
+    align-items: center;   
+    box-sizing: border-box; 
+    background-color: #f7f7f7; 
 }
 
 .card-title {
@@ -288,16 +158,10 @@ body {
     margin-bottom: 0.2rem;
     color: #333;
     line-height: 1.2;
-    /* A classe text-truncate no HTML pode ser usada para uma linha. */
-    /* Para múltiplas linhas com truncamento em área não retangular é complexo. */
-    /* Manter simples por agora. */
 }
 
 .card-text {
-    margin-bottom: 0; /* Ajuste conforme necessário */
-    /* display: flex; */ /* Removido, não mais necessário para empilhar apenas preço */
-    /* flex-direction: column; */ /* Removido */
-    /* gap: 0; */ /* Removido */
+    margin-bottom: 0; 
 }
 
 .preco {
@@ -336,11 +200,6 @@ body {
     margin-bottom: 1rem;
 }
 
-#loading {
-    color: #ff6f00;
-    padding: 20px;
-}
-
 #loading .spinner-border {
     width: 3rem;
     height: 3rem;
@@ -370,158 +229,52 @@ body {
 .input-group-text {
     width: 45px;
     justify-content: center;
-    height: 38px; /* Altura padrão do input do Bootstrap */
+    height: 38px; 
     padding: 0.375rem 0.75rem;
     font-size: 1rem;
     line-height: 1.5;
 }
 
 .btn-search-custom {
-    background-color: #ff6f00; /* Cor de fundo laranja, similar ao tema */
+    background-color: #ff6f00; 
     border: none;
     color: white;
-    padding: 12px; /* Ajuste o padding conforme necessário */
+    padding: 12px; 
     text-align: center;
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-    margin-left: 5px; /* Afastamento à esquerda */
+    margin-left: 5px; 
     cursor: pointer;
-    border-radius: 50%; /* Torna o botão redondo */
-    width: 40px; /* Largura fixa para manter a forma redonda */
-    height: 40px; /* Altura fixa para manter a forma redonda */
-    line-height: 1; /* Para centralizar o ícone verticalmente, ajuste se necessário */
-    display: flex; /* Para centralizar o ícone */
-    align-items: center; /* Para centralizar o ícone */
-    justify-content: center; /* Para centralizar o ícone */
+    border-radius: 50%; 
+    width: 40px; 
+    height: 40px; 
+    line-height: 1; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
 }
 
 .btn-search-custom:hover {
-    background-color: #e65c00; /* Laranja um pouco mais escuro no hover */
+    background-color: #e65c00; 
 }
 
-/* Estilos para o dropdown de notificações */
-#listaNotificacoesDropdown.dropdown-menu {
-    min-width: 450px; /* Aumenta a largura do dropdown */
-    padding: 0.5rem; /* Adiciona um pouco de padding interno */
-}
-
-#listaNotificacoesDropdown .dropdown-item {
-    /* color: #000000 !important; */ /* Movido para ser mais específico abaixo */
-    white-space: normal !important; /* Permite quebra de linha no texto do item */
-    padding-top: 0.75rem;
-    padding-bottom: 0.75rem;
-}
-
-/* Cor do texto principal da notificação para preto */
-#listaNotificacoesDropdown .dropdown-item div > span {
-    color: #000000 !important; 
-}
-
-#listaNotificacoesDropdown .dropdown-item .text-muted {
-    color: #333333 !important; /* Torna a data um pouco mais escura para melhor leitura */
-}
-
-/* Ajuste para o link "Marcar todas como lidas" e "Ver todas" se existirem */
-#listaNotificacoesDropdown .dropdown-item.text-center a {
-    color: #007bff !important; /* Cor padrão de link Bootstrap para consistência */
-}
-
-#listaNotificacoesDropdown .dropdown-item.text-center a:hover {
-    text-decoration: underline !important;
-}
-
-/* Ajuste para a barra de pesquisa dentro do conteúdo */
-.search-bar-content {
-    /* margin-bottom: 20px;  Já tem mb-4 na classe bootstrap */
-    /* Adicione estilos específicos se o d-flex do bootstrap não for suficiente */
-}
-
-.side-nav-bar .nav-item-notificacao {
-    /* Estilo para o container do botão de notificação, se necessário */
-    width: 100%;
-    position: relative; /* Para o posicionamento do dropdown */
-}
-
-.side-nav-bar .btn-notificacao {
-    background: none;
-    border: none;
-    color: #adb5bd;
-    padding: 15px 25px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    font-size: 16px;
-    transition: background-color 0.3s, color 0.3s;
-}
-
-.side-nav-bar .btn-notificacao:hover,
-.side-nav-bar .btn-notificacao.active-link { /* Manter consistência com os links */
-    background-color: #495057;
-    color: #f8f9fa;
-}
-
-.side-nav-bar .btn-notificacao i {
-    margin-right: 15px;
-    font-size: 20px;
-    width: 20px;
-    text-align: center;
-}
-
-.side-nav-bar #listaNotificacoesDropdown {
-    /* Ajustes para o dropdown de notificações na side-nav */
-    /* Pode precisar de ajustes de posicionamento se não abrir corretamente */
-    /* Ex: position: fixed; left: 260px; top: auto; bottom: auto; transform: translateY(-50%); */
-    /* A linha acima é um exemplo, o ideal é testar com o HTML */
-    background-color: #343a40; /* Fundo escuro como a side-nav */
-    border: 1px solid #444;
-    min-width: 350px; /* Largura do dropdown */
-}
-
-.side-nav-bar #listaNotificacoesDropdown .dropdown-header,
-.side-nav-bar #listaNotificacoesDropdown .dropdown-item {
-    color: #f8f9fa; /* Texto claro */
-}
-
-.side-nav-bar #listaNotificacoesDropdown .dropdown-item:hover {
-    background-color: #495057; /* Cor de hover */
-}
-
-.side-nav-bar #listaNotificacoesDropdown .dropdown-divider {
-    border-top: 1px solid #444;
-}
-
-/* Cor do texto principal da notificação para branco/cinza claro */
-.side-nav-bar #listaNotificacoesDropdown .dropdown-item div > span {
-    color: #e0e0e0 !important; 
-}
-
-.side-nav-bar #listaNotificacoesDropdown .dropdown-item .text-muted {
-    color: #adb5bd !important; 
-}
-
-.side-nav-bar #listaNotificacoesDropdown .dropdown-item.text-center a {
-    color: #00ff1a !important; /* Cor de destaque */
-}
-
-/* ESTILOS PARA A NOVA BARRA DE BUSCA CENTRALIZADA */
 .search-bar-container {
-    padding: 20px 0; /* Espaçamento acima e abaixo da barra de busca */
-    width: 100%;
-    display: flex; /* Para centralizar a search-bar-md3 */
+    padding: 20px 0; 
+    display: flex; 
     justify-content: center;
-    flex-shrink: 0; /* Para não encolher se o conteúdo abaixo for grande */
+    flex-shrink: 0; 
 }
 
 .search-bar-md3 {
     display: flex;
     align-items: center;
-    width: 50%; /* Metade da largura do container pai */
-    max-width: 600px; /* Limite máximo de largura */
-    background-color: #e8eaed; /* Cor de fundo estilo Material Design 3 (cinza claro) */
-    border-radius: 28px; /* Cantos bem arredondados */
-    padding: 8px 12px 8px 20px; /* Ajustado: Topo Direita Baixo Esquerda */
-    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.1), 0 1px 4px 0 rgba(0,0,0,0.08); /* Sombra sutil */
+    width: 50%; 
+    max-width: 600px; 
+    background-color: #e8eaed; 
+    border-radius: 28px; 
+    padding: 8px 12px 8px 20px; 
+    box-shadow: 0 1px 2px 0 rgba(0,0,0,0.1), 0 1px 4px 0 rgba(0,0,0,0.08); 
 }
 
 .search-bar-md3 input[type="text"] {
@@ -530,20 +283,20 @@ body {
     background: transparent;
     outline: none;
     font-size: 16px;
-    color: #3c4043; /* Cor do texto do input */
+    color: #3c4043; 
     margin-right: 8px;
 }
 
 .search-bar-md3 input[type="text"]::placeholder {
-    color: #5f6368; /* Cor do placeholder */
+    color: #5f6368; 
 }
 
 .search-bar-md3 button {
     border: none;
     background: transparent;
-    color: #5f6368; /* Cor do ícone de busca */
+    color: #5f6368; 
     padding: 8px;
-    border-radius: 50%; /* Para manter o ícone com fundo redondo se desejado */
+    border-radius: 50%; 
     display: flex;
     align-items: center;
     justify-content: center;
@@ -556,163 +309,30 @@ body {
 }
 
 .search-bar-md3 button:hover {
-    background-color: rgba(0,0,0,0.05); /* Leve feedback no hover */
+    background-color: rgba(0,0,0,0.05); 
 }
 
-/* FIM DOS ESTILOS DA NOVA BARRA DE BUSCA */
-
-/* ESTILOS PARA O BANNER ECOLÓGICO */
 .ecological-info-banner {
     padding: 15px 20px;
-    margin: 10px 20px 15px 20px; /* Ajuste de margem, principalmente superior/inferior */
-    /* background-color: #f8f9fa; */ /* REMOVIDO */
+    margin: 10px 20px 15px 20px; 
     border-radius: 8px;
     display: flex;
-    flex-direction: column; /* Ícone e texto empilhados */
-    align-items: center; /* Centraliza itens na vertical (ícone e parágrafo) */
-    /* justify-content: center; */ /* Não mais necessário com column e align-items */
+    flex-direction: column; 
+    align-items: center; 
     text-align: center;
-    /* border: 1px solid #e9ecef; */ /* REMOVIDO */
 }
 
 .ecological-info-banner i {
-    font-size: 2.2rem; /* Ícone um pouco maior */
-    color: #28a745; /* Verde para o ícone de planta */
-    /* margin-right: 12px; */ /* REMOVIDO */
-    margin-bottom: 10px; /* Espaço entre o ícone e o texto */
+    font-size: 2.2rem; 
+    color: #28a745; 
+    margin-bottom: 10px; 
 }
 
 .ecological-info-banner p {
-    margin-bottom: 0; /* Remove margem padrão do parágrafo */
+    margin-bottom: 0; 
     font-size: 0.9rem;
-    color: #c6c9cb; /* Cinza para baixo contraste */
+    color: #c6c9cb; 
     line-height: 1.4;
-    width: 70%; /* Texto ocupa 50% da largura */
-    max-width: 900px; /* Limite máximo para não ficar muito largo em telas grandes */
-}
-/* FIM ESTILOS BANNER ECOLÓGICO */
-
-/* Ajuste para a barra de pesquisa dentro do conteúdo - AGORA REMOVIDA OU SUBSTITUÍDA */
-/*
-.search-bar-content {
-     margin-bottom: 20px;  Já tem mb-4 na classe bootstrap 
-     Adicione estilos específicos se o d-flex do bootstrap não for suficiente 
-}
-*/
-
-/* REMOVER ou AJUSTAR estilos antigos do .nav-item-notificacao.dropdown e .btn-notificacao se conflitarem */
-/*
-.side-nav-bar .nav-item-notificacao.dropdown {
-    /* Estilos antigos podem ser removidos ou comentados se não mais aplicáveis */
-    /* Ex: position: relative; */
-/*
-}
-
-.side-nav-bar .btn-notificacao.dropdown-toggle {
-    /* Estilos antigos podem ser removidos ou comentados */
-    /* Ex: background-color: transparent; color: #adb5bd; etc. */
-/*
-}
-
-.side-nav-bar .dropdown-menu-dark { /* Se este era o estilo do dropdown antigo, será substituído */
-    /* Comentar ou remover */
-    /* background-color: #343a40; */
-    /* border: 1px solid rgba(255, 255, 255, 0.15); */
-/*
-}
-*/
-
-/* NOVOS ESTILOS PARA A SEÇÃO DE NOTIFICAÇÕES VISÍVEL */
-.side-nav-bar .notifications-section-container {
-    margin-top: 10px;
-    margin-bottom: 15px;
-    padding: 0 10px; /* Adiciona um pouco de padding lateral para o container não colar nas bordas da side-nav */
-}
-
-.side-nav-bar .notifications-header {
-    display: flex;
-    align-items: center;
-    padding: 8px 10px; /* Ajustado o padding */
-    color: #c2c7d0; /* Cor do texto do header da notificação */
-    font-weight: 500;
-    cursor: default; /* Não é mais clicável como um dropdown */
-    /* border-bottom: 1px solid #4f5962; /* Linha sutil abaixo do header de notificações */
-    /* margin-bottom: 5px; */
-}
-
-.side-nav-bar .notifications-header .bi-bell {
-    margin-right: 10px;
-    font-size: 1.1rem;
-    color: #c2c7d0;
-}
-.side-nav-bar .notifications-header span:first-of-type { 
-    flex-grow: 1; 
-}
-
-
-.side-nav-bar .notifications-list {
-    list-style: none;
-    padding: 0;
-    margin: 5px 0 0 0; 
-    background-color: #e9ecef; 
-    border-radius: 6px;  
-    max-height: 220px;   
-    overflow-y: auto;
-    border: 1px solid #ced4da; 
-}
-
-.side-nav-bar .notifications-list li > a.dropdown-item,
-.side-nav-bar .notifications-list li.dropdown-item {
-    color: #343a40; 
-    border-bottom: 1px solid #ced4da; 
-    padding: 8px 12px; 
-    white-space: normal; 
-    display: block; 
-    text-decoration: none;
-    font-size: 0.875rem; 
-}
-
-.side-nav-bar .notifications-list li:last-child > a.dropdown-item,
-.side-nav-bar .notifications-list li:last-child.dropdown-item {
-    border-bottom: none;
-}
-
-.side-nav-bar .notifications-list li > a.dropdown-item.fw-bold { 
-    background-color: #dde0e3; 
-    font-weight: 600 !important;
-}
-
-.side-nav-bar .notifications-list li > a.dropdown-item:hover {
-    background-color: #d3d6d8;
-}
-
-.side-nav-bar .notifications-list .text-muted { 
-    color: #6c757d !important;
-}
-
-.side-nav-bar .notifications-list .dropdown-header {
-    font-weight: bold;
-    color: #495057;
-    background-color: #e9ecef; 
-    border-bottom: 1px solid #ced4da;
-}
-
-
-.side-nav-bar .notifications-list #marcarTodasLidasLinkSideNav {
-    display: block;
-    padding: 10px 12px;
-    text-align: center;
-    color: #007bff;
-    background-color: #e9ecef;
-    font-size: 0.85rem;
-    font-weight: 500;
-}
-.side-nav-bar .notifications-list #marcarTodasLidasLinkSideNav:hover {
-    text-decoration: underline;
-    background-color: #dde0e3;
-}
-
-.side-nav-bar .notifications-header #contadorNotificacoesSideNav {
-    font-size: 0.7em !important;   
-    padding: 0.3em 0.5em !important; 
+    width: 70%; 
+    max-width: 900px; 
 }

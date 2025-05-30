@@ -40,7 +40,6 @@ function mostrarDetalhes(id) {
             const btnEditar = document.getElementById('btnEditar');
             const btnExcluir = document.getElementById('btnExcluir');
             const btnSalvar = document.getElementById('btnSalvar');
-            const btnTenhoInteresse = document.getElementById('btnTenhoInteresse');
             const btnProporTroca = document.getElementById('btnProporTroca');
 
             const btnEnviarMensagem = document.getElementById('btnEnviarMensagemVendedor');
@@ -50,7 +49,7 @@ function mostrarDetalhes(id) {
 
             if (proprietarioIdDoProduto && window.usuarioLogadoId && parseInt(proprietarioIdDoProduto) !== parseInt(window.usuarioLogadoId)) {
                 console.log("[mostrarDetalhes] Mostrando botão Enviar Mensagem.");
-                btnEnviarMensagem.href = `../view/chat.php?usuario_id=${proprietarioIdDoProduto}`; 
+                btnEnviarMensagem.href = `minhas_mensagens.php?abrir_conversa_id=${proprietarioIdDoProduto}`;
                 btnEnviarMensagem.classList.remove('d-none');
             } else {
                 console.log("[mostrarDetalhes] Escondendo botão Enviar Mensagem (usuário é o dono ou não logado ou proprietário não definido).");
@@ -70,21 +69,18 @@ function mostrarDetalhes(id) {
                 if (btnEditar) btnEditar.classList.remove('d-none');
                 if (btnExcluir) btnExcluir.classList.remove('d-none');
                 if (btnSalvar) btnSalvar.classList.add('d-none'); 
-                if (btnTenhoInteresse) btnTenhoInteresse.classList.add('d-none');
                 if (btnProporTroca) btnProporTroca.classList.add('d-none');
             } else if (usuarioLogadoIdNum && usuarioLogadoIdNum !== produtoUsuarioIdNum) {
                  console.log("[mostrarDetalhes] Condição: Usuário logado, NÃO é o dono.");
                 if (btnEditar) btnEditar.classList.add('d-none');
                 if (btnExcluir) btnExcluir.classList.add('d-none');
                 if (btnSalvar) btnSalvar.classList.add('d-none');
-                if (btnTenhoInteresse) btnTenhoInteresse.classList.remove('d-none');
                 if (btnProporTroca) btnProporTroca.classList.remove('d-none');
             } else {
                 console.log("[mostrarDetalhes] Condição: Não logado ou outra situação (esconder todos os botões de ação específica).");
                 if (btnEditar) btnEditar.classList.add('d-none');
                 if (btnExcluir) btnExcluir.classList.add('d-none');
                 if (btnSalvar) btnSalvar.classList.add('d-none');
-                if (btnTenhoInteresse) btnTenhoInteresse.classList.add('d-none');
                 if (btnProporTroca) btnProporTroca.classList.add('d-none');
             }
 
@@ -102,44 +98,6 @@ function mostrarDetalhes(id) {
             console.error('Erro ao carregar detalhes do produto:', error);
             alert('Erro ao carregar detalhes do produto: ' + error.message);
         });
-}
-
-async function registrarInteresseProduto() {
-    if (!currentProdutoId) {
-        alert('ID do produto não encontrado para registrar interesse.');
-        return;
-    }
-    if (!window.usuarioLogadoId) {
-        alert('Você precisa estar logado para demonstrar interesse.');
-        return;
-    }
-
-    try {
-        const response = await fetch('../controllers/registrar_interesse_controller.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `produto_id=${currentProdutoId}`
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            alert(result.message || 'Interesse registrado com sucesso! O vendedor será notificado.');
-            const btnTenhoInteresse = document.getElementById('btnTenhoInteresse');
-            if (btnTenhoInteresse) {
-                btnTenhoInteresse.disabled = true;
-                btnTenhoInteresse.innerHTML = '<i class="bi bi-check-lg"></i> Interesse Enviado';
-            }
-
-        } else {
-            alert('Erro ao registrar interesse: ' + (result.error || 'Ocorreu um problema.'));
-        }
-    } catch (error) {
-        console.error('Erro no fetch ao registrar interesse:', error);
-        alert('Erro de comunicação ao registrar interesse. Tente novamente.');
-    }
 }
 
 function alternarEdicao() {
@@ -217,19 +175,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             })
             .catch(error => {
-                console.error('Erro no cadastro de produto (Dashboard):', error);
+                console.error('Erro no cadastro de produto (Dashboard)::', error);
                 alert('Erro de comunicação ao cadastrar produto.');
             });
         });
     }
 
-    if (typeof window.usuarioLogadoId !== 'undefined' && window.usuarioLogadoId) {
-        console.log("[DOMContentLoaded] Usuário logado. Carregando notificações pela primeira vez e configurando intervalo.");
-        carregarNotificacoes(); 
-        setInterval(carregarNotificacoes, 60000); 
-    } else {
-        console.log("[DOMContentLoaded] Usuário não logado ou ID não definido. Notificações não serão carregadas automaticamente.");
-    }
+    // Lógica de carregar notificações foi movida para menu.php
+    console.log("[DOMContentLoaded] Lógica de notificações do dashboard.js não é mais necessária aqui (movida para menu.php).");
+    // if (typeof window.usuarioLogadoId !== 'undefined' && window.usuarioLogadoId) {
+    //     console.log("[DOMContentLoaded] Usuário logado. Carregando notificações pela primeira vez e configurando intervalo.");
+    //     // carregarNotificacoes(); 
+    //     // setInterval(carregarNotificacoes, 60000); 
+    // }
 });
 
 function exibirProduto(produto) {
@@ -241,190 +199,8 @@ function exibirProduto(produto) {
     }
 }
 
-
-async function carregarNotificacoes() {
-    console.log("[carregarNotificacoes] Verificando ID do usuário logado (window.usuarioLogadoId):", window.usuarioLogadoId);
-    if (!window.usuarioLogadoId) {
-        console.warn("[carregarNotificacoes] Usuário não logado, notificações não serão carregadas.");
-        return;
-    }
-
-    try {
-        const response = await fetch('../controllers/get_notificacoes_controller.php');
-        if (!response.ok) {
-            console.error('Erro HTTP ao buscar notificações:', response.status, response.statusText);
-            document.getElementById('notificacaoItemLoading').textContent = 'Erro ao carregar.';
-            return;
-        }
-        const data = await response.json();
-
-        if (data.success) {
-            renderizarNotificacoesSideNav(data.notificacoes, data.contadorNaoLidas);
-        } else {
-            console.error('Erro ao buscar notificações (API):', data.error);
-            document.getElementById('notificacaoItemLoadingSideNav').textContent = 'Erro ao carregar (API).';
-        }
-    } catch (error) {
-        console.error('Erro no fetch de notificações:', error);
-        document.getElementById('notificacaoItemLoadingSideNav').textContent = 'Falha na comunicação.';
-    }
-}
-
-function renderizarNotificacoesSideNav(notificacoes, contadorNaoLidas) {
-    const listaDropdown = document.getElementById('listaNotificacoesSideNav');
-    const contadorBadge = document.getElementById('contadorNotificacoesSideNav');
-    const loadingItem = document.getElementById('notificacaoItemLoadingSideNav');
-    const nenhumaItem = document.getElementById('notificacaoItemNenhumaSideNav');
-    
-    const marcarTodasLidasContainer = document.getElementById('marcarTodasLidasContainerSideNav'); 
-
-    const itensAtuais = listaDropdown.querySelectorAll('li.notificacao-item');
-    itensAtuais.forEach(item => item.remove());
-
-    if (!loadingItem || !nenhumaItem || !listaDropdown || !marcarTodasLidasContainer) {
-        console.error("[renderizarNotificacoesSideNav] Elementos essenciais da UI de notificações não encontrados. Abortando renderização.");
-        if(loadingItem) loadingItem.textContent = 'Erro na UI.';
-        return;
-    }
-
-    loadingItem.classList.add('d-none'); 
-
-    if (contadorNaoLidas > 0) {
-        if(contadorBadge) {
-            contadorBadge.textContent = contadorNaoLidas > 9 ? '9+' : contadorNaoLidas;
-            contadorBadge.classList.remove('d-none');
-        }
-        if (marcarTodasLidasContainer) {
-            marcarTodasLidasContainer.classList.remove('d-none');
-        }
-    } else {
-        if(contadorBadge) contadorBadge.classList.add('d-none');
-        if (marcarTodasLidasContainer) {
-            marcarTodasLidasContainer.classList.add('d-none');
-        }
-    }
-
-    if (notificacoes && notificacoes.length > 0) {
-        nenhumaItem.classList.add('d-none');
-
-        notificacoes.forEach(notif => {
-            const li = document.createElement('li');
-            li.classList.add('notificacao-item'); 
-            const a = document.createElement('a');
-            a.classList.add('dropdown-item', 'd-flex', 'justify-content-between', 'align-items-start');
-            if (!notif.lida) {
-                a.classList.add('fw-bold'); 
-            }
-            a.href = notif.link || '#';
-            a.onclick = (event) => {
-                event.preventDefault(); 
-                marcarNotificacaoLida(notif.id, notif.link, a);
-            };
-
-            const textoDiv = document.createElement('div');
-            textoDiv.style.whiteSpace = 'normal'; 
-            textoDiv.style.maxWidth = '280px'; 
-            
-            const msgSpan = document.createElement('span');
-            msgSpan.textContent = notif.mensagem;
-            textoDiv.appendChild(msgSpan);
-
-            const dataSpan = document.createElement('small');
-            dataSpan.classList.add('text-muted', 'd-block', 'mt-1');
-            dataSpan.textContent = notif.data_formatada;
-            textoDiv.appendChild(dataSpan);
-
-            a.appendChild(textoDiv);
-
-            const wrapperDireita = document.createElement('div');
-            wrapperDireita.classList.add('d-flex', 'align-items-center', 'ms-auto');
-
-            if (!notif.lida) {
-                const dotSpan = document.createElement('span');
-                dotSpan.classList.add('badge', 'bg-primary', 'rounded-pill', 'me-2');
-                dotSpan.textContent = ' ';
-                dotSpan.style.padding = '0.3em';
-                dotSpan.style.lineHeight = '0.5';
-                wrapperDireita.appendChild(dotSpan);
-            }
-
-            const btnDispensar = document.createElement('button');
-            btnDispensar.classList.add('btn', 'btn-sm', 'p-0'); 
-            btnDispensar.innerHTML = '<i class="bi bi-x-lg text-danger"></i>'; 
-            btnDispensar.style.lineHeight = '1';
-            btnDispensar.style.background = 'none';
-            btnDispensar.style.border = 'none';
-            btnDispensar.title = 'Dispensar notificação';
-            btnDispensar.onclick = (event) => {
-                event.stopPropagation();
-                event.preventDefault();
-                dispensarNotificacao(notif.id, li, !notif.lida); 
-            };
-            wrapperDireita.appendChild(btnDispensar);
-            a.appendChild(wrapperDireita); 
-            
-            li.appendChild(a);
-
-            listaDropdown.insertBefore(li, marcarTodasLidasContainer);
-        });
-    } else {
-        nenhumaItem.classList.remove('d-none');
-    }
-}
-
-async function dispensarNotificacao(notificacaoId, elementoLi, eraNaoLida) {
-
-
-    try {
-        const response = await fetch('../controllers/dispensar_notificacao_controller.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ notificacao_id: notificacaoId })
-        });
-        const result = await response.json();
-
-        if (result.success) {
-            if (elementoLi) {
-                elementoLi.remove();
-            }
-
-            if (eraNaoLida) {
-                const contadorBadge = document.getElementById('contadorNotificacoesSideNav');
-                if (contadorBadge) {
-                    let contagemAtual = parseInt(contadorBadge.textContent);
-                    if (isNaN(contagemAtual) && contadorBadge.textContent.includes('+')) {
-                        carregarNotificacoes(); 
-                        return;
-                    }
-                    if (!isNaN(contagemAtual) && contagemAtual > 0) {
-                        contagemAtual--;
-                        contadorBadge.textContent = contagemAtual > 9 ? '9+' : (contagemAtual === 0 ? '' : contagemAtual);
-                        if (contagemAtual === 0) {
-                            contadorBadge.classList.add('d-none');
-                            const marcarTodasLidasContainer = document.getElementById('marcarTodasLidasContainerSideNav');
-                            if(marcarTodasLidasContainer) marcarTodasLidasContainer.classList.add('d-none');
-                        }
-                    } else {
-                        carregarNotificacoes();
-                    }
-                }
-            }
-            const lista = document.getElementById('listaNotificacoesSideNav');
-            const nenhumaItem = document.getElementById('notificacaoItemNenhumaSideNav');
-            if (lista && nenhumaItem && lista.querySelectorAll('li.notificacao-item').length === 0) {
-                nenhumaItem.classList.remove('d-none');
-            }
-
-        } else {
-            alert('Erro ao remover notificação: ' + (result.error || 'Erro desconhecido.'));
-        }
-    } catch (error) {
-        console.error('Erro no fetch ao dispensar notificação:', error);
-        alert('Erro de comunicação ao remover notificação.');
-    }
-}
+// Funções carregarNotificacoes() e renderizarNotificacoesSideNav() REMOVIDAS daqui
+// pois a lógica de notificações agora é centralizada em menu.php
 
 async function marcarNotificacaoLida(notificacaoId, linkNotificacao, elementoA) {
     try {
@@ -442,11 +218,17 @@ async function marcarNotificacaoLida(notificacaoId, linkNotificacao, elementoA) 
                 const dot = elementoA.querySelector('.badge.bg-primary.rounded-pill');
                 if(dot) dot.remove();
             }
-            carregarNotificacoes(); 
+            // Re-chama a função de carregar notificações do menu.php (assumindo que ela seja global ou acessível)
+            if (typeof carregarNotificacoesAPI === 'function') {
+                carregarNotificacoesAPI(); 
+            } else {
+                // Fallback: recarregar a página pode ser uma opção se a função não estiver acessível diretamente
+                // window.location.reload(); 
+                console.warn("Função carregarNotificacoesAPI() do menu.php não encontrada globalmente.");
+            }
             
             if (linkNotificacao && linkNotificacao !== '#') {
                 window.location.href = linkNotificacao;
-            } else {
             }
         } else {
             console.error('Erro ao marcar notificação como lida:', result.error);
@@ -473,7 +255,11 @@ async function marcarTodasComoLidas(event) {
         });
         const result = await response.json();
         if (result.success) {
-            carregarNotificacoes(); 
+             if (typeof carregarNotificacoesAPI === 'function') {
+                carregarNotificacoesAPI(); 
+            } else {
+                console.warn("Função carregarNotificacoesAPI() do menu.php não encontrada globalmente.");
+            }
         } else {
             alert('Erro ao marcar todas as notificações como lidas: ' + (result.error || 'Erro desconhecido'));
         }
@@ -499,7 +285,7 @@ async function abrirModalPropostaTroca() {
     nenhumProdutoDiv.classList.add('d-none');
 
     try {
-        const response = await fetch('../controllers/get_meus_produtos_controller.php'); // Reutilizando controller existente, se aplicável, ou criar um específico
+        const response = await fetch('../controllers/get_meus_produtos_controller.php'); 
         const data = await response.json();
 
         if (data.success && data.produtos && data.produtos.length > 0) {
@@ -509,7 +295,7 @@ async function abrirModalPropostaTroca() {
                 item.classList.add('list-group-item', 'list-group-item-action', 'd-flex', 'justify-content-between', 'align-items-center');
                 item.onclick = (event) => {
                     event.preventDefault();
-                    enviarPropostaDeTroca(produto.id, data.produto_desejado_proprietario_id); // Passar ID do proprietário do produto desejado
+                    enviarPropostaDeTroca(produto.id, data.produto_desejado_proprietario_id); 
                 };
 
                 const fotoUrl = produto.foto ? `data:image/jpeg;base64,${produto.foto}` : 'https://via.placeholder.com/50';
@@ -548,7 +334,7 @@ async function enviarPropostaDeTroca(idProdutoOferecido, idProdutoDesejadoOrigin
         alert('Você precisa estar logado para enviar uma proposta.');
         return;
     }
-    if (!currentProdutoId) { // currentProdutoId é o ID do produto que o usuário está visualizando e quer trocar
+    if (!currentProdutoId) { 
         alert('Não foi possível identificar o produto desejado para a troca.');
         return;
     }
@@ -557,14 +343,6 @@ async function enviarPropostaDeTroca(idProdutoOferecido, idProdutoDesejadoOrigin
         return;
     }
 
-    // Precisamos buscar o ID do proprietário do produto DESEJADO (currentProdutoId)
-    // Esta informação já deve estar disponível quando 'mostrarDetalhes' é chamado,
-    // mas vamos garantir que temos o ID do proprietário do produto atual.
-    // A forma mais simples é buscar novamente ou passar essa informação para 'abrirModalPropostaTroca' e depois para cá.
-    // Por agora, vou assumir que 'produto.usuario_id' de 'mostrarDetalhes' é o ID do proprietário do produto DESEJADO.
-    // Para isso, precisaremos buscar o produto novamente ou armazenar o proprietário_id de forma acessível.
-
-    // Vamos simplificar e buscar o produto desejado novamente para pegar o proprietário_id
     let proprietarioProdutoDesejadoId;
     try {
         const resProdutoDesejado = await fetch(`../controllers/get_produto.php?id=${currentProdutoId}`);
@@ -599,8 +377,6 @@ async function enviarPropostaDeTroca(idProdutoOferecido, idProdutoDesejadoOrigin
             if (modalProposta) {
                 modalProposta.hide();
             }
-            // Opcional: Redirecionar para o chat ou atualizar a interface
-            // window.location.href = `../view/chat.php?usuario_id=${proprietarioProdutoDesejadoId}`;
 
         } else {
             alert('Erro ao enviar proposta de troca: ' + (result.error || 'Ocorreu um problema.'));
@@ -610,3 +386,6 @@ async function enviarPropostaDeTroca(idProdutoOferecido, idProdutoDesejadoOrigin
         alert('Erro de comunicação ao enviar proposta. Tente novamente.');
     }
 }
+
+// A função dispensarNotificacao foi removida pois menu.php já tem sua própria lógica.
+// O script em menu.php deve lidar com isso.
