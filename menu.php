@@ -335,18 +335,12 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
     pointer-events: none;
     z-index: 1;
     opacity: 0.2;
-    background: radial-gradient(ellipse at center bottom, 
-        #667eea 0%,
-        #764ba2 40%,
-        #f093fb 70%,
-        #f5576c 100%,
-        rgba(255,255,255,0) 120%
-    );
+    background: none;
     background-size: 200% 100%;
     background-position: 0% 0%;
-    filter: blur(6px);
-    transition: opacity 2s;
-    animation: gradienteAura 2s linear infinite;
+    filter: none;
+    transition: none;
+    animation: none;
 }
 
 @keyframes gradienteAura {
@@ -561,16 +555,12 @@ async function removerNotificacao(notificacaoId, listItem) {
         });
         const result = await response.json();
         if (result.success) {
-            // Remove o item da lista imediatamente - Comentado para testar se carregarNotificacoesAPI() resolve
-            // if (listItem && listItem.parentNode) {
-            //     listItem.parentNode.removeChild(listItem);
-            // }
+            if (listItem && listItem.parentNode) {
+                listItem.parentNode.removeChild(listItem);
+            }
             
-            // Recarrega notificações para atualizar badge e lista
             if (typeof carregarNotificacoesAPI === 'function') {
-                // Adicionar um pequeno delay para dar tempo ao backend de processar a dispensa
-                console.log('[Menu Notificações] Notificação removida visualmente. Aguardando 500ms para recarregar via API.');
-                setTimeout(carregarNotificacoesAPI, 500); // Atraso de 0.5 segundos
+                carregarNotificacoesAPI();
             }
         } else {
             alert('Erro ao remover notificação: ' + (result.error || 'Erro desconhecido'));

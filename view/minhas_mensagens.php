@@ -256,6 +256,7 @@ if ($id_usuario_logado) {
                                             }
                                             ?>
                                         </p>
+                                        <button type="button" class="btn btn-danger btn-sm mt-2" onclick="excluirConversa('<?php echo $conversa['outro_usuario_id']; ?>')">Excluir</button>
                                         <?php if ($conversa['nao_lida']): ?>
                                             <span class="badge bg-danger position-absolute top-0 start-100 translate-middle p-2 border border-light rounded-circle" title="Nova mensagem!">
                                                 <span class="visually-hidden">Nova mensagem!</span>
@@ -408,6 +409,30 @@ if ($id_usuario_logado) {
                 console.log('[Minhas Mensagens] Nenhum ID de conversa encontrado na URL para abrir automaticamente.');
             }
         });
+
+        function excluirConversa(usuarioId) {
+            if (confirm('Deseja realmente excluir esta conversa?')) {
+                fetch('../controllers/excluir_conversa_controller.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ usuario_id: usuarioId })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert('Conversa excluída com sucesso.');
+                        location.reload();
+                    } else {
+                        alert('Erro ao excluir conversa: ' + (result.error || 'Erro desconhecido'));
+                    }
+                })
+                .catch(error => {
+                    alert('Erro de comunicação ao excluir conversa.');
+                });
+            }
+        }
     </script>
 </body>
 </html> 

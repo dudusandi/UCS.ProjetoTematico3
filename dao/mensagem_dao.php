@@ -145,5 +145,17 @@ class MensagemDAO {
         return $mensagens;
     }
 
+    public function excluirConversa($usuario1_id, $usuario2_id) {
+        $query = "DELETE FROM mensagens WHERE (remetente_id = ? AND destinatario_id = ?) OR (remetente_id = ? AND destinatario_id = ?)";
+        try {
+            $stmt = $this->pdo->prepare($query);
+            $stmt->execute([$usuario1_id, $usuario2_id, $usuario2_id, $usuario1_id]);
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            error_log("Erro ao excluir conversa: " . $e->getMessage());
+            return false;
+        }
+    }
+
 }
 ?> 
