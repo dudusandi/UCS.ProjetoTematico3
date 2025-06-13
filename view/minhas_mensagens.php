@@ -26,9 +26,9 @@ if ($id_usuario_logado) {
         error_log("Erro ao buscar dados para side-nav em minhas_mensagens.php: " . $e->getMessage());
     }
 } else {
-    // Considerar redirecionar para login se não houver usuário logado
-    // header('Location: login.php');
-    // exit();
+    
+    
+    
 }
 ?>
 
@@ -49,9 +49,9 @@ if ($id_usuario_logado) {
         }
         .main-content {
             flex-grow: 1; 
-            padding: 0; /* Similar à dashboard */
+            padding: 0; 
         }
-        /* Adicionando estilos da dashboard para consistência */
+        
         .main-content > .search-bar-container,
         .main-content > .info-banner-messages,
         .main-content > .messages-section-container {
@@ -59,21 +59,21 @@ if ($id_usuario_logado) {
              margin-right: 20px;
         }
         .main-content > .messages-section-container {
-            padding-top: 20px; /* Espaçamento acima da grade de mensagens */
+            padding-top: 20px; 
             padding-bottom: 20px;
         }
 
-        /* Estilos para a barra de busca, inspirados em dashboard.css */
+        
         .search-bar-container {
-            padding: 20px 0; /* Similar ao .search-bar-container da dashboard */
-            /* width: 100%; */ /* Removido para evitar overflow com margens laterais */
+            padding: 20px 0; 
+             
             display: flex;
             justify-content: center;
             flex-shrink: 0;
-            margin-top: 0; /* Removido margin-top que estava antes, pois o padding do container geral já dá espaço */
-            margin-bottom: 15px; /* Ajustado para um espaçamento bom antes do banner */
+            margin-top: 0; 
+            margin-bottom: 15px; 
         }
-        .search-bar-messages-style { /* Novo wrapper para aplicar o estilo .search-bar-md3 */
+        .search-bar-messages-style { 
             display: flex;
             align-items: center;
             width: 50%; 
@@ -115,7 +115,7 @@ if ($id_usuario_logado) {
         }
 
         .info-banner-messages { 
-            /* background-color: #e8eaed; */ /* Removido para usar o fundo da página, como na dashboard */
+             
             padding: 15px 20px;
             border-radius: 8px; 
             margin-bottom: 20px;
@@ -125,85 +125,119 @@ if ($id_usuario_logado) {
         .info-banner-messages p {
             margin-bottom: 0;
             font-size: 0.9rem; 
-            color: #c6c9cb;    /* Cor do texto do .ecological-info-banner p da dashboard */
+            color: #c6c9cb;    
             line-height: 1.4;  
         }
 
         .card-conversa {
             cursor: pointer;
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-            border-radius: 15px; /* Cantos arredondados */
-            overflow: hidden; /* Garante que o conteúdo interno respeite os cantos arredondados */
-            /* max-width: 280px; */ /* Exemplo de largura máxima, se necessário além das colunas */
-            /* margin-left: auto; */
-            /* margin-right: auto; */
+            border-radius: 15px; 
+            overflow: hidden; 
+             
+            
+            
         }
         .card-conversa:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 16px rgba(0,0,0,0.1);
         }
         .card-conversa.nao-lida {
-            border-left: 5px solid var(--bs-primary); 
+            
         }
         .card-conversa .card-body {
             display: flex;
             flex-direction: column;
-            align-items: center; /* Centraliza ícone e nome */
+            align-items: center; 
             text-align: center;
-            padding: 1.25rem 1rem; /* Ajuste de padding se necessário */
+            padding: 1.25rem 1rem; 
         }
         .card-conversa .icon-conversa {
-            font-size: 3rem; /* Tamanho do ícone da pessoa */
+            font-size: 3rem; 
             margin-bottom: 0.75rem;
-            color: var(--bs-secondary); /* Cor para o ícone */
+            color: var(--bs-secondary); 
         }
         .card-title-conversa {
              white-space: nowrap;
              overflow: hidden;
              text-overflow: ellipsis;
-             font-weight: 600; /* Nome um pouco mais destacado */
-             margin-bottom: 0.5rem; /* Espaço entre nome e última mensagem */
+             font-weight: 600; 
+             margin-bottom: 0.5rem; 
         }
         .ultima-msg-texto.small {
-            display: inline-block; /* Para que o fundo e padding se ajustem ao conteúdo */
-            max-width: 95%;     /* Evita que o balão seja excessivamente largo */
-            background-color: #f1f1f1; /* Fundo do balão */
-            color: #333; /* Cor do texto dentro do balão */
-            padding: 8px 12px; /* Padding interno do balão */
-            border-radius: 10px; /* Cantos arredondados do balão */
-            font-size: 0.85em; /* Tamanho do texto no balão */
-            line-height: 1.4; /* Espaçamento entre linhas no balão */
-            margin-top: 0.75rem; /* Espaço acima do balão, abaixo do nome */
-            text-align: left; /* Alinha o texto do balão à esquerda */
-            word-wrap: break-word; /* Quebra palavras longas */
-            /* Para limitar a altura e mostrar reticências, precisaremos de uma abordagem mais complexa com JS ou line-clamp */
-            /* Por ora, removendo a limitação de altura fixa para um balão mais natural */
+            display: inline-block; 
+            max-width: 95%;     
+            background-color: #f1f1f1; 
+            color: #333; 
+            padding: 8px 12px; 
+            border-radius: 10px; 
+            font-size: 0.85em; 
+            line-height: 1.4; 
+            margin-top: 0.75rem; 
+            text-align: left; 
+            word-wrap: break-word; 
+            
+            
         }
 
+        .card-conversa .badge.bg-danger {
+            display: none;
+        }
 
-        #chatModal .modal-dialog.modal-lg-chat.modal-dialog-scrollable {
             max-width: 800px;
             height: 85vh; 
         }
 
-        #chatModal .modal-content {
             display: flex;
             flex-direction: column;
             height: 100%; 
         }
 
-        #chatModal .modal-body {
             padding: 0; 
             flex-grow: 1; 
             min-height: 0; 
             overflow: hidden; 
         }
 
-        #chatIframe {
             width: 100%;
             height: 100%; 
             border: none;
             box-sizing: border-box; 
+        }
+
+        #chatModal .modal-dialog {
+            margin: 0;
+            width: 100vw;
+            max-width: 100vw;
+        }
+
+        #chatModal .modal-dialog.modal-lg-chat {
+            width: 100vw;
+        }
+
+        #chatModal .modal-content {
+            height: 90vh;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 0;
+        }
+
+        #chatModal .modal-header {
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        #chatModal iframe {
+            background: #ffffff;
+        }
+
+        #chatIframe {
+            width: 100%;
+            height: 100%;
+        }
+
+        #chatModal .modal-body {
+            padding: 0 !important;
         }
     </style>
 </head>
@@ -236,8 +270,6 @@ if ($id_usuario_logado) {
                         <?php foreach ($conversas_formatadas as $conversa): ?>
                             <div class="col card-conversa-col">
                                 <div class="card h-100 card-conversa <?php echo $conversa['nao_lida'] ? 'nao-lida' : ''; ?>" 
-                                     data-bs-toggle="modal" 
-                                     data-bs-target="#chatModal" 
                                      data-usuario-id="<?php echo htmlspecialchars($conversa['outro_usuario_id']); ?>"
                                      data-usuario-nome="<?php echo htmlspecialchars($conversa['nome_outro_usuario']); ?>">
                                     <div class="card-body">
@@ -248,7 +280,7 @@ if ($id_usuario_logado) {
                                         <p class="card-text ultima-msg-texto small">
                                             <?php 
                                             $ultima_msg = $conversa['ultima_mensagem'];
-                                            // Aumentar um pouco o limite de caracteres para a nova altura
+                                            
                                             if (function_exists('mb_strimwidth')) {
                                                 echo htmlspecialchars(mb_strimwidth($ultima_msg, 0, 100, "..."));
                                             } else {
@@ -256,7 +288,7 @@ if ($id_usuario_logado) {
                                             }
                                             ?>
                                         </p>
-                                        <button type="button" class="btn btn-danger btn-sm mt-2" onclick="excluirConversa('<?php echo $conversa['outro_usuario_id']; ?>')">Excluir</button>
+                                        <button type="button" class="btn btn-danger btn-sm mt-2" onclick="excluirConversa('<?php echo $conversa['outro_usuario_id']; ?>', event)">Excluir</button>
                                         <?php if ($conversa['nao_lida']): ?>
                                             <span class="badge bg-danger position-absolute top-0 start-100 translate-middle p-2 border border-light rounded-circle" title="Nova mensagem!">
                                                 <span class="visually-hidden">Nova mensagem!</span>
@@ -284,7 +316,7 @@ if ($id_usuario_logado) {
 
     <!-- Modal para o Chat -->
     <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable modal-lg-chat">
+        <div class="modal-dialog modal-lg modal-lg-chat">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="chatModalLabel">Chat</h5>
@@ -297,9 +329,42 @@ if ($id_usuario_logado) {
         </div>
     </div>
 
+    <!-- Modal de Confirmação de Exclusão -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Tem certeza que deseja excluir esta conversa?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="btnConfirmDeleteConversa">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         window.usuarioLogadoId = <?php echo json_encode($id_usuario_logado); ?>;
+
+        
+        let conversaParaExcluirId = null;
+
+        
+        function excluirConversa(usuarioId, event) {
+            event.stopPropagation();
+            event.preventDefault();
+            conversaParaExcluirId = usuarioId;
+            const modalDel = bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmDeleteModal'));
+            modalDel.show();
+        }
+        
+        window.excluirConversa = excluirConversa;
 
         document.addEventListener('DOMContentLoaded', () => {
             const chatModal = document.getElementById('chatModal');
@@ -324,19 +389,19 @@ if ($id_usuario_logado) {
                     if (chatIframe) {
                         chatIframe.src = 'about:blank'; 
                     }
-                    // Considerar se o reload é realmente necessário ou se pode ser mais seletivo
-                    // window.location.reload(); 
+                    
+                    
                 });
             }
 
-            // Funcionalidade de busca de conversas
+            
             const searchInput = document.getElementById('searchConversasInput');
-            const searchButton = document.getElementById('searchConversasButton'); // Se for usar o botão
+            const searchButton = document.getElementById('searchConversasButton'); 
             const conversasContainer = document.getElementById('listaConversasCards');
             const nenhumaConversaMsg = document.getElementById('nenhumaConversaEncontrada');
 
             function filtrarConversas() {
-                if (!conversasContainer) return; // Sai se não houver container de conversas
+                if (!conversasContainer) return; 
                 
                 const termoBusca = searchInput.value.toLowerCase().trim();
                 const cardsConversa = conversasContainer.querySelectorAll('.card-conversa-col');
@@ -347,10 +412,10 @@ if ($id_usuario_logado) {
                     const nomeUsuario = card.getAttribute('data-usuario-nome').toLowerCase();
                     
                     if (nomeUsuario.includes(termoBusca)) {
-                        cardCol.style.display = ''; // Mostra o card (ou a coluna do card)
+                        cardCol.style.display = ''; 
                         encontradas++;
                     } else {
-                        cardCol.style.display = 'none'; // Esconde o card
+                        cardCol.style.display = 'none'; 
                     }
                 });
 
@@ -366,12 +431,12 @@ if ($id_usuario_logado) {
             if (searchInput) {
                 searchInput.addEventListener('input', filtrarConversas);
             }
-            // Se quiser que o botão de busca também dispare (embora 'input' já seja em tempo real)
-            // if (searchButton) {
-            //     searchButton.addEventListener('click', filtrarConversas);
-            // }
+            
+            
+            
+            
 
-            // Lógica para abrir modal via URL
+            
             console.log('[Minhas Mensagens] Verificando se precisa abrir modal via URL...');
             const params = new URLSearchParams(window.location.search);
             const conversaIdParaAbrir = params.get('abrir_conversa_id');
@@ -408,31 +473,63 @@ if ($id_usuario_logado) {
             } else {
                 console.log('[Minhas Mensagens] Nenhum ID de conversa encontrado na URL para abrir automaticamente.');
             }
-        });
 
-        function excluirConversa(usuarioId) {
-            if (confirm('Deseja realmente excluir esta conversa?')) {
-                fetch('../controllers/excluir_conversa_controller.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ usuario_id: usuarioId })
-                })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.success) {
-                        alert('Conversa excluída com sucesso.');
-                        location.reload();
-                    } else {
-                        alert('Erro ao excluir conversa: ' + (result.error || 'Erro desconhecido'));
+            
+            document.querySelectorAll('.card-conversa').forEach(card => {
+                card.addEventListener('click', function(e) {
+                    
+                    if (e.target.closest('.btn-danger')) {
+                        return;
                     }
-                })
-                .catch(error => {
-                    alert('Erro de comunicação ao excluir conversa.');
+
+                    const usuarioId = this.getAttribute('data-usuario-id');
+                    const usuarioNome = this.getAttribute('data-usuario-nome');
+
+                    if (!usuarioId || !usuarioNome) return;
+
+                    const chatModalEl = document.getElementById('chatModal');
+                    const chatIframe = document.getElementById('chatIframe');
+                    const modalTitle = document.getElementById('chatModalLabel');
+                    if (!chatModalEl || !chatIframe || !modalTitle) return;
+
+                    modalTitle.textContent = 'Chat com ' + usuarioNome;
+                    chatIframe.src = `chat.php?usuario_id=${usuarioId}&nome_usuario=${encodeURIComponent(usuarioNome)}&is_modal=true&scroll_to_bottom=true`;
+
+                    const modalInstance = bootstrap.Modal.getOrCreateInstance(chatModalEl);
+                    modalInstance.show();
+                });
+            });
+
+            const btnConfirmDelete = document.getElementById('btnConfirmDeleteConversa');
+            if (btnConfirmDelete) {
+                btnConfirmDelete.addEventListener('click', () => {
+                    if (!conversaParaExcluirId) return;
+                    fetch('../controllers/excluir_conversa_controller.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ usuario_id: conversaParaExcluirId })
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            
+                            const modalDelEl = document.getElementById('confirmDeleteModal');
+                            const modalDelInst = bootstrap.Modal.getInstance(modalDelEl);
+                            if (modalDelInst) modalDelInst.hide();
+
+                            window.location.href = 'minhas_mensagens.php';
+                        } else {
+                            alert('Erro ao excluir conversa: ' + (result.error || 'Erro desconhecido'));
+                        }
+                    })
+                    .catch(error => {
+                        alert('Erro de comunicação ao excluir conversa.');
+                    });
                 });
             }
-        }
+        });
     </script>
 </body>
 </html> 

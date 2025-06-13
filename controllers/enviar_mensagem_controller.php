@@ -8,13 +8,13 @@ require_once __DIR__ . '/../dao/cliente_dao.php';
 require_once __DIR__ . '/../dao/notificacaodao.php'; 
 require_once __DIR__ . '/../model/notificacao.php';  
 
-// Função para detectar se é uma requisição AJAX
+
 function isAjaxRequest() {
     return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 
            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
 }
 
-// Função para retornar resposta JSON
+
 function sendJsonResponse($success, $message = '', $data = []) {
     header('Content-Type: application/json');
     $responseData = [
@@ -44,16 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $remetente_id_form = filter_input(INPUT_POST, 'remetente_id', FILTER_VALIDATE_INT);
 
     $usuario_logado_id = (int)$_SESSION['usuario_id'];
-
-    if (empty($conteudo)) {
-        if (isAjaxRequest()) {
-            sendJsonResponse(false, 'O conteúdo da mensagem não pode estar vazio.');
-        } else {
-            $_SESSION['erro_mensagem'] = "O conteúdo da mensagem não pode estar vazio.";
-            header('Location: ../view/chat.php?usuario_id=' . $destinatario_id);
-            exit();
-        }
-    }
 
     if (!$destinatario_id || !$remetente_id_form) {
         if (isAjaxRequest()) {
@@ -86,16 +76,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    
+    if (empty($conteudo)) {
+        $mensagemDAO = new MensagemDAO();
+        $conversaExistente = $mensagemDAO->buscarConversa($usuario_logado_id, $destinatario_id);
+
+        if (empty($conversaExistente)) {
+            
+            $mensagemInicial = new Mensagem(null, $usuario_logado_id, $destinatario_id, "Início da conversa.");
+            $mensagemDAO->enviarMensagem($mensagemInicial);
+        }
+
+        
+        header('Location: ../view/chat.php?usuario_id=' . $destinatario_id);
+        exit();
+    }
+
+    
+    $mensagemDAO = new MensagemDAO();
+    $conversaExistente = $mensagemDAO->buscarConversa($usuario_logado_id, $destinatario_id);
+
+    if (empty($conversaExistente)) {
+        error_log("Nenhuma conversa existente encontrada. Criando uma nova conversa entre $usuario_logado_id e $destinatario_id.");
+        
+        $conteudoMensagemInicial = "Início da conversa";
+        $mensagem = new Mensagem(null, $usuario_logado_id, $destinatario_id, $conteudoMensagemInicial);
+
+        if (!$mensagemDAO->enviarMensagem($mensagem)) {
+            error_log("Erro ao iniciar a conversa entre $usuario_logado_id e $destinatario_id.");
+            if (isAjaxRequest()) {
+                sendJsonResponse(false, 'Erro ao iniciar a conversa.');
+            } else {
+                $_SESSION['erro_mensagem'] = "Erro ao iniciar a conversa.";
+                header('Location: ../view/minhas_mensagens.php');
+                exit();
+            }
+        }
+    }
+
+    
     $mensagem = new Mensagem();
     $mensagem->setRemetenteId($usuario_logado_id); 
     $mensagem->setDestinatarioId($destinatario_id);
     $mensagem->setConteudo($conteudo);
 
-    $mensagemDAO = new MensagemDAO();
     $mensagem_id_enviada = $mensagemDAO->enviarMensagem($mensagem);
 
     if ($mensagem_id_enviada) {
-        // Criar notificação
+        
         $nome_remetente = $_SESSION['usuario_nome'] ?? 'Alguém'; 
         $notificacaodao = new notificacaodao(Database::getConnection()); 
         $tipo_notificacao = 'nova_mensagem_chat';

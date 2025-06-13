@@ -544,7 +544,6 @@ function htmlspecialchars(str) {
 }
 
 async function removerNotificacao(notificacaoId, listItem) {
-    if (!confirm('Deseja realmente remover esta notificação?')) return;
     try {
         const response = await fetch('../controllers/dispensar_notificacao_controller.php', {
             method: 'POST',

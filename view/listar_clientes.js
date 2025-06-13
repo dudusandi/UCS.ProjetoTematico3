@@ -33,13 +33,13 @@ function carregarClientes(termo = '', pagina = 1, append = false) {
             
             if (!append) {
                 clientesContainer.innerHTML = `
-                    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    <ul class="list-group list-group-flush">
                         ${clientesHtml}
-                    </div>
+                    </ul>
                 `;
             } else {
-                const row = clientesContainer.querySelector('.row');
-                row.insertAdjacentHTML('beforeend', clientesHtml);
+                const ul = clientesContainer.querySelector('ul.list-group');
+                ul.insertAdjacentHTML('beforeend', clientesHtml);
             }
 
             atualizarEstadoPaginacao(data.total, pagina);
@@ -53,28 +53,18 @@ function carregarClientes(termo = '', pagina = 1, append = false) {
 
 function criarCardCliente(cliente) {
     return `
-        <div class="col">
-            <div class="card h-100">
-                <div class="card-body">
-                    <h5 class="card-title">${cliente.nome}</h5>
-                    <p class="card-text text-muted">
-                        <strong>Telefone:</strong> ${cliente.telefone}<br>
-                        <strong>Email:</strong> ${cliente.email}<br>
-                        <strong>Endereço:</strong> 
-                        ${cliente.rua}, ${cliente.numero}, ${cliente.bairro}, ${cliente.cidade} - ${cliente.estado}
-                    </p>
-                </div>
-                <div class="card-footer d-flex justify-content-between">
-                    <a href="editar_cliente.php?id=${cliente.id}" class="btn btn-sm btn-primary">
-                        <i class="bi bi-pencil"></i> Editar
-                    </a>
-                    <a href="../controllers/excluir_cliente.php?id=${cliente.id}" class="btn btn-sm btn-danger" 
-                       onclick="return confirm('Tem certeza que deseja excluir o cliente ${cliente.nome}?')">
-                        <i class="bi bi-trash"></i> Excluir
-                    </a>
-                </div>
+        <li class="list-group-item d-flex justify-content-between align-items-start py-3">
+            <div class="ms-2 me-auto">
+                <div class="fw-semibold">${cliente.nome}</div>
+                <small class="text-muted d-block"><i class="bi bi-telephone"></i> ${cliente.telefone}</small>
+                <small class="text-muted d-block"><i class="bi bi-envelope"></i> ${cliente.email}</small>
+                <small class="text-muted d-block"><i class="bi bi-geo-alt"></i> ${cliente.rua}, ${cliente.numero}, ${cliente.bairro}, ${cliente.cidade} - ${cliente.estado}</small>
             </div>
-        </div>
+            <div class="btn-group btn-group-sm">
+                <a href="editar_cliente.php?id=${cliente.id}" class="btn btn-outline-primary" title="Editar"><i class="bi bi-pencil"></i></a>
+                <a href="../controllers/excluir_cliente.php?id=${cliente.id}" class="btn btn-outline-danger" title="Excluir" onclick="return confirm('Excluir ${cliente.nome}?')"><i class="bi bi-trash"></i></a>
+            </div>
+        </li>
     `;
 }
 

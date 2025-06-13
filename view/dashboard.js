@@ -2,10 +2,20 @@ let currentProdutoId = null;
 let isEditando = false;
 let fornecedores = []; 
 
-function mostrarDetalhes(id) {
+function mostrarDetalhes(event, id) {
     currentProdutoId = id;
     console.log("[mostrarDetalhes] ID do produto clicado:", id);
     console.log("[mostrarDetalhes] ID do usuário logado (window.usuarioLogadoId):", window.usuarioLogadoId);
+
+    
+    const cardElement = event.currentTarget || event.target;
+    const rect = cardElement.getBoundingClientRect();
+    const originX = rect.left + rect.width / 2;
+    const originY = rect.top + rect.height / 2;
+    const modalDialog = document.querySelector('#produtoModal .modal-dialog');
+    if (modalDialog) {
+        modalDialog.style.transformOrigin = `${originX}px ${originY}px`;
+    }
 
     fetch(`../controllers/get_produto.php?id=${id}`)
         .then(response => response.json())
@@ -181,13 +191,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Lógica de carregar notificações foi movida para menu.php
+    
     console.log("[DOMContentLoaded] Lógica de notificações do dashboard.js não é mais necessária aqui (movida para menu.php).");
-    // if (typeof window.usuarioLogadoId !== 'undefined' && window.usuarioLogadoId) {
-    //     console.log("[DOMContentLoaded] Usuário logado. Carregando notificações pela primeira vez e configurando intervalo.");
-    //     // carregarNotificacoes(); 
-    //     // setInterval(carregarNotificacoes, 60000); 
-    // }
+    
+    
+    
+    
+    
 });
 
 function exibirProduto(produto) {
@@ -199,8 +209,8 @@ function exibirProduto(produto) {
     }
 }
 
-// Funções carregarNotificacoes() e renderizarNotificacoesSideNav() REMOVIDAS daqui
-// pois a lógica de notificações agora é centralizada em menu.php
+
+
 
 async function marcarnotificacaoLida(notificacaoId, linknotificacao, elementoA) {
     try {
@@ -218,12 +228,12 @@ async function marcarnotificacaoLida(notificacaoId, linknotificacao, elementoA) 
                 const dot = elementoA.querySelector('.badge.bg-primary.rounded-pill');
                 if(dot) dot.remove();
             }
-            // Re-chama a função de carregar notificações do menu.php (assumindo que ela seja global ou acessível)
+            
             if (typeof carregarNotificacoesAPI === 'function') {
                 carregarNotificacoesAPI(); 
             } else {
-                // Fallback: recarregar a página pode ser uma opção se a função não estiver acessível diretamente
-                // window.location.reload(); 
+                
+                
                 console.warn("Função carregarNotificacoesAPI() do menu.php não encontrada globalmente.");
             }
             
@@ -242,9 +252,7 @@ async function marcarnotificacaoLida(notificacaoId, linknotificacao, elementoA) 
 
 async function marcarTodasComoLidas(event) {
     event.preventDefault();
-    if (!confirm("Tem certeza que deseja marcar todas as notificações como lidas?")) {
-        return;
-    }
+
     try {
         const response = await fetch('../controllers/marcar_notificacao_controller.php', {
             method: 'POST',
@@ -255,18 +263,34 @@ async function marcarTodasComoLidas(event) {
         });
         const result = await response.json();
         if (result.success) {
-             if (typeof carregarNotificacoesAPI === 'function') {
-                carregarNotificacoesAPI(); 
-            } else {
-                console.warn("Função carregarNotificacoesAPI() do menu.php não encontrada globalmente.");
+            if (typeof carregarNotificacoesAPI === 'function') {
+                carregarNotificacoesAPI();
             }
+            mostrarAlertaBootstrap('Todas as notificações foram marcadas como lidas.', 'success');
         } else {
-            alert('Erro ao marcar todas as notificações como lidas: ' + (result.error || 'Erro desconhecido'));
+            mostrarAlertaBootstrap('Erro ao marcar todas como lidas: ' + (result.error || 'Erro desconhecido'), 'danger');
         }
     } catch (error) {
         console.error('Erro ao marcar todas como lidas:', error);
-        alert('Erro de comunicação.');
+        mostrarAlertaBootstrap('Erro de comunicação.', 'danger');
     }
+}
+
+
+function mostrarAlertaBootstrap(mensagem, tipo = 'success', tempo = 4000) {
+    const alerta = document.createElement('div');
+    alerta.className = `alert alert-${tipo} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
+    alerta.style.zIndex = 1080;
+    alerta.role = 'alert';
+    alerta.innerHTML = `
+        ${mensagem}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    document.body.appendChild(alerta);
+    setTimeout(() => {
+        const alertInstance = bootstrap.Alert.getOrCreateInstance(alerta);
+        alertInstance.close();
+    }, tempo);
 }
 
 async function abrirModalPropostaTroca() {
@@ -281,7 +305,7 @@ async function abrirModalPropostaTroca() {
 
     const listaProdutosDiv = document.getElementById('listaProdutosUsuarioParaTroca');
     const nenhumProdutoDiv = document.getElementById('nenhumProdutoParaTroca');
-    listaProdutosDiv.innerHTML = ''; // Limpa lista anterior
+    listaProdutosDiv.innerHTML = ''; 
     nenhumProdutoDiv.classList.add('d-none');
 
     try {
@@ -318,6 +342,12 @@ async function abrirModalPropostaTroca() {
         } else {
             alert(data.error || 'Erro ao buscar seus produtos.');
             return;
+        }
+
+        
+        const modalProdutoInst = bootstrap.Modal.getInstance(document.getElementById('produtoModal'));
+        if (modalProdutoInst) {
+            modalProdutoInst.hide();
         }
 
         const modalProposta = new bootstrap.Modal(document.getElementById('propostaTrocaModal'));
@@ -372,20 +402,20 @@ async function enviarPropostaDeTroca(idProdutoOferecido, idProdutoDesejadoOrigin
         const result = await response.json();
 
         if (result.success) {
-            alert(result.message || 'Proposta de troca enviada com sucesso!');
+            mostrarAlertaBootstrap(result.message || 'Proposta de troca enviada com sucesso!', 'success');
             const modalProposta = bootstrap.Modal.getInstance(document.getElementById('propostaTrocaModal'));
             if (modalProposta) {
                 modalProposta.hide();
             }
 
         } else {
-            alert('Erro ao enviar proposta de troca: ' + (result.error || 'Ocorreu um problema.'));
+            mostrarAlertaBootstrap('Erro ao enviar proposta de troca: ' + (result.error || 'Ocorreu um problema.'), 'danger');
         }
     } catch (error) {
         console.error('Erro no fetch ao enviar proposta de troca:', error);
-        alert('Erro de comunicação ao enviar proposta. Tente novamente.');
+        mostrarAlertaBootstrap('Erro de comunicação ao enviar proposta. Tente novamente.', 'danger');
     }
 }
 
-// A função dispensarnotificacao foi removida pois menu.php já tem sua própria lógica.
-// O script em menu.php deve lidar com isso.
+
+

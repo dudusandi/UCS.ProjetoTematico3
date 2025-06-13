@@ -15,7 +15,7 @@ class Cliente {
         $this->endereco = $endereco;
     }
 
-    // Getters
+    
     public function getId() { return $this->id; }
     public function getNome() { return $this->nome; }
     public function getTelefone() { return $this->telefone; }
@@ -23,7 +23,7 @@ class Cliente {
     public function getCartaoCredito() { return $this->cartaoCredito; }
     public function getEndereco() { return $this->endereco; }
 
-    // Setters
+    
     public function setId($id) { $this->id = $id; }
     public function setNome($nome) { $this->nome = $nome; }
     public function setTelefone($telefone) { $this->telefone = $telefone; }

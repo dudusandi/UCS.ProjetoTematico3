@@ -19,12 +19,15 @@ class MensagemDAO {
                 $mensagem->getConteudo()
             ]);
             if ($result) {
-                return $this->pdo->lastInsertId();
+                $lastInsertId = $this->pdo->lastInsertId();
+                error_log("Mensagem inserida com sucesso. ID: $lastInsertId, Remetente ID: " . $mensagem->getRemetenteId() . ", Destinatário ID: " . $mensagem->getDestinatarioId() . ", Conteúdo: " . $mensagem->getConteudo());
+                return $lastInsertId;
             } else {
+                error_log("Falha ao inserir mensagem: Remetente ID: " . $mensagem->getRemetenteId() . ", Destinatário ID: " . $mensagem->getDestinatarioId() . ", Conteúdo: " . $mensagem->getConteudo());
                 return false;
             }
         } catch (PDOException $e) {
-
+            error_log("Erro ao enviar mensagem: " . $e->getMessage());
             return false;
         }
     }
@@ -139,8 +142,8 @@ class MensagemDAO {
                 );
             }
         } catch (PDOException $e) {
-            // Logar o erro seria uma boa prática aqui
-            // error_log("Erro em buscarNovasMensagens: " . $e->getMessage());
+            
+            
         }
         return $mensagens;
     }

@@ -5,6 +5,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../dao/mensagem_dao.php';
 require_once __DIR__ . '/../dao/cliente_dao.php'; 
 require_once __DIR__ . '/../model/cliente.php';   
+require_once __DIR__ . '/../model/mensagem.php';
 
 if (!isset($_SESSION['usuario_id'])) { 
     header('Location: ../view/login.php'); 
@@ -14,6 +15,22 @@ if (!isset($_SESSION['usuario_id'])) {
 $usuario_logado_id = $_SESSION['usuario_id']; 
 $mensagemDAO = new MensagemDAO(); 
 $clienteDAO = new ClienteDAO(); 
+
+
+$destinatario_forcar_id = filter_input(INPUT_GET, 'abrir_conversa_id', FILTER_VALIDATE_INT);
+if ($destinatario_forcar_id && $destinatario_forcar_id !== $usuario_logado_id) {
+    
+    $destinatario_existe = $clienteDAO->buscarPorId($destinatario_forcar_id);
+    if ($destinatario_existe) {
+        $conversaExistente = $mensagemDAO->buscarConversa($usuario_logado_id, $destinatario_forcar_id);
+        
+        if (empty($conversaExistente)) {
+            $mensagemInicial = new Mensagem(null, $usuario_logado_id, $destinatario_forcar_id, "Início da conversa.");
+            $mensagemDAO->enviarMensagem($mensagemInicial);
+        }
+    }
+}
+
 
 $ultimas_conversas_raw = $mensagemDAO->buscarUltimasConversas($usuario_logado_id);
 

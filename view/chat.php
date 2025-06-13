@@ -88,35 +88,29 @@ if (!$is_modal_view) {
     <?php endif; ?>
     <link rel="stylesheet" href="estilo_mensagens.css">
     <style>
-        html, body {
+        html,body{height:100%;margin:0;overflow:hidden;}
+        .container-fluid {
             height: 100%;
             margin: 0;
             padding: 0;
             <?php if ($is_modal_view): ?>
-            overflow: hidden; /* Evitar scrollbars no próprio iframe se o conteúdo couber */
-            <?php endif; ?>
-        }
-        body {
-            display: flex;
-            flex-direction: column;
-            <?php if ($is_modal_view): ?>
-            background-color: #f8f9fa; /* Cor de fundo suave para o chat no modal */
+            background-color: #f8f9fa; 
             <?php else: ?>
-            min-height: 100vh; /* Para view normal, garantir altura mínima */
+            min-height: 100vh; 
             <?php endif; ?>
         }
         .main-content {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            min-height: 0; /* Essencial para flex children com overflow/scroll */
-            <?php if (!$is_modal_view): ?>
-            /* padding-top: 10px; // Estilo específico para view normal, se necessário */
-            <?php else: ?>
-            padding-top: 0;
+            min-height: 0;
+            <?php if ($is_modal_view): ?>
+            height: 100%;
+            margin: 0;
+            padding: 0;
             <?php endif; ?>
         }
-        .products-section { /* Container do chat ou da página */
+        .products-section { 
             flex-grow: 1;
             display: flex;
             flex-direction: column;
@@ -126,7 +120,7 @@ if (!$is_modal_view) {
             margin: 0 !important;
             padding: 0 !important;
             <?php else: ?>
-            /* Estilos para view normal, mantendo o que estava antes se aplicável */
+            
             max-width: 70%; 
             margin-left: auto; 
             margin-right: auto; 
@@ -139,24 +133,27 @@ if (!$is_modal_view) {
             flex-direction: column;
             min-height: 0;
             <?php if (!$is_modal_view): ?>
-            height: calc(100vh - 70px); /* Altura para visualização normal */
+            height: calc(100vh - 70px);
+            <?php else: ?>
+            height: 100%;
             <?php endif; ?>
-            /* Se for modal, a altura é determinada pelo flex-grow */
+            border:none !important;
         }
         .chat-container {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            overflow: hidden; /* CRUCIAL: impede que este container role ou se expanda além do seu espaço flexível */
-            min-height: 0;   /* Permite encolher */
-            background-color: #fff;
+            overflow: hidden; 
+            min-height: 0;   
+            background-color: transparent;
+            border:none !important;
         }
         .chat-header {
-            flex-shrink: 0; /* Não encolher */
+            flex-shrink: 0; 
             <?php if ($is_modal_view): ?>
-            /* O header do chat não é mostrado no modal, o título do modal já serve. */
-            /* Se fosse mostrado, teria padding menor: padding: 8px 12px; */
-            /* font-size: 1rem; */
+            
+            
+            
             <?php else: ?>
             padding: 10px 15px;
             border-bottom: 1px solid #eee;
@@ -167,23 +164,24 @@ if (!$is_modal_view) {
             overflow-y: auto;
             min-height: 0;
             word-break: break-word;
-            padding: 10px 12px;
+            padding: 4px 16px;
+            background: transparent;
         }
         .area-envio-mensagem {
             flex-shrink: 0;
             border-top: 1px solid #dee2e6;
             <?php if ($is_modal_view): ?>
-            padding: 8px 12px;
-            background-color: #f8f9fa;
+            padding: 12px 16px;
+            background-color: #ffffff;
             <?php else: ?>
             padding: 10px 15px;
-            /* background-color: #f1f1f1; // Exemplo de cor para view normal */
+            
             <?php endif; ?>
         }
         .area-envio-mensagem form {
-            display: flex; /* Mantém o layout flexível para textarea e botão */
-            align-items: center; /* Alinha verticalmente os itens no centro */
-            width: 100%; /* FAZ O FORMULÁRIO OCUPAR TODA A LARGURA DISPONÍVEL */
+            display: flex; 
+            align-items: center; 
+            width: 100%; 
         }
         .area-envio-mensagem textarea {
             flex-grow: 1;
@@ -215,7 +213,7 @@ if (!$is_modal_view) {
                                 $classe_css = ($msg->getRemetenteId() == $id_usuario_logado) ? 'enviada' : 'recebida';
                                 $data_formatada = date("d/m/Y H:i", strtotime($msg->getDataEnvio()));
                                 ?>
-                                <div class="mensagem <?php echo $classe_css; ?>" data-mensagem-id="<?php echo $msg->getId(); /* Ou $msg['id'] se for array */ ?>">
+                                <div class="mensagem <?php echo $classe_css; ?>" data-mensagem-id="<?php echo $msg->getId();  ?>">
                                     <p style="margin:0;"><?php echo nl2br(htmlspecialchars($msg->getConteudo())); ?></p>
                                     <span class="timestamp"><?php echo $data_formatada; ?></span>
                                 </div>
@@ -249,7 +247,7 @@ if (!$is_modal_view) {
             const params = new URLSearchParams(window.location.search);
             const scrollToBottomParam = params.get('scroll_to_bottom');
 
-            // Pega o ID da última mensagem renderizada inicialmente
+            
             const todasAsMensagens = chatMessagesArea ? chatMessagesArea.querySelectorAll('.mensagem[data-mensagem-id]') : [];
             if (todasAsMensagens.length > 0) {
                 ultimaMensagemIdConhecida = parseInt(todasAsMensagens[todasAsMensagens.length - 1].getAttribute('data-mensagem-id'));
@@ -266,12 +264,12 @@ if (!$is_modal_view) {
             }
 
             if (scrollToBottomParam === 'true') {
-                // Tenta rolar imediatamente e depois com um pequeno delay para garantir
+                
                 doScroll(); 
-                setTimeout(doScroll, 100); // Delay de 100ms
-                setTimeout(doScroll, 300); // Delay adicional para casos mais lentos
+                setTimeout(doScroll, 100); 
+                setTimeout(doScroll, 300); 
             } else {
-                 // Comportamento padrão (que já rola para o final)
+                 
                 doScroll();
             }
         };
@@ -292,10 +290,10 @@ if (!$is_modal_view) {
                 const mensagemDiv = document.createElement('div');
                 mensagemDiv.classList.add('mensagem', 'enviada');
                 mensagemDiv.id = tempId;
-                // Usar textContent para segurança e nl2br manual para quebra de linha
+                
                 const p = document.createElement('p');
                 p.style.margin = '0';
-                p.innerHTML = conteudoMensagem.replace(/\n/g, '<br>'); // nl2br via JS
+                p.innerHTML = conteudoMensagem.replace(/\n/g, '<br>'); 
                 mensagemDiv.appendChild(p);
 
                 const span = document.createElement('span');
@@ -319,11 +317,11 @@ if (!$is_modal_view) {
                     const msgElement = document.getElementById(tempId);
 
                     if (result.success && msgElement) {
-                        if (result.mensagem_id) { // Verificar se o ID da mensagem foi retornado
+                        if (result.mensagem_id) { 
                             msgElement.setAttribute('data-mensagem-id', result.mensagem_id);
-                            msgElement.querySelector('.timestamp').textContent = dataAtual; // Manter o timestamp local por enquanto
+                            msgElement.querySelector('.timestamp').textContent = dataAtual; 
                             msgElement.classList.remove('mensagem-falha');
-                            // msgElement.classList.add('mensagem-sucesso'); // Opcional
+                            
 
                             const novoId = parseInt(result.mensagem_id);
                             if (novoId > ultimaMensagemIdConhecida) {
@@ -350,7 +348,7 @@ if (!$is_modal_view) {
             });
         }
 
-        // Auto-ajuste da altura da textarea
+        
         const textarea = document.querySelector('.area-envio-mensagem textarea');
         if (textarea) {
             textarea.addEventListener('input', function () {
@@ -358,17 +356,17 @@ if (!$is_modal_view) {
                 this.style.height = (this.scrollHeight) + 'px';
             });
 
-            // Enviar mensagem com Enter (Shift+Enter para nova linha)
+            
             textarea.addEventListener('keydown', function(event) {
                 if (event.key === 'Enter' && !event.shiftKey) {
-                    event.preventDefault(); // Previne nova linha no textarea
-                    // Dispara o evento submit do formulário
+                    event.preventDefault(); 
+                    
                     if (chatForm) {
-                        // Verifica se o conteúdo não é apenas espaços em branco antes de enviar
+                        
                         if (this.value.trim() !== '') {
                             chatForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
                         } else {
-                            // Opcional: limpar o textarea se só tiver espaços e o usuário tentar enviar
+                            
                             this.value = ''; 
                         }
                     }
@@ -376,7 +374,7 @@ if (!$is_modal_view) {
             });
         }
 
-        // Função para buscar e renderizar novas mensagens
+        
         async function buscarEAdicionarNovasMensagens() {
             if (!window.usuarioLogadoId || !outroUsuarioId) return;
 
@@ -428,7 +426,7 @@ if (!$is_modal_view) {
                         }
                     }
                 } else if (data.success && data.mensagens && data.mensagens.length === 0) {
-                    // console.log('[Chat.php] Polling: Nenhuma mensagem nova.'); // Opcional
+                    
                 } else if (!data.success && data.error) {
                     console.warn('[Chat.php] Polling: Erro da API ao buscar novas mensagens:', data.error);
                 }
@@ -437,9 +435,9 @@ if (!$is_modal_view) {
             }
         }
 
-        // Iniciar o polling para novas mensagens
+        
         if (window.usuarioLogadoId && outroUsuarioId) {
-            setInterval(buscarEAdicionarNovasMensagens, 3000); // Verificar a cada 3 segundos
+            setInterval(buscarEAdicionarNovasMensagens, 3000); 
             console.log('[Chat.php] Polling para novas mensagens iniciado.');
         }
 

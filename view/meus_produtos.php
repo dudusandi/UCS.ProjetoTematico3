@@ -53,7 +53,7 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="dashboard.css"> <!-- CSS unificado -->
     <style>
-        /* Reforçando box-sizing para consistência */
+        
         .main-content, .main-content > *, .products-section > * {
             box-sizing: border-box;
         }
@@ -63,22 +63,22 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
         }
         .main-content {
             flex-grow: 1; 
-            padding: 0 !important; /* Garantir ausência de padding no main-content */
+            padding: 0 !important; 
         }
         
-        /* Estilos para os filhos diretos de .main-content em meus_produtos.php */
+        
         .main-content > .search-bar-container {
             margin-left: 20px !important;
             margin-right: 20px !important;
-            padding: 20px 0 !important; /* Padding vertical, sem padding lateral */
-            width: calc(100% - 40px); /* Considera as margens laterais */
+            padding: 20px 0 !important; 
+            width: calc(100% - 40px); 
         }
 
         .main-content > .products-section {
-            padding: 20px !important; /* Padding geral para a seção de produtos */
-             width: calc(100% - 40px); /* Adicionado para consistência com search-bar */
-             margin-left: 20px !important; /* Adicionado para consistência */
-             margin-right: 20px !important; /* Adicionado para consistência */
+            padding: 20px !important; 
+             width: calc(100% - 40px); 
+             margin-left: 20px !important; 
+             margin-right: 20px !important; 
         }
 
         .list-group-item img {
@@ -102,31 +102,31 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
             padding: 0.25rem 0.5rem;
             font-size: 0.8rem;
         }
-        #modalCadastroProduto .modal-content {
+
             border-radius: 18px;
             background: #f6f9fb;
             box-shadow: 0 8px 32px 0 rgba(60, 80, 120, 0.10);
             border: none;
         }
-        #modalCadastroProduto .modal-header {
+
             border-bottom: none;
             padding-bottom: 0;
             justify-content: center;
         }
-        #modalCadastroProduto .modal-title {
+
             font-weight: 600;
             color: #3a3a4a;
             text-align: center;
             width: 100%;
         }
-        #modalCadastroProduto .modal-body {
+
             padding-top: 0;
         }
-        #modalCadastroProduto .form-label {
+
             font-weight: 500;
             color: #4a4a5a;
         }
-        #modalCadastroProduto .form-control, #modalCadastroProduto .form-select {
+
             border-radius: 8px;
             border: 1px solid #e0e6ed;
             background: #fff;
@@ -134,11 +134,11 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
             font-size: 1rem;
             margin-bottom: 8px;
         }
-        #modalCadastroProduto .form-control:focus, #modalCadastroProduto .form-select:focus {
+
             border-color: #667eea;
             box-shadow: 0 0 0 2px rgba(102,126,234,0.10);
         }
-        #modalCadastroProduto .image-preview-container {
+
             text-align: center;
             margin-bottom: 20px;
             border: 2px dashed #dbeafe;
@@ -152,21 +152,21 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
             cursor: pointer;
             transition: border-color 0.2s;
         }
-        #modalCadastroProduto .image-preview-container:hover {
+
             border-color: #667eea;
         }
-        #modalCadastroProduto .image-preview-container img {
+
             max-width: 100%;
             max-height: 160px;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(60, 80, 120, 0.08);
         }
-        #modalCadastroProduto .image-preview-text {
+
             color: #7a7a8c;
             font-style: italic;
             font-size: 1rem;
         }
-        #modalCadastroProduto .btn-primary {
+
             background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
             border: none;
             font-weight: 500;
@@ -176,11 +176,11 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
             box-shadow: 0 2px 8px rgba(102,126,234,0.08);
             transition: background 0.2s, box-shadow 0.2s;
         }
-        #modalCadastroProduto .btn-primary:hover {
+
             background: linear-gradient(90deg, #764ba2 0%, #667eea 100%);
             box-shadow: 0 4px 16px rgba(102,126,234,0.12);
         }
-        #modalCadastroProduto .modal-footer {
+
             border-top: none;
         }
     </style>
@@ -242,7 +242,7 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
                                 $precoFormatado = number_format($produto['preco'] ?? 0.0, 2, ',', '.');
 
                                 echo '<li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">';
-                                echo '    <div class="d-flex align-items-center me-3 mb-2 mb-md-0" style="flex-grow: 1; min-width: 200px; cursor:pointer;" onclick="abrirModalEdicao(' . $produto['id'] . ')">'; // Adicionado flex-grow e min-width
+                                echo '    <div class="d-flex align-items-center me-3 mb-2 mb-md-0" style="flex-grow: 1; min-width: 200px; cursor:pointer;" onclick="abrirModalEdicao(' . $produto['id'] . ')">'; 
                                 
                                 if (!empty($produto['foto'])) {
                                     $fotoUrl = 'data:image/jpeg;base64,' . base64_encode($produto['foto']);
@@ -320,17 +320,24 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
                         <div class="col-md-8">
                             <form id="editarProdutoForm">
                                 <input type="hidden" id="produtoModalId" name="id">
-                                <div class="mb-3">
-                                    <label for="produtoModalNomeInput" class="form-label">Nome *</label>
-                                    <input type="text" class="form-control" id="produtoModalNomeInput" name="nome" required>
+                                <div class="row mb-3">
+                                    <div class="col-md-8">
+                                        <label for="produtoModalNomeInput" class="form-label">Nome *</label>
+                                        <input type="text" class="form-control" id="produtoModalNomeInput" name="nome" required>
+                                        <div class="invalid-feedback">Por favor, informe o nome do produto.</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="produtoModalPrecoInput" class="form-label">Preço *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">R$</span>
+                                            <input type="number" class="form-control" id="produtoModalPrecoInput" name="preco" min="0" step="0.01" required>
+                                        </div>
+                                        <div class="invalid-feedback">Por favor, informe o preço.</div>
+                                    </div>
                                 </div>
                                 <div class="mb-3">
                                     <label for="produtoModalDescricaoInput" class="form-label">Descrição</label>
                                     <textarea class="form-control" id="produtoModalDescricaoInput" name="descricao" rows="3"></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="produtoModalPrecoInput" class="form-label">Preço *</label>
-                                    <input type="number" step="0.01" class="form-control" id="produtoModalPrecoInput" name="preco" required>
                                 </div>
                             </form>
                         </div>
@@ -401,22 +408,6 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
               <div class="mb-3">
                 <label for="descricao" class="form-label">Descrição Detalhada</label>
                 <textarea class="form-control" id="descricao" name="descricao" rows="4" placeholder="Descreva o estado do produto, motivo da troca/venda, etc."></textarea>
-              </div>
-              <div class="row mb-3">
-                <div class="col-md-6">
-                  <label for="condicao" class="form-label">Condição do Produto</label>
-                  <select class="form-select" id="condicao" name="condicao">
-                    <option value="">Selecione a condição</option>
-                    <option value="novo">Novo (nunca usado)</option>
-                    <option value="usado_como_novo">Usado - Como Novo</option>
-                    <option value="usado_bom_estado">Usado - Bom Estado</option>
-                    <option value="usado_marcas_uso">Usado - Com Marcas de Uso</option>
-                  </select>
-                </div>
-                <div class="col-md-6">
-                  <label for="categoria" class="form-label">Categoria</label>
-                  <input type="text" class="form-control" id="categoria" name="categoria" placeholder="Ex: Eletrônicos, Vestuário, Livros">
-                </div>
               </div>
               <div class="mt-4 text-center">
                 <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-check-circle"></i> Cadastrar Produto</button>
@@ -539,7 +530,7 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
             }
         });
 
-        // Código do preview de imagem e validação do formulário do modal de cadastro
+        
         (function() {
             const fotoInput = document.getElementById('foto');
             const imagePreviewContainer = document.getElementById('imagePreviewContainer');
@@ -566,7 +557,7 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
                     }
                 });
             }
-            // Validação Bootstrap
+            
             const form = document.getElementById('formCadastroProdutoPagina');
             if (form) {
                 form.addEventListener('submit', function (event) {
@@ -578,6 +569,30 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
                 }, false);
             }
         })();
+
+        
+        document.getElementById('formCadastroProdutoPagina').addEventListener('submit', async function(event) {
+            event.preventDefault(); 
+            const form = event.target;
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert(result.message || 'Produto cadastrado com sucesso!');
+                    location.reload(); 
+                } else {
+                    alert('Erro ao cadastrar produto: ' + (result.error || 'Erro desconhecido'));
+                }
+            } catch (error) {
+                console.error('Erro ao cadastrar produto:', error);
+                alert('Erro de comunicação ao cadastrar produto. Tente novamente.');
+            }
+        });
     </script>
 </body>
 </html> 

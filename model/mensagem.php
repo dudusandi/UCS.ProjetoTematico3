@@ -8,7 +8,7 @@ class Mensagem {
     private $data_envio;
     private $lida;
 
-    // Construtor
+    
     public function __construct($id = null, $remetente_id = null, $destinatario_id = null, $conteudo = null, $data_envio = null, $lida = false) {
         $this->id = $id;
         $this->remetente_id = $remetente_id;
@@ -18,7 +18,7 @@ class Mensagem {
         $this->lida = $lida;
     }
 
-    // Getters
+    
     public function getId() {
         return $this->id;
     }
@@ -43,7 +43,7 @@ class Mensagem {
         return $this->lida;
     }
 
-    // Setters
+    
     public function setId($id) {
         $this->id = $id;
     }

@@ -65,11 +65,11 @@ body::before {
 .logo span {
     background: repeating-linear-gradient(
         90deg,
-        #f093fb 0%,
-        #f5576c 25%,
-        #764ba2 50%,
-        #667eea 75%,
-        #f093fb 100%
+
+
+
+
+
     );
     background-size: 200% 100%;
     -webkit-background-clip: text;

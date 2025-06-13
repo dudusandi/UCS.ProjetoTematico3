@@ -63,10 +63,10 @@ try {
 </head>
 <body>
     <?php 
-    // DEBUG: Para ter certeza absoluta do valor de $id_usuario_logado que o menu.php VAI ver:
-    // echo "<div style='background:yellow; color:black; padding:5px; position:fixed; top:0; left:0; z-index:9999;'>DEBUG menu include: id_usuario_logado = ";
-    // var_dump($id_usuario_logado);
-    // echo "</div>";
+    
+    
+    
+    
     
     include __DIR__ . '/../menu.php'; 
     ?>
@@ -117,12 +117,12 @@ try {
                                 <h3 class="mt-3">' . ($termo_busca ? "Nenhum produto encontrado para \"" . htmlspecialchars($termo_busca) . "\"" : "Nenhum produto cadastrado") . '</h3>
                               </div>';
                     } else {
-                        echo '<div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4">'; 
+                        echo '<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-4">'; 
                         foreach ($produtos as $produto) {
                             $fotoUrl = $produto['foto'] ? 'data:image/jpeg;base64,' . base64_encode($produto['foto']) : 'https://via.placeholder.com/200?text=Sem+Imagem';
                             $precoFormatado = number_format($produto['preco'], 2, ',', '.');
 
-                            $onClickCard = 'onclick="mostrarDetalhes(' . $produto['id'] . ')"';
+                            $onClickCard = 'onclick="mostrarDetalhes(event, ' . $produto['id'] . ')"';
 
                             echo '<div class="col">
                                     <div class="card h-100 produto-card" ' . $onClickCard . '>
@@ -186,11 +186,11 @@ try {
         </div>
     </div>
 
-    <div class="modal fade" id="produtoModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+    <div class="modal fade zoom-modal" id="produtoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="produtoNome"></h5>
+                    <h4 class="modal-title produto-title mb-0" id="produtoNome"></h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">

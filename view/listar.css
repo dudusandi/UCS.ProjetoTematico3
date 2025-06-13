@@ -35,11 +35,11 @@ body {
 .header .logo span {
     background: repeating-linear-gradient(
         90deg,
-        #f093fb 0%,
-        #f5576c 25%,
-        #764ba2 50%,
-        #667eea 75%,
-        #f093fb 100%
+
+
+
+
+
     );
     background-size: 200% 100%;
     -webkit-background-clip: text;
@@ -105,4 +105,26 @@ body {
 .search-bar {
     flex-grow: 1;
     margin: 0 20px;
+}
+
+
+.clientes-list-container ul.list-group {
+    max-width: 900px;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+}
+
+.clientes-list-container .list-group-item {
+    background-color: #fff;
+    transition: background-color 0.2s;
+}
+
+.clientes-list-container .list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+.clientes-list-container .btn-group .btn {
+    min-width: 38px;
 }

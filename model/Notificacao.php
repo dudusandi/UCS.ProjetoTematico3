@@ -10,7 +10,7 @@ class notificacao {
     private $lida;
     private $data_criacao;
 
-    // Construtor
+    
     public function __construct(
         $usuario_id_destino,
         $tipo_notificacao,
@@ -29,7 +29,7 @@ class notificacao {
 
     }
 
-    // Getters
+    
     public function getId() { return $this->id; }
     public function getUsuarioIdDestino() { return $this->usuario_id_destino; }
     public function getUsuarioIdOrigem() { return $this->usuario_id_origem; }
