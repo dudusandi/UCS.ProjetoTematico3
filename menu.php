@@ -37,7 +37,7 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
     ?>
     <div class="notifications-section-container">
         <div class="notifications-header">
-            <i class="bi bi-bell-fill"></i> <!-- Ícone atualizado para API -->
+            <i class="bi bi-bell-fill"></i> 
             <span>Notificações</span> 
             <span id="contadorNotificacoesAPISideNav" class="badge bg-primary ms-2" style="font-size: 0.7em; padding: 0.3em 0.5em; display:none;">
                 0 
@@ -49,7 +49,7 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
         </ul>
     </div>
     <?php else: ?>
-        <?php // echo "<!-- DEBUG menu.php: Bloco de notificações NÃO renderizado pois id_usuario_logado é falso ou não definido. Valor: "; var_dump($id_usuario_logado ?? "INDEFINIDO NO ELSE NOTIF"); echo " -->"; ?>
+        <?php ?>
     <?php endif; ?>
 
     <div class="user-info-nav">
@@ -82,18 +82,18 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
 
 .logo-container {
     text-align: center;
-    margin-bottom: 30px; /* Aumentar um pouco a margem inferior */
-    padding: 10px 0; /* Adicionar padding vertical */
+    margin-bottom: 30px; 
+    padding: 10px 0; 
 }
 
 .logo {
-    font-size: 28px; /* Consistente com o antigo dashboard.css */
+    font-size: 28px; 
     font-weight: bold;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    display: inline-block; /* Importante para o efeito de gradiente no span */
+    display: inline-block; 
 }
 
 .logo span {
@@ -153,11 +153,11 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
 .notifications-list {
     list-style: none;
     padding-left: 0;
-    margin-right: 5px; /* Espaço para a scrollbar não colar */
+    margin-right: 5px; 
     font-size: 0.9em; 
-    height: 500px; /* Altura fixa para a lista de notificações */
-    overflow-y: auto; /* Adiciona scroll vertical quando necessário */
-    padding-right: 10px; /* Ajuste para não colar na scrollbar */
+    height: 500px; 
+    overflow-y: auto; 
+    padding-right: 10px; 
 }
 
 /* Estilo para cada item de notificação */
@@ -168,44 +168,39 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
     padding: 10px 12px;
     margin-bottom: 8px;
     line-height: 1.4;
-    font-size: 0.9em; /* Tamanho da fonte do item */
-    white-space: normal !important; /* Permite a quebra de linha normal, sobrescrevendo Bootstrap */
-    /* border-bottom removido, pois agora tem borda completa */
+    font-size: 0.9em; 
+    white-space: normal !important; 
     overflow: visible;
     position: relative;
 }
 
-/* Destaque para notificações não lidas */
+
 .notifications-list > li.dropdown-item.fw-bold {
-    border-left: 4px solid #0d6efd; /* Borda esquerda azul mais espessa */
-    background-color: #f8f9fa; /* Fundo levemente diferente */
+    border-left: 4px solid #0d6efd; 
+    background-color: #f8f9fa; 
 }
 
-/* Estilo para o link dentro da notificação, se houver */
 .notifications-list > li.dropdown-item a {
     text-decoration: none;
     color: inherit;
-    display: block; /* Para o link ocupar todo o espaço do li */
+    display: block; 
     padding: 0;
 }
 
-/* Classe para o container da mensagem da notificação */
 .notifications-list .notification-message {
     display: block; 
-
-    margin-bottom: 5px; /* Espaço entre mensagem e data */
+    margin-bottom: 5px; 
 }
 
-/* Classe para a data da notificação */
 .notifications-list .notification-date {
     display: block; 
     font-size: 0.85em; 
     color: #6c757d; 
-    text-align: left; /* Alinha a data à esquerda */
+    text-align: left; 
 }
 
 .user-info-nav {
-    margin-top: auto; /* Empurra para o final */
+    margin-top: auto; 
     padding-top: 15px;
     border-top: 1px solid #ddd;
 }
@@ -213,7 +208,7 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
     font-weight: bold;
 }
 
-/* Botão de remover notificação customizado */
+
 .notificacao-remover-container {
     width: 100%;
     display: flex;
@@ -226,7 +221,7 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
     pointer-events: none;
 }
 
-/* Aura sutil na base da notificação (dentro do card) */
+
 .notificacao-aura-suave {
     position: absolute;
     left: 0;
@@ -266,12 +261,12 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
     position: absolute;
     left: 50%;
     bottom: -22px;
-    transform: translate(-50%, 10px); /* Movido um pouco para baixo para efeito de surgir */
-    transition: box-shadow 0.2s, background 0.2s, opacity 0.3s ease, transform 0.3s ease; /* Transições atualizadas */
-    pointer-events: none; /* Inicialmente não interativo */
+    transform: translate(-50%, 10px); 
+    transition: box-shadow 0.2s, background 0.2s, opacity 0.3s ease, transform 0.3s ease; 
+    pointer-events: none; 
     outline: none;
     z-index: 2;
-    opacity: 0; /* Inicialmente invisível */
+    opacity: 0; 
 }
 
 @keyframes gradienteAura {
@@ -307,11 +302,10 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
     top: -38px;
 }
 
-/* Mostrar o botão de remover no hover do item da notificação */
 .notifications-list > li.dropdown-item:hover .notificacao-remover-btn {
     opacity: 1;
-    transform: translate(-50%, 0); /* Retorna à posição original */
-    pointer-events: auto; /* Torna-se interativo */
+    transform: translate(-50%, 0); 
+    pointer-events: auto; 
 }
 
 .notificacao-remover-btn:hover,
@@ -359,34 +353,20 @@ $paginaAtual = basename($_SERVER['PHP_SELF']);
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Variáveis de sessão e usuário (serão definidas pelo PHP que inclui este arquivo)
-    // Certifique-se de que $id_usuario_logado e $nome_usuario estão disponíveis no escopo do include
-    // Como este script está no menu.php, ele terá acesso às variáveis PHP definidas ANTES do include.
 
-    // Função para buscar e exibir notificações da API
     function carregarNotificacoesAPI() {
         const listaNotificacoes = document.getElementById('listaNotificacoesAPISideNav');
         const loadingItem = document.getElementById('notificacaoItemLoadingAPISideNav');
         const nenhumaItem = document.getElementById('notificacaoItemNenhumaAPISideNav');
         const contadorBadge = document.getElementById('contadorNotificacoesAPISideNav');
 
-        // Logs de debug removidos
-        // console.log('[Menu Notificações] Tentando encontrar elementos: listaNotificacoesAPISideNav, notificacaoItemLoadingAPISideNav, notificacaoItemNenhumaAPISideNav, contadorNotificacoesAPISideNav');
-        // if (!listaNotificacoes) console.error('[Menu Notificações Debug] listaNotificacoesAPISideNav NÃO encontrado!');
-        // if (!loadingItem) console.error('[Menu Notificações Debug] notificacaoItemLoadingAPISideNav NÃO encontrado!');
-        // if (!nenhumaItem) console.error('[Menu Notificações Debug] notificacaoItemNenhumaAPISideNav NÃO encontrado!');
-        // if (!contadorBadge) console.error('[Menu Notificações Debug] contadorNotificacoesAPISideNav NÃO encontrado!');
-        
         if (!listaNotificacoes || !loadingItem || !nenhumaItem || !contadorBadge) {
-          // Mantemos este log, pois é útil para saber se os elementos essenciais não foram encontrados
           console.warn('[Menu Notificações] Um ou mais elementos de notificação da API NÃO foram encontrados. Notificações da API não serão carregadas.');
           return; 
         }
 
-        // console.log('[Menu Notificações] Iniciando fetch para ../controllers/get_notificacoes_controller.php');
         fetch('../controllers/get_notificacoes_controller.php') 
             .then(response => {
-                // console.log('[Menu Notificações] Resposta do fetch recebida:', response);
                 if (!response.ok) {
                     console.error('[Menu Notificações] Erro na resposta da rede:', response.status, response.statusText); // Manter este erro crítico
                     throw new Error('Erro na rede ou servidor: ' + response.statusText + ' ao buscar get_notificacoes_controller.php');
@@ -394,35 +374,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json(); 
             })
             .then(data => {
-                // console.log('[Menu Notificações] Dados JSON recebidos e parseados:', data);
                 loadingItem.classList.add('d-none');
                 
                 if (data.success && data.notificacoes) {
-                    // console.log('[Menu Notificações] Sucesso na API. Notificações recebidas:', data.notificacoes, 'ContadorNaoLidas:', data.contadorNaoLidas);
                     const notificacoesRecebidas = data.notificacoes;
-                    // let contadorRenderizadas = 0; // Não usado, pode ser removido
 
-                    // Limpa notificações antigas ANTES de adicionar novas
                     const itensAtuais = listaNotificacoes.querySelectorAll('li:not(#notificacaoItemLoadingAPISideNav):not(#notificacaoItemNenhumaAPISideNav)');
                     itensAtuais.forEach(item => item.remove());
 
                     if (notificacoesRecebidas.length > 0) {
-                        // console.log('[Menu Notificações] Renderizando ' + notificacoesRecebidas.length + ' notificações.');
                         notificacoesRecebidas.forEach((notif, index) => {
-                            // console.log('[Menu Notificações] Renderizando notificação #' + index + ':', notif);
                             const listItem = document.createElement('li');
                             listItem.classList.add('dropdown-item'); 
-                            listItem.style.position = 'relative'; // Para posicionar o botão
+                            listItem.style.position = 'relative'; 
                             
                             let mensagemOriginal = notif.mensagem; 
                             let mensagemFormatada = '<span class="notification-message">' + htmlspecialchars(mensagemOriginal) + '</span>';
                             let dataFormatada = '<span class="notification-date">' + (notif.data_formatada || '') + '</span>';
 
                             let conteudoItem = mensagemFormatada + dataFormatada;
-                            let linkFinal = notif.link; // Link padrão
-                            console.log('[Menu Notificações] Processando notificação:', JSON.stringify(notif)); // Log da notificação inteira
+                            let linkFinal = notif.link; 
+                            console.log('[Menu Notificações] Processando notificação:', JSON.stringify(notif)); 
 
-                            // Verifica se a notificação é para uma conversa e ajusta o link
                             if (notif.link && typeof notif.link === 'string' && notif.link.includes('chat.php?')) {
                                 console.log('[Menu Notificações] Link original da notificação de chat:', notif.link);
                                 try {
@@ -450,14 +423,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             console.log('[Menu Notificações] Link final gerado para a notificação:', linkFinal);
 
                             if (linkFinal && linkFinal !== '#') {
-                                // A classe notification-link-item não é estritamente necessária se o CSS já cobre bem
-                                // os links <a> dentro de li.dropdown-item
                                 listItem.innerHTML = `<a href="${linkFinal}">${conteudoItem}</a>`;
                             } else {
                                 listItem.innerHTML = conteudoItem;
                             }
 
-                            // Botão de remover customizado
                             let btnContainer = document.createElement('div');
                             btnContainer.className = 'notificacao-remover-container';
 
@@ -482,11 +452,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         });
                         nenhumaItem.classList.add('d-none');
                     } else {
-                        // console.log('[Menu Notificações] Nenhuma notificação para renderizar (array vazio).');
                         nenhumaItem.classList.remove('d-none');
                     }
 
-                    // Atualiza o contador geral (badge)
                     if (data.contadorNaoLidas > 0) {
                         contadorBadge.textContent = data.contadorNaoLidas > 9 ? '9+' : data.contadorNaoLidas;
                         contadorBadge.style.display = ''; 
@@ -515,20 +483,16 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // Verifica se os elementos do DOM existem antes de chamar a função
     const listaAPINotificacoes = document.getElementById('listaNotificacoesAPISideNav');
     if (listaAPINotificacoes) {
-        // console.log('[Menu Notificações] Elemento listaNotificacoesAPISideNav encontrado. Chamando carregarNotificacoesAPI().');
-        carregarNotificacoesAPI(); // Carrega as notificações uma vez ao iniciar
-        setInterval(carregarNotificacoesAPI, 5000); // Atualiza a cada 5 segundos
+        carregarNotificacoesAPI(); 
+        setInterval(carregarNotificacoesAPI, 5000); 
     } else {
-        // Mantemos este log, pois é útil para saber se os elementos essenciais não foram encontrados
         console.warn('[Menu Notificações] Elemento listaNotificacoesAPISideNav NÃO encontrado. Notificações da API não serão carregadas.');
     }
 
 });
 
-// Adicionar função utilitária simples para escapar HTML no JS, se não existir uma global
 function htmlspecialchars(str) {
     if (typeof str !== 'string') return '';
     return str.replace(/[&<>'"\/]/g, function (s) {
