@@ -101,7 +101,7 @@ try {
                     if (!isset($pdo)) $pdo = Database::getConnection(); 
                     $produtoDao = new ProdutoDAO();
 
-                    $itensPorPagina = 8;
+                    $itensPorPagina = 10;
                     $paginaAtual = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
                     if ($paginaAtual < 1) $paginaAtual = 1;
                     $offset = ($paginaAtual - 1) * $itensPorPagina;
