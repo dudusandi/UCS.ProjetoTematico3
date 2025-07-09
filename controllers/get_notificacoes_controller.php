@@ -17,7 +17,7 @@ if (!isset($_SESSION['usuario_id'])) {
 }
 
 $usuario_id_destino = (int)$_SESSION['usuario_id'];
-$limite_dropdown = 5; 
+$limite_dropdown = 60; 
 
 try {
     $pdo = Database::getConnection();
