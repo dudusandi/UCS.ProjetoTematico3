@@ -383,8 +383,8 @@ $tipoMensagem_feedback = $_GET['tipo_mensagem'] ?? '';
             <form id="formCadastroProdutoPagina" action="../controllers/cadastrar_produto.php" method="POST" enctype="multipart/form-data">
               <div class="mb-4">
                 <label for="foto" class="form-label">Foto do Produto</label>
-                <div class="image-preview-container" id="imagePreviewContainer">
-                  <img src="#" alt="Pré-visualização da Imagem" class="d-none" id="imagePreview">
+                <div class="image-preview-container text-center" id="imagePreviewContainer" style="border: 2px dashed #dee2e6; border-radius: 8px; padding: 20px; cursor: pointer;">
+                  <img src="#" alt="Pré-visualização da Imagem" class="d-none mx-auto" id="imagePreview" style="max-width: 100%; max-height: 250px; object-fit: contain;">
                   <span class="image-preview-text" id="imagePreviewText">Clique ou arraste para adicionar uma imagem (JPG, PNG, GIF)</span>
                 </div>
                 <input type="file" class="form-control d-none" id="foto" name="foto" accept="image/jpeg,image/png,image/gif">
